@@ -34,16 +34,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     
-    <filter>
-    	<filter-name>LoginFilter</filter-name>
-    	<filter-class>express.ui.filter.LoginFilter</filter-class>
-  	</filter>
-  	<filter-mapping>
-    	<filter-name>LoginFilter</filter-name>
-    	<url-pattern>*.html</url-pattern>
-  	</filter-mapping>
-    
-    
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

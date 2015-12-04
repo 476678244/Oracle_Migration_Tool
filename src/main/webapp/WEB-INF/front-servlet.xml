@@ -12,7 +12,7 @@
 	<mvc:annotation-driven
 		ignore-default-model-on-redirect="true" />
 	<mvc:resources mapping="/**" location="/" />
-	<context:component-scan base-package="spring-based.*" />
+	<context:component-scan base-package="springbased.*" />
 	<aop:aspectj-autoproxy />
 
 	<bean id="viewResolver"
@@ -30,7 +30,7 @@
 	</bean>
 
 	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="springbased.service.ExampleQuartzJob" />
+		<property name="jobClass" value="springbased.service.job.ExampleQuartzJob" />
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="timeout" value="5" />
