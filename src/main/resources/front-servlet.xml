@@ -30,7 +30,7 @@
 	</bean>
 
 	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="express.service.EmailNotificationQuartzJob" />
+		<property name="jobClass" value="springbased.service.ExampleQuartzJob" />
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="timeout" value="5" />
