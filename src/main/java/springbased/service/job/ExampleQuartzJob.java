@@ -2,14 +2,18 @@ package springbased.service.job;
 
 import java.util.Date;
 
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-@Component
-public class ExampleQuartzJob {
+public class ExampleQuartzJob extends QuartzJobBean {
 
-  @Scheduled(fixedRate = 2000)
-  public void scheduledRun() {
-    System.out.println("Time:" + new Date());
+  @Override
+  protected void executeInternal(JobExecutionContext arg0)
+      throws JobExecutionException {
+    System.out.println("ExampleQuartzJob:" + new Date());
+
   }
 }

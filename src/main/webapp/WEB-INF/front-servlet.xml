@@ -43,8 +43,8 @@
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="exampleJob" />
 		<!-- run every 24 hours -->
-		<!-- <property name="cronExpression" value="*/30 * * * * ?" /> -->
-		<property name="cronExpression" value="0 0 1 * * ?" />
+		<property name="cronExpression" value="*/30 * * * * ?" />
+		<!-- <property name="cronExpression" value="0 0 1 * * ?" /> -->
 	</bean>
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
