@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import springbased.bean.MigrationProcess;
-import springbased.dao.ConnectionInfoDAO;
-import springbased.dao.MigrationJobDAO;
+import springbased.dao.impl.ConnectionInfoDAO;
+import springbased.dao.impl.MigrationJobDAO;
 
 @Service
 public class MigrationService {
