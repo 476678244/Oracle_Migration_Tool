@@ -97,5 +97,11 @@ public class MigrationJob {
       return false;
     return true;
   }
+
+  @Override
+  public String toString() {
+    return "MigrationJob [id=" + id + ", source=" + source + ", target="
+        + target + ", startTime=" + startTime + ", endTime=" + endTime + "]";
+  }
   
 }

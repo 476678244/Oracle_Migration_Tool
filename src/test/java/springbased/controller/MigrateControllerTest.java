@@ -19,7 +19,7 @@ public class MigrateControllerTest {
   public void test() {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
-    String sourceUrl = "";
+    String sourceUrl = "jdbc:oracle:thin:@10.129.115.87:1521:dbpool1";
     String sourceSchema = "sfuser_tree";
     this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,
         sourceSchema, null, null, null, null);

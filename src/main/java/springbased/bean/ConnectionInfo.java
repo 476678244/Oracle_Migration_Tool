@@ -105,6 +105,12 @@ public class ConnectionInfo {
       return false;
     return true;
   }
+
+  @Override
+  public String toString() {
+    return "ConnectionInfo [id=" + id + ", username=" + username + ", password="
+        + password + ", schema=" + schema + ", url=" + url + "]";
+  }
   
   
 }
