@@ -14,18 +14,18 @@ import springbased.example.bean.Point;
 @ContextConfiguration
 public class PointDAOTest {
 
-	@Autowired
-	private PointDAO<Point> pointDAO;
+//	@Autowired
+//	private PointDAO<Point> pointDAO;
 
 	@Test
 	public void test() {
-		Point p = new Point();
-		p.setX(1);
-		p.setY(1);
-		p.setName("Point1-1");
-		this.pointDAO.getBasicDAO().save(p);
-		int points = this.pointDAO.getBasicDAO().find().asList().size();
-		System.out.println("Points size:" + points);
+//		Point p = new Point();
+//		p.setX(1);
+//		p.setY(1);
+//		p.setName("Point1-1");
+//		this.pointDAO.getBasicDAO().save(p);
+//		int points = this.pointDAO.getBasicDAO().find().asList().size();
+//		System.out.println("Points size:" + points);
 	}
 
 	@Configuration
