@@ -12,6 +12,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.2.3.RELEASE</spring.version>
 		<springdata.version>1.8.1.RELEASE</springdata.version>
+		<log4j.version>1.2.17</log4j.version>
 	</properties>
 	<build>
 		<plugins>
@@ -28,7 +29,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-		
+
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<webResources>
 						<!-- make sure that src/main/webapp resources win -->
@@ -43,7 +44,11 @@
 
 
 	<dependencies>
-	
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -233,6 +238,11 @@
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 			<version>1.8.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.4.0</version>
 		</dependency>
 
 	</dependencies>

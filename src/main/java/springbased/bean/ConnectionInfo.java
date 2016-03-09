@@ -18,6 +18,19 @@ public class ConnectionInfo {
   
   private String url;
 
+  public ConnectionInfo(String username, String password, String schema,
+      String url) {
+    super();
+    this.username = username;
+    this.password = password;
+    this.schema = schema;
+    this.url = url;
+  }
+
+  public ConnectionInfo() {
+    super();
+  }
+
   public String getUsername() {
     return username;
   }
