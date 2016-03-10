@@ -13,6 +13,7 @@ import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
 import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
+import springbased.service.SequenceUtil;
 import springbased.service.TableUtil;
 
 @RestController
@@ -48,6 +49,8 @@ public class MigrateController {
     TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
         sourceSchema, tableList);
     IndexUtil.copyIndex(targetCon, targetSchema, sourceCon, sourceSchema,
+        tableList);
+    SequenceUtil.copySequence(targetCon, targetSchema, sourceCon, sourceSchema,
         tableList);
     int a = 0;
 

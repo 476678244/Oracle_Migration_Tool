@@ -28,7 +28,6 @@ public class IndexUtil {
               + "di.owner=dic.index_owner and di.index_name=dic.index_name "
               + "and not exists (select 1 from dba_constraints dc where dc.owner=di.owner and dc.CONSTRAINT_NAME=di.index_name and dc.CONSTRAINT_TYPE='P') "
               + "and index_type='NORMAL' ) order by table_name,index_name, COLUMN_POSITION");
-
       pstmt.setString(1, sourceSchema.toUpperCase());
       // pstmt.setString(2, sourceSchema);
       ResultSet rs = pstmt.executeQuery();
@@ -40,6 +39,7 @@ public class IndexUtil {
         String indName = rs.getString(2);
         String colName = rs.getString(3);
         tab2Ind.put(indName, tabName);
+        log.info("table vs index found:" + tabName + " vs " + indName);
         List<String> colList = cols2Ind.get(indName);
         if (colList == null) {
           colList = new ArrayList<String>();
@@ -47,10 +47,8 @@ public class IndexUtil {
         }
         colList.add(colName);
       }
-
       rs.close();
       pstmt.close();
-
       pstmt = sourceConn.prepareStatement(
           " select table_name,index_name,COLUMN_NAME from " + "("
               + "select dic.table_name,dic.index_name,dic.COLUMN_EXPRESSION as column_name ,dic.COLUMN_POSITION  from dba_indexes  di,"
@@ -61,12 +59,12 @@ public class IndexUtil {
               + ") order by table_name,index_name, COLUMN_POSITION");
       pstmt.setString(1, sourceSchema.toUpperCase());
       rs = pstmt.executeQuery();
-
       while (rs.next()) {
         String tabName = rs.getString(1);
         String indName = rs.getString(2);
         String colName = rs.getString(3);
         tab2Ind.put(indName, tabName);
+        log.info("table vs index found:" + tabName + " vs " + indName);
         List<String> colList = cols2Ind.get(indName);
         if (colList == null) {
           colList = new ArrayList<String>();
@@ -77,7 +75,6 @@ public class IndexUtil {
       }
       rs.close();
       pstmt.close();
-
       Iterator iter = tab2Ind.entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry entry = (Map.Entry) iter.next();
@@ -93,7 +90,7 @@ public class IndexUtil {
         String indexDDL = "create unique index " + targetSchema + "." + indName
             + " on " + targetSchema + "." + tabName + " (" + colString + ")";
         if (tableList.contains(tabName)) {
-
+          log.info("constructed create index DDL :" + indexDDL);
           indexList.add(indexDDL);
         }
       }
@@ -103,15 +100,13 @@ public class IndexUtil {
           String indexDDL = indexList.get(i);
           pstmt = targetConn.prepareStatement(indexDDL);
           pstmt.execute();
-          
+          log.info("successfully run:" + indexDDL);
         } catch (SQLException e) {
           log.error(e);
         } finally {
           pstmt.close();
         }
-
       }
-
     } catch (SQLException e) {
       log.error(e);
       if (e.getErrorCode() != 261) {

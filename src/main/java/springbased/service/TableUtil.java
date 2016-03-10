@@ -39,8 +39,11 @@ public class TableUtil {
 
       rs = pstmt.executeQuery();
       while (rs.next()) {
-        tableList.add(rs.getString(1));
-        tempTableList.put(rs.getString(1), rs.getString(2));
+        String tableName = rs.getString(1);
+        tableList.add(tableName);
+        String tempTable = rs.getString(2);
+        tempTableList.put(tableName, tempTable);
+        log.info("find out table:" + tableName + " temporary:" + tempTable);
       }
       rs.close();
       pstmt.close();
@@ -107,7 +110,7 @@ public class TableUtil {
           // create table in HANA
           ps = targetConn.prepareStatement(tableDDL);
           ps.execute();
-
+          log.info("successfully run:" + tableDDL);
         } catch (SQLException e) {
           log.error(e);
         } finally {
@@ -225,6 +228,8 @@ public class TableUtil {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    log.info("constructed create table DDL:");
+    log.info(ddl);
     return ddl;
 
   }
@@ -262,7 +267,8 @@ public class TableUtil {
       colListString += ")";
     }
     sb.append(colListString);
-
+    log.info("constructed add primary key DDL:");
+    log.info(sb.toString());
     return sb.toString();
   }
 
