@@ -21,8 +21,16 @@ public class MigrateControllerTest {
     String sourcePassword = "sfuser";
     String sourceUrl = "jdbc:oracle:thin:@10.129.115.87:1521:dbpool1";
     String sourceSchema = "sfuser_tree";
-    this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,
-        sourceSchema, null, null, null, null);
+    String targetUsername = "sfuser";
+    String targetPassword = "sfuser";
+    String targetUrl = "jdbc:oracle:thin:@10.129.115.87:1521:dbpool1";
+    String targetSchema = "sfuser_aceqa920";
+    boolean test = false;
+    if (test) {
+      this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,
+          sourceSchema, targetUsername, targetPassword, targetUrl,
+          targetSchema);
+    }
   }
 
   @Configuration

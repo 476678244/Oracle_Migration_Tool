@@ -10,6 +10,7 @@ import springbased.bean.ConnectionInfo;
 import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
 import springbased.service.MigrationService;
+import springbased.service.TableUtil;
 
 @RestController
 public class MigrateController {
@@ -40,6 +41,8 @@ public class MigrateController {
     Connection sourceCon = this.migrationService.getConnection(sourceConInfo);
     Connection targetCon = this.migrationService.getConnection(targetConInfo);
     log.info(sourceCon);
+    TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon, sourceSchema);
+    int a = 0;
     
   }
 }
