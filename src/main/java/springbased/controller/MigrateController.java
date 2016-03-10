@@ -1,6 +1,8 @@
 package springbased.controller;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springbased.bean.ConnectionInfo;
 import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
+import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
 import springbased.service.TableUtil;
 
@@ -16,7 +19,7 @@ import springbased.service.TableUtil;
 public class MigrateController {
 
   private static final Logger log = Logger.getLogger(MigrateController.class);
-  
+
   @Autowired
   private ConnectionInfoDAO connectionInfoDAO;
 
@@ -41,8 +44,12 @@ public class MigrateController {
     Connection sourceCon = this.migrationService.getConnection(sourceConInfo);
     Connection targetCon = this.migrationService.getConnection(targetConInfo);
     log.info(sourceCon);
-    TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon, sourceSchema);
+    List<String> tableList = new ArrayList<String>();
+    TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
+        sourceSchema, tableList);
+    IndexUtil.copyIndex(targetCon, targetSchema, sourceCon, sourceSchema,
+        tableList);
     int a = 0;
-    
+
   }
 }

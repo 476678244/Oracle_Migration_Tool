@@ -26,7 +26,7 @@ public class TableUtil {
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
 
   public static void fetchDDLAndCopyData(Connection targetConn,
-      String targetSchema, Connection sourceConn, String sourceSchema) {
+      String targetSchema, Connection sourceConn, String sourceSchema, List<String> tableList) {
     try {
       PreparedStatement pstmt = sourceConn.prepareStatement(
           "select table_name,TEMPORARY from dba_tables dt where upper(owner)=?  and not exists "
@@ -38,7 +38,6 @@ public class TableUtil {
       HashMap<String, String> tempTableList = new HashMap<String, String>();
 
       rs = pstmt.executeQuery();
-      List<String> tableList = new ArrayList<String>();
       while (rs.next()) {
         tableList.add(rs.getString(1));
         tempTableList.put(rs.getString(1), rs.getString(2));
