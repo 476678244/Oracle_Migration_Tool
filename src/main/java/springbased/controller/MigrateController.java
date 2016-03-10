@@ -35,9 +35,9 @@ public class MigrateController {
       log.error(e);
     }
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
-        sourcePassword, sourceSchema, sourceUrl);
+        sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
-        targetPassword, targetSchema, targetUrl);
+        targetPassword, targetUrl);
     Connection sourceCon = this.migrationService.getConnection(sourceConInfo);
     Connection targetCon = this.migrationService.getConnection(targetConInfo);
     log.info(sourceCon);
