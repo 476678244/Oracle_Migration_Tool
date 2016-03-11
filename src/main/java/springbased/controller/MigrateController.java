@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springbased.bean.ConnectionInfo;
 import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
+import springbased.service.FKUtil;
 import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
 import springbased.service.SequenceUtil;
@@ -52,6 +53,7 @@ public class MigrateController {
         tableList);
     SequenceUtil.copySequence(targetCon, targetSchema, sourceCon, sourceSchema,
         tableList);
+    FKUtil.addFK(sourceSchema, targetSchema, sourceCon, targetCon);
     int a = 0;
 
   }

@@ -293,6 +293,7 @@ public class TableUtil {
       String insertString = "INSERT INTO " + targetSchema + "." + tableName
           + " VALUES (" + columns + ")";
       PreparedStatement prepStmnt = targetConn.prepareStatement(insertString);
+      log.info("add batch:" + insertString);
 
       int cols = md.getColumnCount();
       int rows = 0;
@@ -403,6 +404,7 @@ public class TableUtil {
             if (rows % logSize == 0) {
               prepStmnt.executeBatch();
               targetConn.commit();
+              log.info("batch executed!");
               prepStmnt.clearBatch();
             }
           } catch (Exception e) {
@@ -414,6 +416,7 @@ public class TableUtil {
 
       prepStmnt.executeBatch();
       targetConn.commit();
+      log.info("batch executed!");
       prepStmnt.clearBatch();
       queryResult.close();
       pstmt.close();
