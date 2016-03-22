@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springbased.bean.ConnectionInfo;
 import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
+import springbased.readonly.ReadOnlyConnection;
 import springbased.service.FKUtil;
 import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
@@ -43,9 +44,11 @@ public class MigrateController {
         sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
         targetPassword, targetUrl);
-    Connection sourceCon = this.migrationService.getConnection(sourceConInfo);
+    ReadOnlyConnection sourceCon = this.migrationService.getReadOnlyConnection(sourceConInfo);
     Connection targetCon = this.migrationService.getConnection(targetConInfo);
-    log.info(sourceCon);
+    if (!sourceCon.isReadOnly()) {
+      log.warn("sourceCon account is not read only...");
+    }
     List<String> tableList = new ArrayList<String>();
     TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
         sourceSchema, tableList);

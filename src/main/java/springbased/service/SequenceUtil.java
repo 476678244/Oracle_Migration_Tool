@@ -10,12 +10,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import springbased.readonly.ReadOnlyConnection;
+
 public class SequenceUtil {
 
   private static final Logger log = Logger.getLogger(SequenceUtil.class);
 
   public static void copySequence(Connection targetConn, String targetSchema,
-      Connection sourceConn, String sourceSchema, List<String> tableList) {
+      ReadOnlyConnection sourceConn, String sourceSchema, List<String> tableList) {
     // migrate sequence
     try {
       ResultSet rs = null;

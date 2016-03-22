@@ -19,12 +19,12 @@ public class MigrateControllerTest {
   public void test() {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
-    String sourceUrl = "jdbc:oracle:thin:@10.129.115.87:1521:dbpool1";
-    String sourceSchema = "sfuser_tree";
+    String sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
+    String sourceSchema = "sfuser_jdm";
     String targetUsername = "sfuser";
     String targetPassword = "sfuser";
-    String targetUrl = "jdbc:oracle:thin:@10.129.115.87:1521:dbpool1";
-    String targetSchema = "sfuser_aceqa920";
+    String targetUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
+    String targetSchema = "sfuser_real";
     boolean test = false;
     if (test) {
       this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,

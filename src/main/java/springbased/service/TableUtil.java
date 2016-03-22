@@ -19,6 +19,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import springbased.readonly.ReadOnlyConnection;
+
 public class TableUtil {
 
   private static final Logger log = Logger.getLogger(TableUtil.class);
@@ -26,7 +28,7 @@ public class TableUtil {
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
 
   public static void fetchDDLAndCopyData(Connection targetConn,
-      String targetSchema, Connection sourceConn, String sourceSchema, List<String> tableList) {
+      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema, List<String> tableList) {
     try {
       PreparedStatement pstmt = sourceConn.prepareStatement(
           "select table_name,TEMPORARY from dba_tables dt where upper(owner)=?  and not exists "
@@ -58,7 +60,7 @@ public class TableUtil {
   }
 
   private static void copyDataToTable(Connection targetConn,
-      String targetSchema, Connection sourceConn, String sourceSchema,
+      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema,
       List<String> tableList, HashMap<String, String> tempTableList) {
     // get primary key info
     try {
@@ -153,7 +155,7 @@ public class TableUtil {
   }
 
   public static String constructTableDDL(String tableName, String sourceSchema,
-      Connection sourceConn, String targetSchema,
+      ReadOnlyConnection sourceConn, String targetSchema,
       HashMap<String, String> tempTableList, Map<String, Integer> columnMap)
           throws IOException {
     PreparedStatement pstmt;
@@ -273,7 +275,7 @@ public class TableUtil {
   }
 
   public static void migrateTableData(String tableName, String sourceSchema,
-      Connection sourceConn, String targetSchema, Connection targetConn,
+      ReadOnlyConnection sourceConn, String targetSchema, Connection targetConn,
       Map<String, Integer> columnScales) {
 
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";

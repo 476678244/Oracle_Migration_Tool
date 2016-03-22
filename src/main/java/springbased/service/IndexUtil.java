@@ -9,16 +9,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
+
+import springbased.readonly.ReadOnlyConnection;
 
 public class IndexUtil {
 
   private static final Logger log = Logger.getLogger(IndexUtil.class);
   
   public static void copyIndex(Connection targetConn, String targetSchema,
-      Connection sourceConn, String sourceSchema, List<String> tableList) {
+      ReadOnlyConnection sourceConn, String sourceSchema, List<String> tableList) {
     // copy unique index
     try {
       PreparedStatement pstmt;
@@ -94,7 +95,7 @@ public class IndexUtil {
   }
 
   private static String translateSysNcToTableName(String owner,
-      String sysNcName, Connection targetConn, Connection sourceConn, String tabName)
+      String sysNcName, Connection targetConn, ReadOnlyConnection sourceConn, String tabName)
           throws SQLException {
     PreparedStatement pstmt = null;
     ResultSet rs = null;

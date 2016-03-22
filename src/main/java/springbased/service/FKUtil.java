@@ -8,12 +8,14 @@ import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
+import springbased.readonly.ReadOnlyConnection;
+
 public class FKUtil {
 
   private static final Logger log = Logger.getLogger(FKUtil.class);
   
   public static void addFK(String sourceSchema, String targetSchema,
-      Connection sourceConn, Connection targetConn) {
+      ReadOnlyConnection sourceConn, Connection targetConn) {
     PreparedStatement pstmt = null;
     try {
       Stack<String> failedFKs = new Stack<String>();
