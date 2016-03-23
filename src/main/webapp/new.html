@@ -1,0 +1,61 @@
+<html lang="en" ng-app="myApp">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oracle Migration Tool</title>
+
+
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css" />
+
+
+</head>
+
+<body>
+  
+  <form class="form-horizontal" role="form" ng-controller="MyCtrl1">
+    <dir clas="config-section">
+      <label>SourceDB</label>
+      <div class="config-detail">
+        <div class="input-detail">
+          <div class="config-ip">
+            <label class="config-detail-label">IP</label>
+            <input class="config-detail-text" value="10.58.100.66"></input>
+          </div>
+          <div class="config-username">
+            <label class="config-detail-label">Username</label>
+            <input class="config-detail-text" value="sfuser"></input>
+          </div>
+          <div class="config-password">
+            <label class="config-detail-label">Password</label>
+            <input class="config-detail-text" value="sfuser"></input>
+          </div>
+          <div class="config-sid">
+            <label class="config-detail-label">SID</label>
+            <input class="config-detail-text" value="dbpool1"></input>
+          </div>
+          <div class="config-schema">
+            <label class="config-detail-label">Schema</label>
+            <input class="config-detail-text" value="sfuser_tree"></input>
+          </div>
+        </div>
+        <div class="validate-button">
+          <button type="button">Validate</button>
+        </div>
+      </div>
+    </dir>
+  </form>
+  <script src="lib/common/jquery.min.js"></script>
+  <script src="lib/common/bootstrap.min.js"></script>
+  <script src="lib/angular/angular.js"></script>
+  <script src="lib/angular/angular-route.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/directives.js"></script>
+</body>
+
+</html>
