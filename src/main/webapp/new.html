@@ -16,34 +16,48 @@
 <body>
   
   <form class="form-horizontal" role="form" ng-controller="MyCtrl1">
-    <dir clas="config-section">
-      <label>SourceDB</label>
-      <div class="config-detail">
+    <dir class="config-section row">
+      <div class="label-section col-sm-3">
+        <h3>
+          <span class="label label-pill label-primary">Source DB</span>
+        </h3>
+      </div>
+      <div class="config-detail col-sm-7">
         <div class="input-detail">
-          <div class="config-ip">
-            <label class="config-detail-label">IP</label>
-            <input class="config-detail-text" value="10.58.100.66"></input>
+          <div class="form-group row">
+            <label class="col-sm-2 form-control-label label label-default label-attribute-font">IP:</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputEmail3" value="10.58.100.66">
+            </div>
           </div>
-          <div class="config-username">
-            <label class="config-detail-label">Username</label>
-            <input class="config-detail-text" value="sfuser"></input>
+          <div class="form-group row">
+            <label class="col-sm-2 form-control-label label label-default label-attribute-font">Username:</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+            </div>
           </div>
-          <div class="config-password">
-            <label class="config-detail-label">Password</label>
-            <input class="config-detail-text" value="sfuser"></input>
+          <div class="form-group row">
+            <label class="col-sm-2 form-control-label label label-default label-attribute-font">Password:</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+            </div>
           </div>
-          <div class="config-sid">
-            <label class="config-detail-label">SID</label>
-            <input class="config-detail-text" value="dbpool1"></input>
+          <div class="form-group row">
+            <label class="col-sm-2 form-control-label label label-default label-attribute-font">SID</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputEmail3" value="dbpool1">
+            </div>
           </div>
-          <div class="config-schema">
-            <label class="config-detail-label">Schema</label>
-            <input class="config-detail-text" value="sfuser_tree"></input>
+          <div class="form-group row">
+            <label class="col-sm-2 form-control-label label label-default label-attribute-font">Schema:</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="inputEmail3" value="sfuser_tree">
+            </div>
           </div>
         </div>
-        <div class="validate-button">
-          <button type="button">Validate</button>
-        </div>
+      </div>
+      <div clas="col-sm-2">
+        <button type="button" class="btn btn-primary">Validate</button>
       </div>
     </dir>
   </form>
