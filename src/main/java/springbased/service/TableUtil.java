@@ -1,6 +1,5 @@
 package springbased.service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -19,6 +18,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
 public class TableUtil {
@@ -28,17 +28,19 @@ public class TableUtil {
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
 
   public static void fetchDDLAndCopyData(Connection targetConn,
-      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema, List<String> tableList) {
+      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema,
+      List<String> tableList) throws SQLException {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    HashMap<String, String> tempTableList = new HashMap<String, String>();
     try {
-      PreparedStatement pstmt = sourceConn.prepareStatement(
+      pstmt = sourceConn.prepareStatement(
           "select table_name,TEMPORARY from dba_tables dt where upper(owner)=?  and not exists "
-              + "(select 1 from dba_tab_columns dtc where upper(dtc.owner)=? and dtc.table_name=dt.table_name and dtc.data_type in ('ROWID','UROWID')) order by table_name");
-      ResultSet rs = null;
+              + "(select 1 from dba_tab_columns dtc where upper(dtc.owner)=? "
+              + "and dtc.table_name=dt.table_name and dtc.data_type in ('ROWID','UROWID')) "
+              + " order by table_name");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, sourceSchema.toUpperCase());
-
-      HashMap<String, String> tempTableList = new HashMap<String, String>();
-
       rs = pstmt.executeQuery();
       while (rs.next()) {
         String tableName = rs.getString(1);
@@ -47,12 +49,13 @@ public class TableUtil {
         tempTableList.put(tableName, tempTable);
         log.info("find out table:" + tableName + " temporary:" + tempTable);
       }
+    } catch (SQLException e) {
       rs.close();
       pstmt.close();
-      copyDataToTable(targetConn, targetSchema, sourceConn, sourceSchema,
-          tableList, tempTableList);
-    } catch (SQLException e) {
     }
+
+    copyDataToTable(targetConn, targetSchema, sourceConn, sourceSchema,
+        tableList, tempTableList);
   }
 
   public static String timeString() {
@@ -61,17 +64,23 @@ public class TableUtil {
 
   private static void copyDataToTable(Connection targetConn,
       String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema,
-      List<String> tableList, HashMap<String, String> tempTableList) {
+      List<String> tableList, HashMap<String, String> tempTableList)
+          throws SQLException {
     // get primary key info
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    HashMap<String, List<String>> pkmap = new HashMap<String, List<String>>();
+    HashMap<String, String> pktable2namemap = new HashMap<String, String>();
     try {
-      PreparedStatement pstmt = sourceConn.prepareStatement(
-          "select dcc.table_name,dcc.column_name,dcc.constraint_name from dba_cons_columns dcc, dba_constraints dc where upper(dc.owner)=? and upper(dcc.owner)=? and dcc.constraint_name=dc.constraint_name "
+      pstmt = sourceConn.prepareStatement(
+          "select dcc.table_name,dcc.column_name,dcc.constraint_name "
+              + " from dba_cons_columns dcc, dba_constraints dc where upper(dc.owner)=? "
+              + " and upper(dcc.owner)=? and dcc.constraint_name=dc.constraint_name "
               + "and dc.constraint_type='P' order by dcc.table_name,position ");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, sourceSchema.toUpperCase());
-      ResultSet rs = pstmt.executeQuery();
-      HashMap<String, List<String>> pkmap = new HashMap<String, List<String>>();
-      HashMap<String, String> pktable2namemap = new HashMap<String, String>();
+      rs = pstmt.executeQuery();
+
       while (rs.next()) {
         String table_name = rs.getString(1);
         String column_name = rs.getString(2);
@@ -83,37 +92,43 @@ public class TableUtil {
         List<String> cols = pkmap.get(table_name);
         cols.add(column_name);
       }
+    } catch (SQLException e) {
+      log.error(e);
+    } finally {
       rs.close();
       pstmt.close();
+    }
+    List<String> tableDDLList = new ArrayList<String>();
+    List<String> pkDDLList = new ArrayList<String>();
+    Map<String, Map<String, Integer>> scaleMap = new HashMap<String, Map<String, Integer>>();
 
-      List<String> tableDDLList = new ArrayList<String>();
-      List<String> pkDDLList = new ArrayList<String>();
-      Map<String, Map<String, Integer>> scaleMap = new HashMap<String, Map<String, Integer>>();
-      for (int i = 0; i < tableList.size(); i++) {
-        String tableName = tableList.get(i);
-        // construct table DDL
-        Map<String, Integer> columnMap = new HashMap<String, Integer>();
-        String tableDDL = constructTableDDL(tableName, sourceSchema, sourceConn,
-            targetSchema, tempTableList, columnMap);
-        // add primary key DDL
-        String pkDDL = addPKDDL(tableName, targetSchema, pkmap,
-            pktable2namemap);
-        scaleMap.put(tableName, columnMap);
-        tableDDLList.add(tableDDL);
-        if (pkDDL != null) {
-          pkDDLList.add(pkDDL);
-        }
+    for (int i = 0; i < tableList.size(); i++) {
+      String tableName = tableList.get(i);
+      // construct table DDL
+      Map<String, Integer> columnMap = new HashMap<String, Integer>();
+      String tableDDL = constructTableDDL(tableName, sourceSchema, sourceConn,
+          targetSchema, tempTableList, columnMap);
+      // add primary key DDL
+      String pkDDL = addPKDDL(tableName, targetSchema, pkmap, pktable2namemap);
+      scaleMap.put(tableName, columnMap);
+      tableDDLList.add(tableDDL);
+      if (pkDDL != null) {
+        pkDDLList.add(pkDDL);
       }
+    }
 
+    try {
       for (int i = 0; i < tableDDLList.size(); i++) {
         PreparedStatement ps = null;
+        String tableDDL = null;
         try {
-          String tableDDL = tableDDLList.get(i);
+          tableDDL = tableDDLList.get(i);
           // create table in HANA
           ps = targetConn.prepareStatement(tableDDL);
           ps.execute();
           log.info("successfully run:" + tableDDL);
         } catch (SQLException e) {
+          ThreadLocalErrorMonitor.add(tableDDL, e);
           log.error(e);
         } finally {
           ps.close();
@@ -122,42 +137,33 @@ public class TableUtil {
 
       for (int i = 0; i < pkDDLList.size(); i++) {
         PreparedStatement ps = null;
+        String pkDDL = null;
         try {
-          String pkDDL = pkDDLList.get(i);
-          // create pk in HANA
+          pkDDL = pkDDLList.get(i);
           ps = targetConn.prepareStatement(pkDDL);
           ps.execute();
         } catch (SQLException e) {
+          ThreadLocalErrorMonitor.add(pkDDL, e);
           log.error(e);
         } finally {
           ps.close();
         }
       }
 
-      // for (String tableName : tableList) {
-      // disablePersistentMerge(tableName, targetSchema, targetConn);
-      // }
       for (int i = 0; i < tableList.size(); i++) {
         String tableName = tableList.get(i);
-        // migrate table data from oracle to HANA.
         migrateTableData(tableName, sourceSchema, sourceConn, targetSchema,
             targetConn, scaleMap.get(tableName));
       }
-      // for (String tableName : tableList) {
-      // enablePersistentMerge(tableName, targetSchema, targetConn);
-      // }
-    } catch (IOException e) {
-      log.error(e);
-    } catch (Exception e) {
-      log.error(e);
+    } finally {
+
     }
 
   }
 
   public static String constructTableDDL(String tableName, String sourceSchema,
       ReadOnlyConnection sourceConn, String targetSchema,
-      HashMap<String, String> tempTableList, Map<String, Integer> columnMap)
-          throws IOException {
+      HashMap<String, String> tempTableList, Map<String, Integer> columnMap) {
     PreparedStatement pstmt;
     StringBuffer sb = new StringBuffer();
     String ddl = null;
@@ -238,7 +244,7 @@ public class TableUtil {
 
   public static String addPKDDL(String tableName, String targetSchema,
       HashMap<String, List<String>> pkmap,
-      HashMap<String, String> pktable2namemap) throws IOException {
+      HashMap<String, String> pktable2namemap) {
     StringBuffer sb = new StringBuffer();
     sb.append(
         "alter table " + targetSchema + "." + tableName + " add constraint ");
@@ -276,14 +282,17 @@ public class TableUtil {
 
   public static void migrateTableData(String tableName, String sourceSchema,
       ReadOnlyConnection sourceConn, String targetSchema, Connection targetConn,
-      Map<String, Integer> columnScales) {
+      Map<String, Integer> columnScales) throws SQLException {
 
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
-    PreparedStatement pstmt;
+    PreparedStatement pstmt = null;
+    PreparedStatement prepStmnt = null;
+    ResultSet queryResult = null;
+    String insertString = null;
     try {
       pstmt = sourceConn.prepareStatement(queryString);
 
-      ResultSet queryResult = pstmt.executeQuery();
+      queryResult = pstmt.executeQuery();
       ResultSetMetaData md = queryResult.getMetaData();
 
       String columns = "";
@@ -292,9 +301,9 @@ public class TableUtil {
       }
       columns = columns.substring(0, columns.length() - 1);
 
-      String insertString = "INSERT INTO " + targetSchema + "." + tableName
+      insertString = "INSERT INTO " + targetSchema + "." + tableName
           + " VALUES (" + columns + ")";
-      PreparedStatement prepStmnt = targetConn.prepareStatement(insertString);
+      prepStmnt = targetConn.prepareStatement(insertString);
       log.info("add batch:" + insertString);
 
       int cols = md.getColumnCount();
@@ -409,23 +418,24 @@ public class TableUtil {
               log.info("batch executed!");
               prepStmnt.clearBatch();
             }
-          } catch (Exception e) {
-            e.printStackTrace();
+          } catch (SQLException e) {
+            log.error(e);
+            ThreadLocalErrorMonitor.add(insertString, e);
           }
         }
-
       }
-
       prepStmnt.executeBatch();
       targetConn.commit();
       log.info("batch executed!");
       prepStmnt.clearBatch();
+      columns = null;
+    } catch (SQLException e) {
+      log.error(e);
+      ThreadLocalErrorMonitor.add(insertString, e);
+    } finally {
       queryResult.close();
       pstmt.close();
       prepStmnt.close();
-      columns = null;
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
   }
 

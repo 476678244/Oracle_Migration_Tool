@@ -1,6 +1,7 @@
 package springbased.controller;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import springbased.bean.ConnectionInfo;
-import springbased.dao.impl.ConnectionInfoDAO;
-import springbased.dao.impl.MigrationJobDAO;
+import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 import springbased.service.FKUtil;
 import springbased.service.IndexUtil;
@@ -22,12 +22,6 @@ import springbased.service.TableUtil;
 public class MigrateController {
 
   private static final Logger log = Logger.getLogger(MigrateController.class);
-
-  @Autowired
-  private ConnectionInfoDAO connectionInfoDAO;
-
-  @Autowired
-  private MigrationJobDAO migrationJobDAO;
 
   @Autowired
   private MigrationService migrationService;
@@ -44,19 +38,32 @@ public class MigrateController {
         sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
         targetPassword, targetUrl);
-    ReadOnlyConnection sourceCon = this.migrationService.getReadOnlyConnection(sourceConInfo);
+    ReadOnlyConnection sourceCon = this.migrationService
+        .getReadOnlyConnection(sourceConInfo);
     Connection targetCon = this.migrationService.getConnection(targetConInfo);
     if (!sourceCon.isReadOnly()) {
       log.warn("sourceCon account is not read only...");
     }
     List<String> tableList = new ArrayList<String>();
-    TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
-        sourceSchema, tableList);
-    IndexUtil.copyIndex(targetCon, targetSchema, sourceCon, sourceSchema,
-        tableList);
-    SequenceUtil.copySequence(targetCon, targetSchema, sourceCon, sourceSchema,
-        tableList);
-    FKUtil.addFK(sourceSchema, targetSchema, sourceCon, targetCon);
+    try {
+      TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
+          sourceSchema, tableList);
+      IndexUtil.copyIndex(targetCon, targetSchema, sourceCon, sourceSchema,
+          tableList);
+      SequenceUtil.copySequence(targetCon, targetSchema, sourceCon,
+          sourceSchema, tableList);
+      FKUtil.addFK(sourceSchema, targetSchema, sourceCon, targetCon);
+    } catch (SQLException sqle) {
+      log.error("Migration process failed due to:");
+      log.error(sqle);
+    }
+    if (ThreadLocalErrorMonitor.isErrorsExisting()) {
+      log.info("Migration process end successfully, but with some errors.");
+      log.info("Please modify and rerun these sqls to fix these errors manually. ");
+      log.info(ThreadLocalErrorMonitor.printErrors());
+    } else {
+      log.error("Migration process end successfully without any errors!");
+    }
     int a = 0;
 
   }

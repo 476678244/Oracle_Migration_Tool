@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
 public class SequenceUtil {
@@ -17,20 +18,23 @@ public class SequenceUtil {
   private static final Logger log = Logger.getLogger(SequenceUtil.class);
 
   public static void copySequence(Connection targetConn, String targetSchema,
-      ReadOnlyConnection sourceConn, String sourceSchema, List<String> tableList) {
+      ReadOnlyConnection sourceConn, String sourceSchema,
+      List<String> tableList) throws SQLException {
     // migrate sequence
+    ResultSet rs = null;
+    PreparedStatement pstmt = null;
+    List<String> seqDDLList = new ArrayList<String>();
     try {
-      ResultSet rs = null;
-      PreparedStatement pstmt = null;
       pstmt = sourceConn.prepareStatement(
-          "select sequence_name,MIN_VALUE,INCREMENT_BY,CYCLE_FLAG,LAST_NUMBER, ORDER_FLAG from dba_sequences where upper(sequence_owner)=? order by sequence_name");
+          "select sequence_name,MIN_VALUE,INCREMENT_BY,CYCLE_FLAG,LAST_NUMBER, ORDER_FLAG "
+              + " from dba_sequences where upper(sequence_owner)=? order by sequence_name");
       try {
         pstmt.setString(1, sourceSchema.toUpperCase());
         rs = pstmt.executeQuery();
       } catch (SQLException e) {
         log.error(e);
       }
-      List<String> seqDDLList = new ArrayList<String>();
+
       while (rs.next()) {
         try {
           String seqName = rs.getString(1);
@@ -49,23 +53,25 @@ public class SequenceUtil {
           log.error(e);
         }
       }
+    } finally {
       rs.close();
       pstmt.close();
-      for (int i = 0; i < seqDDLList.size(); i++) {
-        try {
-          String seqDDL = seqDDLList.get(i);
-          // System.out.println(seqDDL);
-          pstmt = targetConn.prepareStatement(seqDDL);
-          pstmt.execute();
-          log.info("successfully run:" + seqDDL);
-        } catch (SQLException e) {
-          log.error(e);
-        } finally {
-          pstmt.close();
-        }
+    }
+
+    for (int i = 0; i < seqDDLList.size(); i++) {
+      String seqDDL = null;
+      try {
+        seqDDL = seqDDLList.get(i);
+        // System.out.println(seqDDL);
+        pstmt = targetConn.prepareStatement(seqDDL);
+        pstmt.execute();
+        log.info("successfully run:" + seqDDL);
+      } catch (SQLException e) {
+        log.error(e);
+        ThreadLocalErrorMonitor.add(seqDDL, e);
+      } finally {
+        pstmt.close();
       }
-    } catch (SQLException e) {
-      log.error(e);
     }
   }
 }

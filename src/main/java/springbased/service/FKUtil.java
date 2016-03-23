@@ -4,22 +4,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
+import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
 public class FKUtil {
 
   private static final Logger log = Logger.getLogger(FKUtil.class);
-  
+
   public static void addFK(String sourceSchema, String targetSchema,
-      ReadOnlyConnection sourceConn, Connection targetConn) {
+      ReadOnlyConnection sourceConn, Connection targetConn)
+          throws SQLException {
     PreparedStatement pstmt = null;
+    ResultSet rs = null;
     try {
-      Stack<String> failedFKs = new Stack<String>();
-      
+
       pstmt = sourceConn.prepareStatement(
           "Select 'alter table ' || Owner || '.' || Table_Name || ' add constraint ' || Constraint_Name "
               + "|| ' foreign key ' "
@@ -37,8 +38,8 @@ public class FKUtil {
       pstmt.setString(2, sourceSchema.toUpperCase());
       pstmt.setString(3, sourceSchema.toUpperCase());
       pstmt.setString(4, sourceSchema.toUpperCase());
-      log.info("adding FK:");
-      ResultSet rs = pstmt.executeQuery();
+      log.info("adding FK...");
+      rs = pstmt.executeQuery();
       String sql = null;
       while (rs.next()) {
         PreparedStatement pstmtTarget = null;
@@ -46,7 +47,7 @@ public class FKUtil {
           sql = rs.getString(1).toUpperCase().replaceAll(
               sourceSchema.toUpperCase(), targetSchema.toUpperCase());
           String deleteRule = rs.getString(2);
-          if(!"NO ACTION".equals(deleteRule)) {
+          if (!"NO ACTION".equals(deleteRule)) {
             sql += " ON DELETE CASCADE";
           }
           log.info("constructed add FK DDL:" + sql);
@@ -55,24 +56,19 @@ public class FKUtil {
           log.info("successfully run:" + sql);
           sql = null;
         } catch (SQLException e) {
-          failedFKs.push(sql.substring(sql.indexOf("ADD CONSTRAINT") + 14,
-              sql.indexOf("FOREIGN KEY")));
           log.error(e);
+          ThreadLocalErrorMonitor.add(sql, e);
         } finally {
-          if (pstmtTarget != null) {            
+          if (pstmtTarget != null) {
             pstmtTarget.close();
           }
         }
       }
-      rs.close();
     } catch (SQLException e) {
       log.error(e);
     } finally {
-      try {
-        pstmt.close();
-      } catch (SQLException e) {
-        log.error(e);
-      }
+      rs.close();
+      pstmt.close();
     }
   }
 }

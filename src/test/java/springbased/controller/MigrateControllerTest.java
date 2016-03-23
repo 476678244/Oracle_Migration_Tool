@@ -20,7 +20,7 @@ public class MigrateControllerTest {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
     String sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
-    String sourceSchema = "sfuser_jdm";
+    String sourceSchema = "sfuser_tree";
     String targetUsername = "sfuser";
     String targetPassword = "sfuser";
     String targetUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
