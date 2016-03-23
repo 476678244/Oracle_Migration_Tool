@@ -32,11 +32,11 @@
 .config-section {
   margin-left: auto;
   margin-right: auto;
-  max-width: 700px;
+  max-width: 780px;
   padding: 0;
   clear: both;
   padding-top: 20px;
-  padding-left: 20px;
+  padding-left: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -46,20 +46,20 @@
   padding: 0;
   float: left;
   width: 15%;
-  margin-right: 40px;
+  margin-right: 20px;
 }
 
 .config-detail {
   padding: 0;
   width: 60%;
   float: left;
-  padding-bottom: 50px;
+  padding-bottom: 30px;
 }
 
 .validate-button-section {
   width: 15%;
   float: left;
-  padding-top: 260px;
+  padding-top: 250px;
 }
 
 .label-attribute-font {
