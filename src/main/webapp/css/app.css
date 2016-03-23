@@ -35,9 +35,10 @@
   max-width: 700px;
   padding: 0;
   clear: both;
-  border-style: ridge;
   padding-top: 20px;
   padding-left: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .label-section {
