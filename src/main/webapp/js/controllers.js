@@ -24,3 +24,8 @@ angular.module('myApp.controllers', []).
   .controller('MyCtrl2', [function() {
 
   }]);
+
+var oracleMigration = window.oracleMigration;
+oracleMigration.controller('ConfigController', ["$scope", function($scope) {
+	$scope.ip = "10.58.100.66";
+}]);
