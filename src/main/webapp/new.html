@@ -15,9 +15,9 @@
 
 <body>
   
-<div>
+<div ng-controller="ConfigController">
   <hr>
-    <dir class="config-section row" ng-controller="ConfigController">
+    <dir class="config-section row">
       <div class="label-section ">
         <h3>
           <span class="label label-pill label-primary">Source DB</span>
@@ -28,38 +28,39 @@
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">IP:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="{{ip}}">
+              <input type="text" class="form-control" id="inputEmail3" value="{{sourceIp}}" ng-model="sourceIp">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Username:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+              <input type="text" class="form-control" id="inputEmail3" value="{{sourceUsername}}" ng-model="sourceUsername">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Password:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+              <input type="text" class="form-control" id="inputEmail3" value="{{sourcePassword}}" ng-model="sourcePassword">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">SID</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="dbpool1">
+              <input type="text" class="form-control" id="inputEmail3" value="{{sourceSID}}" ng-model="sourceSID">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Schema:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser_tree">
+              <input type="text" class="form-control" id="inputEmail3" value="{{sourceSchema}}" ng-model="sourceSchema">
             </div>
           </div>
-          <label class="label label-success label-attribute-font">Validate Successfully!</label>
+          <label ng-if="validateSuccess(sourceValidateResult)" class="label label-success label-attribute-font">Validate Successfully!</label>
+          <label ng-if="validateFail(sourceValidateResult)" class="label label-danger label-attribute-font">Validate Failed!</label>
         </div>
       </div>
       <div class="validate-button-section">
-        <button type="button" class="btn btn-primary">Validate Connection</button>
+        <button type="button" class="btn btn-primary" ng-click="validate(true)">Validate Connection</button>
       </div>
     </dir>
   <hr>
@@ -74,37 +75,39 @@
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">IP:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="10.58.100.66">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetIp}}" ng-model="targetIp">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Username:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetUsername}}" ng-model="targetUsername">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Password:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetPassword}}" ng-model="targetPassword">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">SID</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="dbpool1">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetSID}}" ng-model="targetSID">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-default label-attribute-font">Schema:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="sfuser_jdm">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetSchema}}" ng-model="targetSchema">
             </div>
           </div>
+          <label ng-if="validateSuccess(targetValidateResult)" class="label label-success label-attribute-font">Validate Successfully!</label>
+          <label ng-if="validateFail(targetValidateResult)" class="label label-danger label-attribute-font">Validate Failed!</label>
         </div>
       </div>
       <div class="validate-button-section">
-        <button type="button" class="btn btn-primary">Validate Connection</button>
+        <button type="button" class="btn btn-primary" ng-click="validate(false)">Validate Connection</button>
       </div>
     </dir>
   <hr>
