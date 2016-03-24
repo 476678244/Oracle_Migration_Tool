@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import springbased.bean.ConnectionInfo;
+import springbased.bean.ValidationResult;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 import springbased.service.FKUtil;
@@ -33,7 +34,8 @@ public class MigrateController {
   @RequestMapping("/migrate")
   public void migrate(String sourceUsername, String sourcePassword,
       String sourceUrl, String sourceSchema, String targetUsername,
-      String targetPassword, String targetUrl, String targetSchema) {
+      String targetPassword, String targetUrl, String targetSchema)
+          throws SQLException {
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
         sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
@@ -62,6 +64,13 @@ public class MigrateController {
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);
+    } finally {
+      if (sourceCon != null) {
+        sourceCon.close();
+      }
+      if (targetCon != null) {
+        targetCon.close();
+      }
     }
     if (ThreadLocalErrorMonitor.isErrorsExisting()) {
       log.info("Migration process end successfully, but with some errors.");
@@ -78,12 +87,32 @@ public class MigrateController {
   public ValidationResult validateSourceConnection(
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
-      @RequestParam("sid") String sid, @RequestParam("schema") String schema) {
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+          throws SQLException {
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
     ConnectionInfo sourceConInfo = new ConnectionInfo(username, password, url);
     ReadOnlyConnection sourceCon = null;
     try {
       sourceCon = this.migrationService.getReadOnlyConnection(sourceConInfo);
+      ValidationResult result = this.migrationService
+          .validateSourceSchema(sourceCon, schema);
+      if (result.getStatus() == ValidationResult.FAIL) {
+        return result;
+      }
+      if (!sourceCon.isReadOnly()) {
+        return new ValidationResult() {
+          @Override
+          public int getStatus() {
+            return SUCCESSWITHWARNING;
+          }
+
+          @Override
+          public String getCause() {
+            return "Source DB connection is not read only.";
+          }
+        };
+      }
+      return new ValidationResult();
     } catch (SQLException e) {
       return new ValidationResult() {
         @Override
@@ -96,32 +125,25 @@ public class MigrateController {
           return e.getMessage();
         }
       };
+    } finally {
+      if (sourceCon != null) {
+        sourceCon.close();
+      }
     }
-    if (!sourceCon.isReadOnly()) {
-      return new ValidationResult() {
-        @Override
-        public int getStatus() {
-          return SUCCESSWITHWARNING;
-        }
-        @Override
-        public String getCause() {
-          return "Source DB connection is not read only.";
-        }
-      };
-    }
-    return new ValidationResult();
   }
 
   @RequestMapping("/validateTargetConnection")
   public ValidationResult validateTargetConnection(
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
-      @RequestParam("sid") String sid, @RequestParam("schema") String schema) {
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+          throws SQLException {
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
     ConnectionInfo targetConInfo = new ConnectionInfo(username, password, url);
     Connection targetCon = null;
     try {
       targetCon = this.migrationService.getConnection(targetConInfo);
+      return this.migrationService.validateTargetSchema(targetCon, schema);
     } catch (SQLException e) {
       return new ValidationResult() {
         @Override
@@ -134,21 +156,10 @@ public class MigrateController {
           return e.getMessage();
         }
       };
-    }
-    return new ValidationResult();
-  }
-
-  public class ValidationResult {
-    
-    public static final int SUCCESS = 1;
-    public static final int FAIL = -1;
-    public static final int SUCCESSWITHWARNING = 2;
-    public int getStatus() {
-      return SUCCESS;
-    }
-
-    public String getCause() {
-      return "";
+    } finally {
+      if (targetCon != null) {
+        targetCon.close();
+      }
     }
   }
 

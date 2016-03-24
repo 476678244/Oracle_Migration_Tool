@@ -1,5 +1,7 @@
 package springbased.controller;
 
+import java.sql.SQLException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ public class MigrateControllerTest {
   private MigrateController controller;
 
   @Test
-  public void test() {
+  public void test() throws SQLException {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
     String sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
