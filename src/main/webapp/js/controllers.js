@@ -26,7 +26,7 @@ angular.module('myApp.controllers', []).
   }]);
 
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('ConfigController', ["$scope", function($scope) {
+oracleMigration.controller('ConfigController', ["$scope", '$http', function($scope, $http) {
 	$scope.sourceIp = "10.58.100.66";
 	$scope.sourceUsername = "sfuser";
 	$scope.sourcePassword = "sfuser";
@@ -45,16 +45,46 @@ oracleMigration.controller('ConfigController', ["$scope", function($scope) {
 
 	$scope.validate = function (source) {
 		if (source) {
-			if ($scope.sourceIp == "10.58.100.66") {
-				$scope.sourceValidateResult = 1;
-			} else {
-				$scope.sourceValidateResult = -1;
-			}
+			$http({
+				method: 'GET',
+				url: '/springbased-1.0/validateSourceConnection',
+				params: {
+					ip: $scope.sourceIp,
+					username: $scope.sourceUsername,
+					password: $scope.sourcePassword,
+					sid: $scope.sourceSID,
+					schema: $scope.sourceSchema
+				}
+			}).then(function successCallback(response) {
+				$scope.sourceValidateResult = response.data.status;
+				$scope.sourceValidateMessage = response.data.cause;
+			}, function errorCallback(response) {
+				// called asynchronously if an error occurs
+				// or server returns response with an error status.
+			});
+		} else {
+			$http({
+				method: 'GET',
+				url: '/springbased-1.0/validateTargetConnection',
+				params: {
+					ip: $scope.targetIp,
+					username: $scope.targetUsername,
+					password: $scope.targetPassword,
+					sid: $scope.targetSID,
+					schema: $scope.targetSchema
+				}
+			}).then(function successCallback(response) {
+				$scope.targetValidateResult = response.data.status;
+				$scope.targetValidateMessage = response.data.cause;
+			}, function errorCallback(response) {
+				// called asynchronously if an error occurs
+				// or server returns response with an error status.
+			});			
 		}
 	}
 
 	$scope.validateSuccess = function(result) {
-		if (result > 0) {
+		if (result === 1) {
 			return true;
 		}
 		return false;
@@ -62,6 +92,13 @@ oracleMigration.controller('ConfigController', ["$scope", function($scope) {
 
 	$scope.validateFail = function(result) {
 		if (result < 0) {
+			return true;
+		}
+		return false;
+	} 
+
+	$scope.validateWarn = function(result) {
+		if (result === 2) {
 			return true;
 		}
 		return false;

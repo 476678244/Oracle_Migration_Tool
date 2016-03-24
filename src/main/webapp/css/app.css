@@ -60,9 +60,15 @@
   width: 15%;
   float: left;
   padding-top: 250px;
+  padding-left: 10px;
 }
 
 .label-attribute-font {
   font-size: 13px;
   line-height: 25px;
+}
+
+.label-fail-wrap {
+  white-space: normal;
+  display: block;
 }

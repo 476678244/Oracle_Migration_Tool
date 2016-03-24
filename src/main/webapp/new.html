@@ -55,8 +55,9 @@
               <input type="text" class="form-control" id="inputEmail3" value="{{sourceSchema}}" ng-model="sourceSchema">
             </div>
           </div>
-          <label ng-if="validateSuccess(sourceValidateResult)" class="label label-success label-attribute-font">Validate Successfully!</label>
-          <label ng-if="validateFail(sourceValidateResult)" class="label label-danger label-attribute-font">Validate Failed!</label>
+          <label ng-if="validateSuccess(sourceValidateResult)" class="label label-success">Validate Successfully!</label>
+          <label ng-if="validateFail(sourceValidateResult)" class="label label-danger label-fail-wrap">Validate Failed, cause: {{sourceValidateMessage}}</label>
+          <label ng-if="validateWarn(sourceValidateResult)" class="label label-warning">Validate Success, but with warning: {{sourceValidateMessage}}</label>
         </div>
       </div>
       <div class="validate-button-section">
@@ -102,8 +103,8 @@
               <input type="text" class="form-control" id="inputEmail3" value="{{targetSchema}}" ng-model="targetSchema">
             </div>
           </div>
-          <label ng-if="validateSuccess(targetValidateResult)" class="label label-success label-attribute-font">Validate Successfully!</label>
-          <label ng-if="validateFail(targetValidateResult)" class="label label-danger label-attribute-font">Validate Failed!</label>
+          <label ng-if="validateSuccess(targetValidateResult)" class="label label-success">Validate Successfully!</label>
+          <label ng-if="validateFail(targetValidateResult)" class="label label-danger label-fail-wrap">Validate Failed, cause: {{targetValidateMessage}}</label>
         </div>
       </div>
       <div class="validate-button-section">

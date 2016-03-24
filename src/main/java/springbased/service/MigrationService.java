@@ -29,20 +29,15 @@ public class MigrationService {
 
   }
 
-  public Connection getConnection(ConnectionInfo connectionInfo) {
-    try {
-      Connection connection = DriverManager.getConnection(
-          connectionInfo.getUrl(), connectionInfo.getUsername(),
-          connectionInfo.getPassword());
-      return connection;
-    } catch (SQLException e) {
-      log.error(e);
-      return null;
-    }
+  public Connection getConnection(ConnectionInfo connectionInfo)
+      throws SQLException {
+    Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
+        connectionInfo.getUsername(), connectionInfo.getPassword());
+    return connection;
   }
 
   public ReadOnlyConnection getReadOnlyConnection(
-      ConnectionInfo connectionInfo) {
+      ConnectionInfo connectionInfo) throws SQLException {
     Connection connection = this.getConnection(connectionInfo);
     if (connection == null)
       return null;
