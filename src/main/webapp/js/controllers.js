@@ -102,5 +102,20 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 			return true;
 		}
 		return false;
-	} 
+	}
+
+	$scope.showToValidateButton = function() {
+		if ($scope.targetValidateResult > 0 && $scope.sourceValidateResult > 0) {
+			return false;
+		}
+		return true;
+	}
+	var showToValidateButton = $scope.showToValidateButton;
+
+	$scope.showToMigrateButton = function() {
+		if (showToValidateButton()) {
+			return false;
+		}
+		return true;
+	}
 }]);
