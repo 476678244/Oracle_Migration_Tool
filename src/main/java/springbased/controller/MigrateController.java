@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import springbased.bean.ConnectionInfo;
+import springbased.bean.MigrationJob;
+import springbased.bean.StatusEnum;
 import springbased.bean.ValidationResult;
+import springbased.dao.impl.ConnectionInfoDAO;
+import springbased.dao.impl.MigrationJobDAO;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 import springbased.service.FKUtil;
@@ -22,6 +26,9 @@ import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
 import springbased.service.SequenceUtil;
 import springbased.service.TableUtil;
+import springbased.service.idgenerate.IdService;
+import springbased.service.taskpool.MigrationRunnable;
+import springbased.service.taskpool.MigrationThreadPool;
 
 @RestController
 public class MigrateController {
@@ -31,6 +38,18 @@ public class MigrateController {
   @Autowired
   private MigrationService migrationService;
 
+  @Autowired
+  private ConnectionInfoDAO connectionInfoDAO;
+
+  @Autowired
+  private MigrationJobDAO migrationJobDAO;
+  
+  @Autowired
+  private MigrationThreadPool migrationThreadPool;
+  
+  @Autowired
+  private IdService idService;
+  
   @RequestMapping("/migrate")
   public void migrate(String sourceUsername, String sourcePassword,
       String sourceUrl, String sourceSchema, String targetUsername,
@@ -171,5 +190,45 @@ public class MigrateController {
       log.error(e);
       throw new Exception(e);
     }
+  }
+  
+  @RequestMapping("/fireMigration")
+  public void fireMigration(String sourceUsername, String sourcePassword,
+      String sourceUrl, String sourceSchema, String targetUsername,
+      String targetPassword, String targetUrl, String targetSchema) { 
+    ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
+        sourcePassword, sourceUrl);
+    if (!this.connectionInfoDAO.getAll().contains(sourceConInfo)) {
+      this.connectionInfoDAO.save(sourceConInfo);
+    }
+    ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
+        targetPassword, targetUrl);
+    if (!this.connectionInfoDAO.getAll().contains(targetConInfo)) {
+      this.connectionInfoDAO.save(targetConInfo);
+    }
+    MigrationJob job = new MigrationJob();
+    job.setJobId(this.idService.generateNextJobId());
+    job.setSource(sourceConInfo);
+    job.setSourceSchema(sourceSchema);
+    job.setTarget(targetConInfo);
+    job.setStatus(StatusEnum.TASK_FIRED);
+    job.setTargetSchema(targetSchema);
+    this.migrationJobDAO.save(job);
+    this.migrationThreadPool.addTask(job);
+  }
+  
+  @RequestMapping("/getJobList")
+  public List<MigrationJob> getJobList() {
+    List<MigrationJob> dbJobList = (List<MigrationJob>) this.migrationJobDAO.getAll();
+    List<MigrationJob> jobList = new ArrayList<MigrationJob>(dbJobList.size());
+    for (MigrationJob job : dbJobList) {
+      MigrationRunnable activeThread = this.migrationThreadPool.getThreadInfo(job.getJobId());
+      if (activeThread != null) {
+        dbJobList.remove(job);
+        jobList.add(job);
+      }
+    }
+    jobList.addAll(dbJobList);
+    return jobList;
   }
 }

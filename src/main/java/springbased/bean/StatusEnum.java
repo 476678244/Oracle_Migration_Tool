@@ -2,5 +2,5 @@ package springbased.bean;
 
 public enum StatusEnum {
 
-  STARTED, FINISHED;
+  TASK_FIRED, STARTED, FINISHED;
 }

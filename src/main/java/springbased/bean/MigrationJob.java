@@ -13,6 +13,8 @@ public class MigrationJob {
   @Id
   private ObjectId id;
   
+  private long jobId;
+  
   @Reference
   private ConnectionInfo source;
   
@@ -22,6 +24,20 @@ public class MigrationJob {
   private Date startTime;
   
   private Date endTime;
+
+  private String sourceSchema;
+  
+  private String targetSchema;
+  
+  private StatusEnum status; 
+  
+  public StatusEnum getStatus() {
+    return status;
+  }
+
+  public void setStatus(StatusEnum status) {
+    this.status = status;
+  }
 
   public ConnectionInfo getSource() {
     return source;
@@ -55,14 +71,43 @@ public class MigrationJob {
     this.endTime = endTime;
   }
 
+  public ObjectId getId() {
+    return id;
+  }
+
+  public void setId(ObjectId id) {
+    this.id = id;
+  }
+
+  public long getJobId() {
+    return jobId;
+  }
+
+  public void setJobId(long jobId) {
+    this.jobId = jobId;
+  }
+
+  public String getSourceSchema() {
+    return sourceSchema;
+  }
+
+  public void setSourceSchema(String sourceSchema) {
+    this.sourceSchema = sourceSchema;
+  }
+
+  public String getTargetSchema() {
+    return targetSchema;
+  }
+
+  public void setTargetSchema(String targetSchema) {
+    this.targetSchema = targetSchema;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
-    result = prime * result + ((source == null) ? 0 : source.hashCode());
-    result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
-    result = prime * result + ((target == null) ? 0 : target.hashCode());
+    result = prime * result + (int) (jobId ^ (jobId >>> 32));
     return result;
   }
 
@@ -75,25 +120,7 @@ public class MigrationJob {
     if (getClass() != obj.getClass())
       return false;
     MigrationJob other = (MigrationJob) obj;
-    if (endTime == null) {
-      if (other.endTime != null)
-        return false;
-    } else if (!endTime.equals(other.endTime))
-      return false;
-    if (source == null) {
-      if (other.source != null)
-        return false;
-    } else if (!source.equals(other.source))
-      return false;
-    if (startTime == null) {
-      if (other.startTime != null)
-        return false;
-    } else if (!startTime.equals(other.startTime))
-      return false;
-    if (target == null) {
-      if (other.target != null)
-        return false;
-    } else if (!target.equals(other.target))
+    if (jobId != other.jobId)
       return false;
     return true;
   }
