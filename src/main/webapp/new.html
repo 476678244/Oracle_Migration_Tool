@@ -9,7 +9,7 @@
 
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/app.css" />
-
+  <link rel="stylesheet" href="css/adapt-strap.css"/>
 
 </head>
 
@@ -114,11 +114,16 @@
   <hr>
   <button type="button" class="btn btn-secondary btn-lg btn-block" ng-if="showToValidateButton()">Please do validation for source DB and target DB at first.</button>
   <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()">Fire Migration</button>
+  <ad-loading-icon ng-show="showSimpleIcon"></ad-loading-icon><br>
 </div>
   <script src="lib/common/jquery.min.js"></script>
   <script src="lib/common/bootstrap.min.js"></script>
   <script src="lib/angular/angular.js"></script>
+  <script src="lib/common/angular-sanitize.min.js"></script>
   <script src="lib/angular/angular-route.js"></script>
+  <!-- adapt-strap -->
+  <script src="lib/common/adapt-strap.min.js"></script>
+  <script src="lib/common/adapt-strap.tpl.min.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>

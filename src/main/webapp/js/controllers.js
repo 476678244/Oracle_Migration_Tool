@@ -43,6 +43,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 
 	$scope.targetValidateResult = 0;
 
+	$scope.showSimpleIcon = true;
+	
 	$scope.validate = function (source) {
 		if (source) {
 			$http({
