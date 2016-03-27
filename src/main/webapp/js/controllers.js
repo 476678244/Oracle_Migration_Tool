@@ -118,4 +118,12 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 		}
 		return true;
 	}
+
+	$scope.sourceInputChanged = function () {
+		$scope.sourceValidateResult = 0;
+	}
+
+	$scope.targetInputChanged = function () {
+		$scope.targetValidateResult = 0;
+	}
 }]);
