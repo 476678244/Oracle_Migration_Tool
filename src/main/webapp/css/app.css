@@ -29,6 +29,11 @@
   padding: 0;
 }
 
+.migration-container {
+  background-image: url('../img/bg.jpg');
+  background-position: bottom;
+}
+
 .config-section {
   margin-left: auto;
   margin-right: auto;

@@ -13,10 +13,9 @@
 
 </head>
 
-<body>
+<body class="migration-container">
   
 <div ng-controller="ConfigController">
-  <hr>
     <dir class="config-section row">
       <div class="label-section ">
         <h3>
@@ -65,7 +64,6 @@
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateSourceConnectionButton"></ad-loading-icon><br>
       </div>
     </dir>
-  <hr>
     <dir class="config-section row">
       <div class="label-section ">
         <h3>
@@ -113,7 +111,6 @@
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateTargetConnectionButton"></ad-loading-icon><br>
       </div>
     </dir>
-  <hr>
   <div>
       <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts>
       <button type="button" class="btn btn-secondary btn-lg btn-block" ng-if="showToValidateButton()">Please do validation for source DB and target DB at first.</button>
