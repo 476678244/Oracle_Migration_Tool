@@ -37,13 +37,20 @@
 .config-section {
   margin-left: auto;
   margin-right: auto;
+  margin-top: 20px;
   max-width: 780px;
   padding: 0;
   clear: both;
   padding-top: 20px;
   padding-left: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 6px solid #ddd;
+  /*border: 1px groove;*/
+  border-radius: 8px;
+}
+
+.input-detail {
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
 .label-section {
@@ -56,16 +63,15 @@
 
 .config-detail {
   padding: 0;
-  width: 60%;
+  width: 80%;
   float: left;
-  padding-bottom: 30px;
+  padding-bottom: 15px;
 }
 
 .validate-button-section {
-  width: 15%;
+  width: 20%;
   float: left;
-  padding-top: 250px;
-  padding-left: 10px;
+  margin-left: -15px;
 }
 
 .label-attribute-font {
@@ -76,4 +82,10 @@
 .label-fail-wrap {
   white-space: normal;
   display: block;
+}
+
+.label-pill {
+  padding-right: .6em;
+  padding-left: .6em;
+  border-radius: 10rem;
 }
