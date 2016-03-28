@@ -15,7 +15,7 @@ config(['$routeProvider', function($routeProvider) {
 }]);
 
 // oracle migration main module
-var oracleMigration = angular.module('oracleMigration', ['ngRoute']);
+var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap']);
   oracleMigration.config(['$routeProvider', function($routeProvider){
     $routeProvider.when('/', {
       templateUrl : './new.html',

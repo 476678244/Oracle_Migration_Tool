@@ -193,9 +193,23 @@ public class MigrateController {
   }
   
   @RequestMapping("/fireMigration")
-  public void fireMigration(String sourceUsername, String sourcePassword,
-      String sourceUrl, String sourceSchema, String targetUsername,
-      String targetPassword, String targetUrl, String targetSchema) { 
+  public void fireMigration(@RequestParam("sourceUsername") String sourceUsername,
+      @RequestParam("sourcePassword") String sourcePassword,
+      @RequestParam("sourceUrl") String sourceUrl, 
+      @RequestParam("sourceSchema") String sourceSchema,
+      @RequestParam("targetUsername") String targetUsername,
+      @RequestParam("targetPassword") String targetPassword,
+      @RequestParam("targetUrl") String targetUrl, 
+      @RequestParam("targetSchema") String targetSchema) { 
+    boolean test = true;
+    if (test) {
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        return;
+      }
+      return;
+    }
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
         sourcePassword, sourceUrl);
     if (!this.connectionInfoDAO.getAll().contains(sourceConInfo)) {

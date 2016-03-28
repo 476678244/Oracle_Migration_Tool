@@ -7,7 +7,7 @@
   <title>Oracle Migration Tool</title>
 
 
-  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/adapt-strap.css"/>
 
@@ -62,6 +62,7 @@
       </div>
       <div class="validate-button-section">
         <button type="button" class="btn btn-primary" ng-click="validate(true)">Validate Connection</button>
+        <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateSourceConnectionButton"></ad-loading-icon><br>
       </div>
     </dir>
   <hr>
@@ -109,12 +110,17 @@
       </div>
       <div class="validate-button-section">
         <button type="button" class="btn btn-primary" ng-click="validate(false)">Validate Connection</button>
+        <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateTargetConnectionButton"></ad-loading-icon><br>
       </div>
     </dir>
   <hr>
-  <button type="button" class="btn btn-secondary btn-lg btn-block" ng-if="showToValidateButton()">Please do validation for source DB and target DB at first.</button>
-  <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()">Fire Migration</button>
-  <ad-loading-icon ng-show="showSimpleIcon"></ad-loading-icon><br>
+  <div>
+      <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts>
+      <button type="button" class="btn btn-secondary btn-lg btn-block" ng-if="showToValidateButton()">Please do validation for source DB and target DB at first.</button>
+      <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
+      <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
+  </div>
+
 </div>
   <script src="lib/common/jquery.min.js"></script>
   <script src="lib/common/bootstrap.min.js"></script>

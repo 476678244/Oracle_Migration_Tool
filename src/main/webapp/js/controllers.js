@@ -26,7 +26,7 @@ angular.module('myApp.controllers', []).
   }]);
 
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('ConfigController', ["$scope", '$http', function($scope, $http) {
+oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', function($scope, $http, adAlerts) {
 	$scope.sourceIp = "10.58.100.66";
 	$scope.sourceUsername = "sfuser";
 	$scope.sourcePassword = "sfuser";
@@ -34,6 +34,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 	$scope.sourceSchema = "sfuser_tree";
 
 	$scope.sourceValidateResult = 0;
+	$scope.showLoadingIconForValidateSourceConnectionButton = false;
 
 	$scope.targetIp = "10.58.100.66";
 	$scope.targetUsername = "sfuser";
@@ -42,11 +43,13 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 	$scope.targetSchema = "sfuser_real";
 
 	$scope.targetValidateResult = 0;
+	$scope.showLoadingIconForValidateTargetConnectionButton = false;
 
-	$scope.showSimpleIcon = true;
+	$scope.showLoadingIcon = false;
 	
 	$scope.validate = function (source) {
 		if (source) {
+			$scope.showLoadingIconForValidateSourceConnectionButton = true;
 			$http({
 				method: 'GET',
 				url: '/springbased-1.0/validateSourceConnection',
@@ -60,11 +63,11 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 			}).then(function successCallback(response) {
 				$scope.sourceValidateResult = response.data.status;
 				$scope.sourceValidateMessage = response.data.cause;
+				$scope.showLoadingIconForValidateSourceConnectionButton = false;
 			}, function errorCallback(response) {
-				// called asynchronously if an error occurs
-				// or server returns response with an error status.
 			});
 		} else {
+			$scope.showLoadingIconForValidateTargetConnectionButton = true;
 			$http({
 				method: 'GET',
 				url: '/springbased-1.0/validateTargetConnection',
@@ -78,9 +81,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 			}).then(function successCallback(response) {
 				$scope.targetValidateResult = response.data.status;
 				$scope.targetValidateMessage = response.data.cause;
+				$scope.showLoadingIconForValidateTargetConnectionButton = false;
 			}, function errorCallback(response) {
-				// called asynchronously if an error occurs
-				// or server returns response with an error status.
 			});			
 		}
 	}
@@ -107,6 +109,9 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 	}
 
 	$scope.showToValidateButton = function() {
+		if ($scope.showLoadingIcon) {
+			return false;
+		}
 		if ($scope.targetValidateResult > 0 && $scope.sourceValidateResult > 0) {
 			return false;
 		}
@@ -118,6 +123,9 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 		if (showToValidateButton()) {
 			return false;
 		}
+		if ($scope.showLoadingIcon) {
+			return false;
+		}
 		return true;
 	}
 
@@ -127,5 +135,30 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', function($sco
 
 	$scope.targetInputChanged = function () {
 		$scope.targetValidateResult = 0;
+	}
+
+	$scope.fireMigration = function() {
+		$scope.showLoadingIcon = true;
+		var sourceUrl = "jdbc:oracle:thin:@" + $scope.sourceIp + ":1521:" + $scope.sourceSID;
+		var targetUrl = "jdbc:oracle:thin:@" + $scope.targetIp + ":1521:" + $scope.targetSID;
+		$http({
+			method: 'GET',
+			url: '/springbased-1.0/fireMigration',
+			params: {
+				sourceUsername: $scope.sourceUsername,
+				sourcePassword: $scope.sourcePassword,
+				sourceUrl: sourceUrl,
+				sourceSchema: $scope.sourceSchema,
+				targetUsername: $scope.targetUsername,
+				targetPassword: $scope.targetPassword,
+				targetUrl: targetUrl,
+				targetSchema: $scope.targetSchema
+			}
+		}).then(function successCallback(response) {
+			$scope.showLoadingIcon = false;
+			adAlerts.success('Success!', 'Migration Job has been scheduled!');
+		}, function errorCallback(response) {
+			adAlerts.error('Error!', 'Internal Error, please contact Zonghan for help.');
+		});
 	}
 }]);
