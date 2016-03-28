@@ -201,25 +201,21 @@ public class MigrateController {
       @RequestParam("targetPassword") String targetPassword,
       @RequestParam("targetUrl") String targetUrl, 
       @RequestParam("targetSchema") String targetSchema) { 
-    boolean test = true;
-    if (test) {
-      try {
-        Thread.sleep(2000);
-      } catch (InterruptedException e) {
-        return;
-      }
-      return;
-    }
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
         sourcePassword, sourceUrl);
-    if (!this.connectionInfoDAO.getAll().contains(sourceConInfo)) {
+    List<ConnectionInfo> connections = this.connectionInfoDAO.getAll();
+    if (!connections.contains(sourceConInfo)) {
       this.connectionInfoDAO.save(sourceConInfo);
-    }
+      connections = this.connectionInfoDAO.getAll();
+    } 
+    sourceConInfo = connections.get(connections.indexOf(sourceConInfo));
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
         targetPassword, targetUrl);
     if (!this.connectionInfoDAO.getAll().contains(targetConInfo)) {
       this.connectionInfoDAO.save(targetConInfo);
+      connections = this.connectionInfoDAO.getAll();
     }
+    targetConInfo = connections.get(connections.indexOf(targetConInfo));
     MigrationJob job = new MigrationJob();
     job.setJobId(this.idService.generateNextJobId());
     job.setSource(sourceConInfo);

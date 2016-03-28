@@ -1,6 +1,6 @@
 package springbased.dao.impl;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +15,7 @@ public class ConnectionInfoDAO extends AbstractDAO<ConnectionInfo> {
     return ConnectionInfo.class;
   }
   
-  public Collection<ConnectionInfo> getAll() {
+  public List<ConnectionInfo> getAll() {
     return this.basicDAO.find().asList();
   }
   

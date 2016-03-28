@@ -55,7 +55,6 @@ public class ConnectionInfo {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + ((password == null) ? 0 : password.hashCode());
     result = prime * result + ((url == null) ? 0 : url.hashCode());
     result = prime * result + ((username == null) ? 0 : username.hashCode());
@@ -71,11 +70,6 @@ public class ConnectionInfo {
     if (getClass() != obj.getClass())
       return false;
     ConnectionInfo other = (ConnectionInfo) obj;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
     if (password == null) {
       if (other.password != null)
         return false;
