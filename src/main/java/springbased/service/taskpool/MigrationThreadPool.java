@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,8 @@ public class MigrationThreadPool {
     MigrationRunnable thread = new MigrationThread(
         job, this.migrationService, this.migrationJobDAO);
     threadMapping.put(job.getJobId(), thread);
-    executorService.execute(thread);
+    Future<?> future = executorService.submit(thread);
+    thread.setFuture(future);
   }
   
   public MigrationRunnable getThreadInfo(long jobId) {

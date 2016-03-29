@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
@@ -20,7 +21,7 @@ import springbased.service.MigrationService;
 import springbased.service.SequenceUtil;
 import springbased.service.TableUtil;
 
-public class MigrationThread implements MigrationRunnable {
+public class MigrationThread extends Thread implements MigrationRunnable {
 
   private static final Logger log = Logger.getLogger(MigrationThread.class);
 
@@ -42,6 +43,7 @@ public class MigrationThread implements MigrationRunnable {
   public void run() {
     job.setStatus(StatusEnum.STARTED);
     job.setStartTime(new Date());
+    this.jobDAO.save(job);
     ReadOnlyConnection sourceCon = null;
     Connection targetCon = null;
     try {
@@ -53,12 +55,20 @@ public class MigrationThread implements MigrationRunnable {
     }
     List<String> tableList = new ArrayList<String>();
     try {
+      job.setStatus(StatusEnum.TABLE);
+      this.jobDAO.save(job);
       TableUtil.fetchDDLAndCopyData(targetCon, job.getTargetSchema(), sourceCon,
           job.getSourceSchema(), tableList);
+      job.setStatus(StatusEnum.INDEX);
+      this.jobDAO.save(job);
       IndexUtil.copyIndex(targetCon, job.getTargetSchema(), sourceCon,
           job.getSourceSchema(), tableList);
+      job.setStatus(StatusEnum.SEQUENCE);
+      this.jobDAO.save(job);
       SequenceUtil.copySequence(targetCon, job.getTargetSchema(), sourceCon,
           job.getSourceSchema(), tableList);
+      job.setStatus(StatusEnum.FK);
+      this.jobDAO.save(job);
       FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), sourceCon,
           targetCon);
     } catch (SQLException sqle) {
@@ -113,4 +123,15 @@ public class MigrationThread implements MigrationRunnable {
     return job.getStartTime();
   }
 
+  private Future<?> future;
+  
+  @Override
+  public void setFuture(Future<?> future) {
+    this.future = future;
+  }
+  
+  @Override
+  public Future<?> getFuture() {
+    return this.future;
+  }
 }

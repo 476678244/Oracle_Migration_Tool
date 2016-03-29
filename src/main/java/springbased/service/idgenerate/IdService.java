@@ -18,7 +18,7 @@ public class IdService {
   private MigrationJobDAO jobDAO;
 
   public long generateNextJobId() {
-    if (max.equals(0)) {
+    if (max.longValue() == 0) {
       synchronized (max) {
         // init max
         Collection<MigrationJob> jobs = this.jobDAO.getAll();

@@ -7,10 +7,13 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class MigrationJob {
 
   @Id
+  @JsonIgnore
   private ObjectId id;
   
   private long jobId;

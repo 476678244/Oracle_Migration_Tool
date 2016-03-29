@@ -3,6 +3,7 @@ package springbased.controller;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +18,7 @@ import springbased.bean.ConnectionInfo;
 import springbased.bean.MigrationJob;
 import springbased.bean.StatusEnum;
 import springbased.bean.ValidationResult;
+import springbased.bean.vo.MigrationJobVO;
 import springbased.dao.impl.ConnectionInfoDAO;
 import springbased.dao.impl.MigrationJobDAO;
 import springbased.monitor.ThreadLocalErrorMonitor;
@@ -227,18 +229,32 @@ public class MigrateController {
     this.migrationThreadPool.addTask(job);
   }
   
-  @RequestMapping("/getJobList")
-  public List<MigrationJob> getJobList() {
+  @RequestMapping("/jobs")
+  public List<MigrationJobVO> getJobList() {
     List<MigrationJob> dbJobList = (List<MigrationJob>) this.migrationJobDAO.getAll();
-    List<MigrationJob> jobList = new ArrayList<MigrationJob>(dbJobList.size());
-    for (MigrationJob job : dbJobList) {
+    List<MigrationJobVO> jobList = new ArrayList<MigrationJobVO>(dbJobList.size());
+    Iterator<MigrationJob> dbJobListIterator = dbJobList.iterator();
+    while (dbJobListIterator.hasNext()) {
+      MigrationJob job = dbJobListIterator.next();
       MigrationRunnable activeThread = this.migrationThreadPool.getThreadInfo(job.getJobId());
       if (activeThread != null) {
-        dbJobList.remove(job);
-        jobList.add(job);
+        dbJobListIterator.remove();
+        MigrationJobVO jobVO = new MigrationJobVO(job);
+        jobVO.setInThreadPool(true);
+        jobList.add(jobVO);
+        if (activeThread.getFuture().isDone()
+            && !job.getStatus().equals(StatusEnum.FINISHED)) {
+          job.setStatus(StatusEnum.FAILED);
+        }
       }
     }
-    jobList.addAll(dbJobList);
+    for (MigrationJob job : dbJobList) {
+      jobList.add(new MigrationJobVO(job));
+      if (!job.getStatus().equals(StatusEnum.FINISHED)) {
+        job.setStatus(StatusEnum.FAILED);
+      }
+    }
     return jobList;
   }
+
 }
