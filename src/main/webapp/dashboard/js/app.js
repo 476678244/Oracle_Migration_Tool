@@ -34,3 +34,14 @@ $(function() {
     return $(".side-menu .nav .dropdown .collapse").collapse('hide');
   });
 });
+
+// oracle migration main module
+var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap']);
+  oracleMigration.config(['$routeProvider', function($routeProvider){
+    $routeProvider.when('/', {
+      templateUrl : '../html/table/datatable.html',
+      controller  : 'MonitorController'
+    });
+  }]);
+
+window.oracleMigration = oracleMigration;

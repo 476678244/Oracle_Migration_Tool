@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="oracleMigration">
 
 <head>
     <title>Flat Admin V.2 - Free Bootstrap Admin Templates</title>
@@ -21,7 +21,7 @@
     <link rel="stylesheet" type="text/css" href="../../css/themes/flat-blue.css">
 </head>
 
-<body class="flat-blue">
+<body class="flat-blue" ng-controller="MonitorController">
     <div class="app-container">
         <div class="row content-container">
             <nav class="navbar navbar-default navbar-fixed-top navbar-top">
@@ -107,7 +107,7 @@
                 </div>
             </nav>
             <!-- Main Content -->
-            <div class="container-fluid">
+            <div class="container-fluid" ng-if="showContainer()">
                 <div class="side-body">
                     <div class="page-title">
                         <span class="title">Migration Jobs</span>
@@ -174,6 +174,12 @@
         </footer>
     <div>
     <!-- Javascript Libs -->
+    <script src="../../../lib/angular/angular.js"></script>
+    <script src="../../../lib/angular/angular-route.js"></script>
+    <script src="../../../lib/common/angular-sanitize.min.js"></script>
+    <!-- adapt-strap -->
+    <script src="../../../lib/common/adapt-strap.min.js"></script>
+    <script src="../../../lib/common/adapt-strap.tpl.min.js"></script>
     <script type="text/javascript" src="../../lib/js/jquery.min.js"></script>
     <script type="text/javascript" src="../../lib/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../../lib/js/Chart.min.js"></script>
@@ -188,6 +194,8 @@
     <script type="text/javascript" src="../../lib/js/ace/theme-github.js"></script>
     <!-- Javascript -->
     <script type="text/javascript" src="../../js/app.js"></script>
+    <script type="text/javascript" src="../../js/controllers.js"></script>
+
 </body>
 
 </html>
