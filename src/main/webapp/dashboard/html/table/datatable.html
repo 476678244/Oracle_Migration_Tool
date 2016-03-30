@@ -107,7 +107,7 @@
                 </div>
             </nav>
             <!-- Main Content -->
-            <div class="container-fluid" ng-if="showContainer()">
+            <div class="container-fluid">
                 <div class="side-body">
                     <div class="page-title">
                         <span class="title">Migration Jobs</span>
@@ -122,9 +122,27 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <table class="datatable table table-striped" cellspacing="0" width="100%">
+                                    <div class="top">
+                                        <div class="dataTables_filter searchBox">
+                                            <label class="searchBoxLabel">Search:</label>
+                                            <input type="search" class="form-control input-sm searchBoxInput" placeholder="" aria-controls="table007" ng-model="searchKeyword" ng-change="searchKeywordChanged()">
+                                        </div>
+                                        <div class="dataTables_length lineLength">
+                                            <label>Show 
+                                                <select name="table007_length" aria-controls="table007" class="form-control input-sm">
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                </select> entries
+                                            </label>
+                                        </div>
+                                        <div class="clearBothForTop"></div>
+                                    </div>
+                                    <table id="table007" class="datatable table table-striped" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
+                                                <th>Job Id</th>
                                                 <th>SourceDB</th>
                                                 <th>SourceSchema</th>
                                                 <th>TargetDB</th>
@@ -133,30 +151,15 @@
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody ng-repeat="job in jobs | filter: searchKeyword as results">
                                             <tr>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_tree</td>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_real</td>
-                                                <td>2011/04/25</td>
-                                                <td>Finished</td>
-                                            </tr>
-                                            <tr>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_tree</td>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_real</td>
-                                                <td>2011/04/15</td>
-                                                <td>Failed</td>
-                                            </tr>
-                                            <tr>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_jdm</td>
-                                                <td>10.58.100.66</td>
-                                                <td>sfuser_real</td>
-                                                <td>2011/04/15</td>
-                                                <td>Processing Table Data</td>
+                                                <td>{{job.job.jobId}}</td>
+                                                <td>{{job.job.source.url}}</td>
+                                                <td>{{job.job.sourceSchema}}</td>
+                                                <td>{{job.job.target.url}}</td>
+                                                <td>{{job.job.targetSchema}}</td>
+                                                <td>{{job.startTime}}</td>
+                                                <td>{{job.job.status}}</td>
                                             </tr>
                                         </tbody>
                                     </table>

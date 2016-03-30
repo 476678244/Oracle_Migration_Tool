@@ -1230,3 +1230,25 @@ body.login-page {
   .featurette-heading {
     margin-top: 100px;
     margin-bottom: 20px; } }
+
+.searchBox {
+  float: right;
+}
+
+.lineLength {
+  float: left;
+}
+
+.searchBoxLabel {
+  display: inline;
+  width: 30%;
+}
+
+.searchBoxInput {
+  display: inline;
+  width: 70%;
+}
+
+.clearBothForTop {
+  clear: both;
+}

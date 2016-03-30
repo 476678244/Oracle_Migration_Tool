@@ -35,6 +35,11 @@ $(function() {
   });
 });
 
+$(document).ready(function() {
+  $('#table007_filter').remove();
+  $('#table007_length').remove();
+} );
+
 // oracle migration main module
 var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap']);
   oracleMigration.config(['$routeProvider', function($routeProvider){

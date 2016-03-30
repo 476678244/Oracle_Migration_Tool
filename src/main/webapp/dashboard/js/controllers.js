@@ -3,20 +3,18 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 	$scope.jobs = {
 	};
 
-	$scope.showContainerFlag = false;
+	$scope.searchKeyword = '8';
 
 	$http({
 		method: 'GET',
 		url: '/springbased-1.0/jobs'
 	}).then(function successCallback(response) {
-		$scope.showContainerFlag = true;
 		$scope.jobs = response.data;
 	}, function errorCallback(response) {
 	});
 
-	$scope.showContainer = function() {
-		return $scope.showContainerFlag;
-	};
-
+	$scope.searchKeywordChanged = function() {
+		var a = 0;
+	}
 			
 }]);
