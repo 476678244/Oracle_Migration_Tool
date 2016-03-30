@@ -150,8 +150,8 @@
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody ng-repeat="job in jobs | filter: searchKeyword | orderBy : '-job.jobId' | limitTo : lineLengthSelect.selectValue as results">
-                                            <tr>
+                                        <tbody>
+                                            <tr ng-repeat="job in jobs | filter: searchKeyword | orderBy : '-job.jobId' | limitTo : lineLengthSelect.selectValue as results">
                                                 <td>{{job.job.jobId}}</td>
                                                 <td>{{job.job.source.url}}</td>
                                                 <td>{{job.job.sourceSchema}}</td>
@@ -159,6 +159,15 @@
                                                 <td>{{job.job.targetSchema}}</td>
                                                 <td>{{job.startTime}}</td>
                                                 <td>{{job.job.status}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>SourceDB</th>
+                                                <th>SourceSchema</th>
+                                                <th>TargetDB</th>
+                                                <th>TargetSchema</th>
+                                                <th>Start date</th>
+                                                <th>Status</th>
                                             </tr>
                                         </tbody>
                                     </table>
