@@ -3,7 +3,12 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 	$scope.jobs = {
 	};
 
-	$scope.searchKeyword = '8';
+	$scope.searchKeyword = '';
+	$scope.lineLengthSelect = {
+		"selectValue" : 5
+	}
+	
+	window.lineLengthSelect = $scope.lineLengthSelect;
 
 	$http({
 		method: 'GET',
@@ -14,7 +19,11 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 	});
 
 	$scope.searchKeywordChanged = function() {
-		var a = 0;
+		var a = $scope.lineLengthSelect;
+	}
+
+	$scope.lineLengthSelectChanged = function() {
+		var b = 0;
 	}
 			
 }]);

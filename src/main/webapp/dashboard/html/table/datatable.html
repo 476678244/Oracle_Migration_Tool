@@ -125,24 +125,23 @@
                                     <div class="top">
                                         <div class="dataTables_filter searchBox">
                                             <label class="searchBoxLabel">Search:</label>
-                                            <input type="search" class="form-control input-sm searchBoxInput" placeholder="" aria-controls="table007" ng-model="searchKeyword" ng-change="searchKeywordChanged()">
+                                            <input id="searchBoxInput" type="search" class="form-control input-sm searchBoxInput" placeholder="" aria-controls="table007" ng-model="searchKeyword" ng-change="searchKeywordChanged()">
                                         </div>
-                                        <div class="dataTables_length lineLength">
-                                            <label>Show 
-                                                <select name="table007_length" aria-controls="table007" class="form-control input-sm">
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                                </select> entries
+                                        <div class="lineLength">
+                                            <label>Show {{lineLengthSelect.selectValue}}  
                                             </label>
+                                            <select id="lineLengthSelect" name="lineLengthSelect">
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                            </select> 
+                                            entries
                                         </div>
                                         <div class="clearBothForTop"></div>
                                     </div>
                                     <table id="table007" class="datatable table table-striped" cellspacing="0" width="100%">
                                         <thead>
                                             <tr>
-                                                <th>Job Id</th>
+                                                <th>#</th>
                                                 <th>SourceDB</th>
                                                 <th>SourceSchema</th>
                                                 <th>TargetDB</th>
@@ -151,7 +150,7 @@
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody ng-repeat="job in jobs | filter: searchKeyword as results">
+                                        <tbody ng-repeat="job in jobs | filter: searchKeyword | orderBy : '-job.jobId' | limitTo : lineLengthSelect.selectValue as results">
                                             <tr>
                                                 <td>{{job.job.jobId}}</td>
                                                 <td>{{job.job.source.url}}</td>
@@ -177,6 +176,7 @@
         </footer>
     <div>
     <!-- Javascript Libs -->
+    <!-- <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script> -->
     <script src="../../../lib/angular/angular.js"></script>
     <script src="../../../lib/angular/angular-route.js"></script>
     <script src="../../../lib/common/angular-sanitize.min.js"></script>

@@ -46,7 +46,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 	$scope.showLoadingIconForValidateTargetConnectionButton = false;
 
 	$scope.showLoadingIcon = false;
-	
+
 	$scope.validate = function (source) {
 		if (source) {
 			$scope.showLoadingIconForValidateSourceConnectionButton = true;
