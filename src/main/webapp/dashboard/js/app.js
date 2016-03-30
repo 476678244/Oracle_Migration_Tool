@@ -35,19 +35,6 @@ $(function() {
   });
 });
 
-$(document).ready(function() {
-  $('#table007_filter').remove();
-  $('#table007_length').remove();
-  $( "select" ).change(function() {
-    var str = "";
-    $( "select option:selected" ).each(function() {
-      str += $( this ).text() + " ";
-    });
-    window.lineLengthSelect.selectValue = str;
-    angular.element(document.querySelector('#searchBoxInput')).triggerHandler('change');
-  });
-} );
-
 // oracle migration main module
 var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap']);
   oracleMigration.config(['$routeProvider', function($routeProvider){

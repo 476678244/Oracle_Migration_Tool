@@ -5,10 +5,10 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 
 	$scope.searchKeyword = '';
 	$scope.lineLengthSelect = {
-		"selectValue" : 5
+		"selectValue" : 10
 	}
-	
-	window.lineLengthSelect = $scope.lineLengthSelect;
+
+	window.monitorControllerScope = $scope;
 
 	$http({
 		method: 'GET',
@@ -27,3 +27,18 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 	}
 			
 }]);
+
+$(document).ready(function() {
+  $('#table007_filter').remove();
+  $('#table007_length').remove();
+  $( "select" ).change(function() {
+    var str = "";
+    $( "select option:selected" ).each(function() {
+      str += $( this ).text() + " ";
+    });
+    window.monitorControllerScope.$apply(function() {
+		window.monitorControllerScope.lineLengthSelect.selectValue = str;
+    });
+    //angular.element(document.querySelector('#searchBoxInput')).triggerHandler('change');
+  });
+} );
