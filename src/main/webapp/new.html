@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/adapt-strap.css"/>
+  <link rel="stylesheet" href="css/angular-dropdowns.min.css"/>
 
 </head>
 
@@ -115,6 +116,11 @@
       <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
       <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
   </div>
+  <p>You have selected: {{ddSelectSelected}}</p>
+  <div dropdown-select="ddSelectOptions"
+      dropdown-model="ddSelectSelected"
+      dropdown-item-label="text" >
+  </div>
 
 </div>
   <script src="lib/common/jquery.min.js"></script>
@@ -123,6 +129,7 @@
   <script src="lib/common/angular-sanitize.min.js"></script>
   <script src="lib/angular/angular-route.js"></script>
   <!-- adapt-strap -->
+  <script src="lib/common/angular-dropdowns.min.js"></script>
   <script src="lib/common/adapt-strap.min.js"></script>
   <script src="lib/common/adapt-strap.tpl.min.js"></script>
   <script src="js/app.js"></script>

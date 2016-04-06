@@ -4,10 +4,13 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class ConnectionInfo {
 
   @Id
+  @JsonIgnore
   private ObjectId id;
 
   private String username;

@@ -258,4 +258,8 @@ public class MigrateController {
     return jobList;
   }
 
+  @RequestMapping("/connections")
+  public List<ConnectionInfo> getConnections() {
+    return this.connectionInfoDAO.getAll();
+  }
 }
