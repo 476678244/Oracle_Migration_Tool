@@ -15,6 +15,15 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 		url: '/springbased-1.0/jobs'
 	}).then(function successCallback(response) {
 		$scope.jobs = response.data;
+		// transform data to readable
+		angular.forEach($scope.jobs, function(value, key) {
+			var date = value.startTime;
+			if (date === 0) {
+				value.startTime = '';
+			} else {
+				value.startTime = (new Date(date)).toString();
+			}
+		});
 	}, function errorCallback(response) {
 	});
 

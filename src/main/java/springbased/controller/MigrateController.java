@@ -195,7 +195,7 @@ public class MigrateController {
   }
   
   @RequestMapping("/fireMigration")
-  public void fireMigration(@RequestParam("sourceUsername") String sourceUsername,
+  public long fireMigration(@RequestParam("sourceUsername") String sourceUsername,
       @RequestParam("sourcePassword") String sourcePassword,
       @RequestParam("sourceUrl") String sourceUrl, 
       @RequestParam("sourceSchema") String sourceSchema,
@@ -227,6 +227,7 @@ public class MigrateController {
     job.setTargetSchema(targetSchema);
     this.migrationJobDAO.save(job);
     this.migrationThreadPool.addTask(job);
+    return job.getJobId();
   }
   
   @RequestMapping("/jobs")

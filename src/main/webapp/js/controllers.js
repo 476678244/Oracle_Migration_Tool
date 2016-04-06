@@ -46,6 +46,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 	$scope.showLoadingIconForValidateTargetConnectionButton = false;
 
 	$scope.showLoadingIcon = false;
+	$scope.successfullyFired = false;
 
 	$scope.validate = function (source) {
 		if (source) {
@@ -126,6 +127,9 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 		if ($scope.showLoadingIcon) {
 			return false;
 		}
+		if ($scope.successfullyFired) {
+			return false;
+		}
 		return true;
 	}
 
@@ -156,7 +160,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 			}
 		}).then(function successCallback(response) {
 			$scope.showLoadingIcon = false;
-			adAlerts.success('Success!', 'Migration Job has been scheduled!');
+			$scope.successfullyFired = true;
+			adAlerts.success('Success!', 'Migration Job has been scheduled! Job Id:' + response.data);
 		}, function errorCallback(response) {
 			adAlerts.error('Error!', 'Internal Error, please contact Zonghan for help.');
 		});
