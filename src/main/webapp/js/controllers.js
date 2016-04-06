@@ -167,33 +167,51 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 		});
 	};
 
-	$scope.ddSelectOptions = [
+	$scope.getQuickSelectionOptions = function() {
+		$http({
+			method: 'GET',
+			url: '/springbased-1.0/connections'
+		}).then(function successCallback(response) {
+			angular.forEach(response.data, function(value, key) {
+				var quickSelectOption = {};
+				quickSelectOption.username = value.username;
+				quickSelectOption.password = value.password;
+				quickSelectOption.ip = value.url.replace('jdbc:oracle:thin:@','').replace(/:1521:.*/,'');
+				quickSelectOption.sid = value.url.replace(/jdbc:oracle:thin:@.*:1521:/,'');
+				quickSelectOption.url = value.url;
+				$scope.quickSelectOptions.push(quickSelectOption);
+			});
+		}, function errorCallback(response) {
+		});
+	};
+	$scope.getQuickSelectionOptions();
+
+	$scope.sourceQuickSelectionChange = function() {
+		$scope.sourceUsername = $scope.sourceQuickSelectOptionsSelected.username;
+		$scope.sourcePassword = $scope.sourceQuickSelectOptionsSelected.password;
+		$scope.sourceIp = $scope.sourceQuickSelectOptionsSelected.ip;
+		$scope.sourceSID = $scope.sourceQuickSelectOptionsSelected.sid;
+	};
+
+	$scope.quickSelectOptions = [
         {
-            text: 'Option1',
-            value: 'a value'
+            ip: 'ip1',
+            username: 'username1',
+            password: 'password1',
+            sid: 'sid1',
+            url: 'url1'
         },
         {
-            text: 'Option2',
-            value: 'another value',
-            someprop: 'somevalue'
-        },
-        {
-            // Any option with divider set to true will be a divider
-            // in the menu and cannot be selected.
-            divider: true
-        },
-        {
-            // Any divider option with a 'text' property will
-            // behave similarly to a divider and cannot be selected.
-            divider: true,
-            text: 'divider label'
-        },
-        {
-            // Example of an option with the 'href' property
-            text: 'Option4',
-            href: '#option4'
+            ip: 'ip2',
+            username: 'username2',
+            password: 'password2',
+            sid: 'sid2',
+            url: 'url2'
         }
     ];
 
-    $scope.ddSelectSelected = {}; 
+    $scope.sourceQuickSelectOptionsSelected = {};
+    if ($scope.quickSelectOptions.length >0) {
+    	$scope.sourceQuickSelectOptionsSelected = $scope.quickSelectOptions[0];
+    }
 }]);
