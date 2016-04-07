@@ -133,12 +133,18 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 		return true;
 	}
 
-	$scope.sourceInputChanged = function () {
+	$scope.sourceInputChanged = function (schema) {
 		$scope.sourceValidateResult = 0;
+		if (!schema) {
+			$scope.sourceQuickSelectOptionsSelected = {};
+		}
 	}
 
-	$scope.targetInputChanged = function () {
+	$scope.targetInputChanged = function (schema) {
 		$scope.targetValidateResult = 0;
+		if (!schema) {
+			$scope.targetQuickSelectOptionsSelected = {};
+		}
 	}
 
 	$scope.fireMigration = function() {
@@ -196,10 +202,10 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 	};
 
 	$scope.targetQuickSelectionChange = function(selected) {
-		$scope.sourceUsername = selected.username;
-		$scope.sourcePassword = selected.password;
-		$scope.sourceIp = selected.ip;
-		$scope.sourceSID = selected.sid;
+		$scope.targetUsername = selected.username;
+		$scope.targetPassword = selected.password;
+		$scope.targetIp = selected.ip;
+		$scope.targetSID = selected.sid;
 	};
 
 	$scope.quickSelectOptions = [
