@@ -71,7 +71,20 @@
 .validate-button-section {
   width: 20%;
   float: left;
-  margin-left: -15px;
+  margin-left: -20px;
+}
+
+.validate-button-section .validate-button {
+  margin-bottom: 20px;
+}
+
+.validate-button-section .label-guide {
+  white-space: normal;
+  line-height: 16px;
+}
+
+.validate-button-section .monitor-page-link {
+  margin-top: 20px;
 }
 
 .label-attribute-font {

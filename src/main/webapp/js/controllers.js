@@ -26,7 +26,7 @@ angular.module('myApp.controllers', []).
   }]);
 
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', function($scope, $http, adAlerts) {
+oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '$window', function($scope, $http, adAlerts, $window) {
 	$scope.sourceIp = "10.58.100.66";
 	$scope.sourceUsername = "sfuser";
 	$scope.sourcePassword = "sfuser";
@@ -213,4 +213,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 
     $scope.sourceQuickSelectOptionsSelected = {};
     $scope.targetQuickSelectOptionsSelected = {};
+
+    $scope.gotoMonitorPage = function() {
+    	$window.location.href = 'dashboard/html/table/datatable.html';
+    }
 }]);
