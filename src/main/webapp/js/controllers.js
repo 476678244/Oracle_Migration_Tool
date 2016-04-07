@@ -31,7 +31,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 	$scope.sourceUsername = "sfuser";
 	$scope.sourcePassword = "sfuser";
 	$scope.sourceSID = "dbpool1";
-	$scope.sourceSchema = "sfuser_tree";
+	$scope.sourceSchema = "";
 
 	$scope.sourceValidateResult = 0;
 	$scope.showLoadingIconForValidateSourceConnectionButton = false;
@@ -40,7 +40,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 	$scope.targetUsername = "sfuser";
 	$scope.targetPassword = "sfuser";
 	$scope.targetSID = "dbpool1";
-	$scope.targetSchema = "sfuser_real";
+	$scope.targetSchema = "";
 
 	$scope.targetValidateResult = 0;
 	$scope.showLoadingIconForValidateTargetConnectionButton = false;
@@ -180,38 +180,31 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', f
 				quickSelectOption.sid = value.url.replace(/jdbc:oracle:thin:@.*:1521:/,'');
 				quickSelectOption.url = value.url;
 				$scope.quickSelectOptions.push(quickSelectOption);
+				$scope.sourceQuickSelectOptionsSelected = quickSelectOption;
+				$scope.targetQuickSelectOptionsSelected = quickSelectOption;
 			});
 		}, function errorCallback(response) {
 		});
 	};
 	$scope.getQuickSelectionOptions();
 
-	$scope.sourceQuickSelectionChange = function() {
-		$scope.sourceUsername = $scope.sourceQuickSelectOptionsSelected.username;
-		$scope.sourcePassword = $scope.sourceQuickSelectOptionsSelected.password;
-		$scope.sourceIp = $scope.sourceQuickSelectOptionsSelected.ip;
-		$scope.sourceSID = $scope.sourceQuickSelectOptionsSelected.sid;
+	$scope.sourceQuickSelectionChange = function(selected) {
+		$scope.sourceUsername = selected.username;
+		$scope.sourcePassword = selected.password;
+		$scope.sourceIp = selected.ip;
+		$scope.sourceSID = selected.sid;
+	};
+
+	$scope.targetQuickSelectionChange = function(selected) {
+		$scope.sourceUsername = selected.username;
+		$scope.sourcePassword = selected.password;
+		$scope.sourceIp = selected.ip;
+		$scope.sourceSID = selected.sid;
 	};
 
 	$scope.quickSelectOptions = [
-        {
-            ip: 'ip1',
-            username: 'username1',
-            password: 'password1',
-            sid: 'sid1',
-            url: 'url1'
-        },
-        {
-            ip: 'ip2',
-            username: 'username2',
-            password: 'password2',
-            sid: 'sid2',
-            url: 'url2'
-        }
     ];
 
     $scope.sourceQuickSelectOptionsSelected = {};
-    if ($scope.quickSelectOptions.length >0) {
-    	$scope.sourceQuickSelectOptionsSelected = $scope.quickSelectOptions[0];
-    }
+    $scope.targetQuickSelectOptionsSelected = {};
 }]);

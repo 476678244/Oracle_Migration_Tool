@@ -79,6 +79,11 @@
   line-height: 25px;
 }
 
+.label-db-font {
+  font-size: 13px;
+  line-height: 35px;
+}
+
 .label-fail-wrap {
   white-space: normal;
   display: block;
@@ -88,4 +93,8 @@
   padding-right: .6em;
   padding-left: .6em;
   border-radius: 10rem;
+}
+
+.wrap-dd-select {
+  width: 385px;
 }

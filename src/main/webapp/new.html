@@ -8,9 +8,9 @@
 
 
   <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/adapt-strap.css"/>
   <link rel="stylesheet" href="css/angular-dropdowns.min.css"/>
+  <link rel="stylesheet" href="css/app.css"/>
 
 </head>
 
@@ -21,11 +21,11 @@
       <div class="config-detail ">
         <div class="input-detail">
           <div class="form-group row">
-            <label class="col-sm-3 label label-pill label-warning label-attribute-font">Source DB</label>
+            <label class="col-sm-3 label label-pill label-warning label-db-font">Source DB</label>
             <div class="col-sm-9"> 
               <div dropdown-select="quickSelectOptions"
                dropdown-model="sourceQuickSelectOptionsSelected"
-               dropdown-item-label="url" dropdown-onchange="sourceQuickSelectionChange()">
+               dropdown-item-label="url" dropdown-onchange="sourceQuickSelectionChange(selected)">
               </div>
             </div>
           </div>
@@ -73,8 +73,13 @@
       <div class="config-detail ">
         <div class="input-detail">
           <div class="form-group row">
-            <label class="col-sm-3 label label-pill label-warning label-attribute-font">Target DB</label>
-            <div class="col-sm-9"> </div>
+            <label class="col-sm-3 label label-pill label-warning label-db-font">Target DB</label>
+            <div class="col-sm-9">
+              <div dropdown-select="quickSelectOptions"
+               dropdown-model="targetQuickSelectOptionsSelected"
+               dropdown-item-label="url" dropdown-onchange="targetQuickSelectionChange(selected)">
+              </div>
+            </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-info label-attribute-font">IP:</label>
@@ -121,7 +126,6 @@
       <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
       <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
   </div>
-  <p>You have selected: {{ddSelectSelected}}</p>
 
 </div>
   <script src="lib/common/jquery.min.js"></script>
