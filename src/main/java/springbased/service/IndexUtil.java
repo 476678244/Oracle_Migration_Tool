@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import springbased.bean.ConnectionInfo;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
@@ -19,8 +20,8 @@ public class IndexUtil {
 
   private static final Logger log = Logger.getLogger(IndexUtil.class);
 
-  public static void copyIndex(Connection targetConn, String targetSchema,
-      ReadOnlyConnection sourceConn, String sourceSchema,
+  public static void copyIndex(ConnectionInfo targetConnInfo, String targetSchema,
+      ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException {
     // copy unique index
     List<String> indexList = new ArrayList<String>();
@@ -28,6 +29,7 @@ public class IndexUtil {
     HashMap<String, List<String>> cols2Ind = new HashMap<String, List<String>>();
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     try {
       pstmt = sourceConn.prepareStatement(
           " select table_name,index_name,COLUMN_NAME from " + "("
@@ -47,8 +49,8 @@ public class IndexUtil {
         String indName = rs.getString(2);
         String colName = rs.getString(3);
         if (colName.toUpperCase().contains("SYS_NC")) {
-          colName = translateSysNcToTableName(sourceSchema, colName, targetConn,
-              sourceConn, tabName);
+          colName = translateSysNcToTableName(sourceSchema, colName,
+              sourceConnInfo, tabName);
         }
         tab2Ind.put(indName, tabName);
         log.info("table vs index found:" + tabName + " vs " + indName);
@@ -62,6 +64,7 @@ public class IndexUtil {
     } finally {
       rs.close();
       pstmt.close();
+      sourceConn.close();
     }
 
     // construct index DDL
@@ -86,6 +89,7 @@ public class IndexUtil {
     }
 
     // add indexes
+    Connection targetConn = MigrationService.getConnection(targetConnInfo);
     for (String indexDDL : indexList) {
       try {
         pstmt = targetConn.prepareStatement(indexDDL);
@@ -96,16 +100,18 @@ public class IndexUtil {
         ThreadLocalErrorMonitor.add(indexDDL, e);
       } finally {
         pstmt.close();
+        targetConn.close();
       }
     }
 
   }
 
   private static String translateSysNcToTableName(String owner,
-      String sysNcName, Connection targetConn, ReadOnlyConnection sourceConn,
+      String sysNcName, ConnectionInfo sourceConnInfo,
       String tabName) throws SQLException {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     try {
       pstmt = sourceConn.prepareStatement(
           "select DATA_DEFAULT from dba_tab_cols where owner = ? "
@@ -121,6 +127,7 @@ public class IndexUtil {
     } finally {
       rs.close();
       pstmt.close();
+      sourceConn.close();
     }
   }
 

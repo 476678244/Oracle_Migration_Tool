@@ -1,6 +1,5 @@
 package springbased.service.taskpool;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +13,6 @@ import springbased.bean.MigrationJob;
 import springbased.bean.StatusEnum;
 import springbased.dao.impl.MigrationJobDAO;
 import springbased.monitor.ThreadLocalErrorMonitor;
-import springbased.readonly.ReadOnlyConnection;
 import springbased.service.FKUtil;
 import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
@@ -44,51 +42,28 @@ public class MigrationThread extends Thread implements MigrationRunnable {
     job.setStatus(StatusEnum.STARTED);
     job.setStartTime(new Date());
     this.jobDAO.save(job);
-    ReadOnlyConnection sourceCon = null;
-    Connection targetCon = null;
-    try {
-      sourceCon = this.migrationService.getReadOnlyConnection(job.getSource());
-      targetCon = this.migrationService.getConnection(job.getTarget());
-    } catch (SQLException e) {
-      log.error(e);
-      return;
-    }
     List<String> tableList = new ArrayList<String>();
     try {
       job.setStatus(StatusEnum.TABLE);
       this.jobDAO.save(job);
-      TableUtil.fetchDDLAndCopyData(targetCon, job.getTargetSchema(), sourceCon,
+      TableUtil.fetchDDLAndCopyData(job.getTarget(), job.getTargetSchema(), job.getSource(),
           job.getSourceSchema(), tableList);
       job.setStatus(StatusEnum.INDEX);
       this.jobDAO.save(job);
-      IndexUtil.copyIndex(targetCon, job.getTargetSchema(), sourceCon,
+      IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(), job.getSource(),
           job.getSourceSchema(), tableList);
       job.setStatus(StatusEnum.SEQUENCE);
       this.jobDAO.save(job);
-      SequenceUtil.copySequence(targetCon, job.getTargetSchema(), sourceCon,
+      SequenceUtil.copySequence(job.getTarget(), job.getTargetSchema(), job.getSource(),
           job.getSourceSchema(), tableList);
       job.setStatus(StatusEnum.FK);
       this.jobDAO.save(job);
-      FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), sourceCon,
-          targetCon);
+      FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), job.getSource(),
+          job.getTarget());
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);
     } finally {
-      if (sourceCon != null) {
-        try {
-          sourceCon.close();
-        } catch (SQLException e) {
-          log.error(e);
-        }
-      }
-      if (targetCon != null) {
-        try {
-          targetCon.close();
-        } catch (SQLException e) {
-          log.error(e);
-        }
-      }
     }
     if (ThreadLocalErrorMonitor.isErrorsExisting()) {
       log.info("Migration process end successfully, but with some errors.");

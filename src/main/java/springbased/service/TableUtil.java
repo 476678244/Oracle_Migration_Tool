@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import springbased.bean.ConnectionInfo;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
@@ -27,9 +28,11 @@ public class TableUtil {
 
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
 
-  public static void fetchDDLAndCopyData(Connection targetConn,
-      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema,
+  public static void fetchDDLAndCopyData(ConnectionInfo targetConnInfo,
+      String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException {
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
+    //Connection targetConn = MigrationService.getConnection(targetConnInfo);
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     HashMap<String, String> tempTableList = new HashMap<String, String>();
@@ -52,9 +55,10 @@ public class TableUtil {
     } catch (SQLException e) {
       rs.close();
       pstmt.close();
+      sourceConn.close();
     }
 
-    copyDataToTable(targetConn, targetSchema, sourceConn, sourceSchema,
+    copyDataToTable(targetConnInfo, targetSchema, sourceConnInfo, sourceSchema,
         tableList, tempTableList);
   }
 
@@ -62,10 +66,11 @@ public class TableUtil {
     return "[" + new Timestamp(System.currentTimeMillis()).toString() + "] ";
   }
 
-  private static void copyDataToTable(Connection targetConn,
-      String targetSchema, ReadOnlyConnection sourceConn, String sourceSchema,
+  private static void copyDataToTable(ConnectionInfo targetConnInfo,
+      String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList, HashMap<String, String> tempTableList)
           throws SQLException {
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     // get primary key info
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -97,6 +102,7 @@ public class TableUtil {
     } finally {
       rs.close();
       pstmt.close();
+      sourceConn.close();
     }
     List<String> tableDDLList = new ArrayList<String>();
     List<String> pkDDLList = new ArrayList<String>();
@@ -106,7 +112,7 @@ public class TableUtil {
       String tableName = tableList.get(i);
       // construct table DDL
       Map<String, Integer> columnMap = new HashMap<String, Integer>();
-      String tableDDL = constructTableDDL(tableName, sourceSchema, sourceConn,
+      String tableDDL = constructTableDDL(tableName, sourceSchema, sourceConnInfo,
           targetSchema, tempTableList, columnMap);
       // add primary key DDL
       String pkDDL = addPKDDL(tableName, targetSchema, pkmap, pktable2namemap);
@@ -119,6 +125,7 @@ public class TableUtil {
 
     try {
       for (int i = 0; i < tableDDLList.size(); i++) {
+        Connection targetConn = MigrationService.getConnection(targetConnInfo);
         PreparedStatement ps = null;
         String tableDDL = null;
         try {
@@ -132,10 +139,12 @@ public class TableUtil {
           log.error(e);
         } finally {
           ps.close();
+          targetConn.close();
         }
       }
 
       for (int i = 0; i < pkDDLList.size(); i++) {
+        Connection targetConn = MigrationService.getConnection(targetConnInfo);
         PreparedStatement ps = null;
         String pkDDL = null;
         try {
@@ -147,13 +156,14 @@ public class TableUtil {
           log.error(e);
         } finally {
           ps.close();
+          targetConn.close();
         }
       }
 
       for (int i = 0; i < tableList.size(); i++) {
         String tableName = tableList.get(i);
-        migrateTableData(tableName, sourceSchema, sourceConn, targetSchema,
-            targetConn, scaleMap.get(tableName));
+        migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
+            targetConnInfo, scaleMap.get(tableName));
       }
     } finally {
 
@@ -162,9 +172,11 @@ public class TableUtil {
   }
 
   public static String constructTableDDL(String tableName, String sourceSchema,
-      ReadOnlyConnection sourceConn, String targetSchema,
-      HashMap<String, String> tempTableList, Map<String, Integer> columnMap) {
-    PreparedStatement pstmt;
+      ConnectionInfo sourceConnInfo, String targetSchema,
+      HashMap<String, String> tempTableList, Map<String, Integer> columnMap) throws SQLException {
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
     StringBuffer sb = new StringBuffer();
     String ddl = null;
     try {
@@ -184,7 +196,7 @@ public class TableUtil {
               + "order by column_id");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, tableName.toUpperCase());
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
       while (rs.next()) {
         String colname = rs.getString(1);
         String datatype = rs.getString(2);
@@ -222,8 +234,6 @@ public class TableUtil {
         sb.append("\"" + colname + "\" " + datatype + ""
             + (nullable.equals("N") ? " NOT NULL" : "") + " ,");
       }
-      rs.close();
-      pstmt.close();
 
       ddl = sb.toString();
       ddl = ddl.substring(0, ddl.length() - 1);
@@ -234,7 +244,11 @@ public class TableUtil {
         ddl += "ON COMMIT DELETE ROWS";
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      log.error(e);
+    } finally {
+      rs.close();
+      pstmt.close();
+      sourceConn.close();
     }
     log.info("constructed create table DDL:");
     log.info(ddl);
@@ -281,7 +295,7 @@ public class TableUtil {
   }
 
   public static void migrateTableData(String tableName, String sourceSchema,
-      ReadOnlyConnection sourceConn, String targetSchema, Connection targetConn,
+      ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
       Map<String, Integer> columnScales) throws SQLException {
 
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
@@ -289,6 +303,8 @@ public class TableUtil {
     PreparedStatement prepStmnt = null;
     ResultSet queryResult = null;
     String insertString = null;
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
+    Connection targetConn = MigrationService.getConnection(targetConnInfo);
     try {
       pstmt = sourceConn.prepareStatement(queryString);
 
@@ -436,6 +452,8 @@ public class TableUtil {
       queryResult.close();
       pstmt.close();
       prepStmnt.close();
+      sourceConn.close();
+      targetConn.close();
     }
   }
 

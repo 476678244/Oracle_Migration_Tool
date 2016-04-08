@@ -1,7 +1,6 @@
 package springbased.service;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +12,7 @@ import springbased.bean.ConnectionInfo;
 import springbased.bean.MigrationProcess;
 import springbased.bean.ValidationResult;
 import springbased.readonly.ReadOnlyConnection;
+import springbased.service.connectionpool.DataSourceFactory;
 
 @Service
 public class MigrationService {
@@ -23,16 +23,16 @@ public class MigrationService {
 
   }
 
-  public Connection getConnection(ConnectionInfo connectionInfo)
+  public static Connection getConnection(ConnectionInfo connectionInfo)
       throws SQLException {
-    Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
-        connectionInfo.getUsername(), connectionInfo.getPassword());
+    Connection connection = DataSourceFactory.getDataSource(connectionInfo)
+        .getConnection();
     return connection;
   }
 
-  public ReadOnlyConnection getReadOnlyConnection(ConnectionInfo connectionInfo)
+  public static ReadOnlyConnection getReadOnlyConnection(ConnectionInfo connectionInfo)
       throws SQLException {
-    Connection connection = this.getConnection(connectionInfo);
+    Connection connection = getConnection(connectionInfo);
     if (connection == null)
       return null;
     return new ReadOnlyConnection(connection);

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import springbased.bean.ConnectionInfo;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
@@ -17,12 +18,13 @@ public class SequenceUtil {
 
   private static final Logger log = Logger.getLogger(SequenceUtil.class);
 
-  public static void copySequence(Connection targetConn, String targetSchema,
-      ReadOnlyConnection sourceConn, String sourceSchema,
+  public static void copySequence(ConnectionInfo targetConnInfo, String targetSchema,
+      ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException {
     // migrate sequence
     ResultSet rs = null;
     PreparedStatement pstmt = null;
+    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     List<String> seqDDLList = new ArrayList<String>();
     try {
       pstmt = sourceConn.prepareStatement(
@@ -56,10 +58,12 @@ public class SequenceUtil {
     } finally {
       rs.close();
       pstmt.close();
+      sourceConn.close();
     }
 
     for (int i = 0; i < seqDDLList.size(); i++) {
       String seqDDL = null;
+      Connection targetConn = MigrationService.getConnection(targetConnInfo);
       try {
         seqDDL = seqDDLList.get(i);
         // System.out.println(seqDDL);
@@ -71,6 +75,7 @@ public class SequenceUtil {
         ThreadLocalErrorMonitor.add(seqDDL, e);
       } finally {
         pstmt.close();
+        targetConn.close();
       }
     }
   }

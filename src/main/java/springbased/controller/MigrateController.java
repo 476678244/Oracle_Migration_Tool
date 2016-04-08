@@ -61,37 +61,19 @@ public class MigrateController {
         sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
         targetPassword, targetUrl);
-    ReadOnlyConnection sourceCon = null;
-    Connection targetCon = null;
-    try {
-      sourceCon = this.migrationService.getReadOnlyConnection(sourceConInfo);
-      targetCon = this.migrationService.getConnection(targetConInfo);
-    } catch (SQLException e) {
-      log.error(e);
-      return;
-    }
-    if (!sourceCon.isReadOnly()) {
-      log.warn("sourceCon account is not read only...");
-    }
     List<String> tableList = new ArrayList<String>();
     try {
-      TableUtil.fetchDDLAndCopyData(targetCon, targetSchema, sourceCon,
+      TableUtil.fetchDDLAndCopyData(targetConInfo, targetSchema, sourceConInfo,
           sourceSchema, tableList);
-      IndexUtil.copyIndex(targetCon, targetSchema, sourceCon, sourceSchema,
+      IndexUtil.copyIndex(targetConInfo, targetSchema, sourceConInfo, sourceSchema,
           tableList);
-      SequenceUtil.copySequence(targetCon, targetSchema, sourceCon,
+      SequenceUtil.copySequence(targetConInfo, targetSchema, sourceConInfo,
           sourceSchema, tableList);
-      FKUtil.addFK(sourceSchema, targetSchema, sourceCon, targetCon);
+      FKUtil.addFK(sourceSchema, targetSchema, sourceConInfo, targetConInfo);
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);
     } finally {
-      if (sourceCon != null) {
-        sourceCon.close();
-      }
-      if (targetCon != null) {
-        targetCon.close();
-      }
     }
     if (ThreadLocalErrorMonitor.isErrorsExisting()) {
       log.info("Migration process end successfully, but with some errors.");
@@ -114,7 +96,7 @@ public class MigrateController {
     ConnectionInfo sourceConInfo = new ConnectionInfo(username, password, url);
     ReadOnlyConnection sourceCon = null;
     try {
-      sourceCon = this.migrationService.getReadOnlyConnection(sourceConInfo);
+      sourceCon = MigrationService.getReadOnlyConnection(sourceConInfo);
       ValidationResult result = this.migrationService
           .validateSourceSchema(sourceCon, schema);
       if (result.getStatus() == ValidationResult.FAIL) {
@@ -163,7 +145,7 @@ public class MigrateController {
     ConnectionInfo targetConInfo = new ConnectionInfo(username, password, url);
     Connection targetCon = null;
     try {
-      targetCon = this.migrationService.getConnection(targetConInfo);
+      targetCon = MigrationService.getConnection(targetConInfo);
       return this.migrationService.validateTargetSchema(targetCon, schema);
     } catch (SQLException e) {
       return new ValidationResult() {
@@ -261,5 +243,10 @@ public class MigrateController {
   @RequestMapping("/connections")
   public List<ConnectionInfo> getConnections() {
     return this.connectionInfoDAO.getAll();
+  }
+  
+  @RequestMapping("/cancelJob")
+  public void cancelJob(@RequestParam("jobId") long jobId) { 
+    migrationThreadPool.getThreadInfo(jobId).getFuture().cancel(true);
   }
 }
