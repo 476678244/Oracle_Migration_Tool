@@ -23,7 +23,7 @@ public class MigrationThreadPool {
   private MigrationJobDAO migrationJobDAO;
 
   private static ExecutorService executorService = Executors
-      .newFixedThreadPool(2);
+      .newFixedThreadPool(3);
 
   private static Map<Long, MigrationRunnable> threadMapping =
       new ConcurrentHashMap<Long, MigrationRunnable>();
