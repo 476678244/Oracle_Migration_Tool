@@ -18,13 +18,14 @@ public class SequenceUtil {
 
   private static final Logger log = Logger.getLogger(SequenceUtil.class);
 
-  public static void copySequence(ConnectionInfo targetConnInfo, String targetSchema,
-      ConnectionInfo sourceConnInfo, String sourceSchema,
+  public static void copySequence(ConnectionInfo targetConnInfo,
+      String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException {
     // migrate sequence
     ResultSet rs = null;
     PreparedStatement pstmt = null;
-    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
+    ReadOnlyConnection sourceConn = MigrationService
+        .getReadOnlyConnection(sourceConnInfo);
     List<String> seqDDLList = new ArrayList<String>();
     try {
       pstmt = sourceConn.prepareStatement(
@@ -33,12 +34,7 @@ public class SequenceUtil {
       try {
         pstmt.setString(1, sourceSchema.toUpperCase());
         rs = pstmt.executeQuery();
-      } catch (SQLException e) {
-        log.error(e);
-      }
-
-      while (rs.next()) {
-        try {
+        while (rs.next()) {
           String seqName = rs.getString(1);
           int minVal = rs.getInt(2);
           int incBy = rs.getInt(3);
@@ -50,10 +46,12 @@ public class SequenceUtil {
               + (cycleFlag.equals("Y") ? " CYCLE " : " NOCYCLE ")
               + (orderFlag.equals("Y") ? " ORDER " : " NOORDER ");
           seqDDLList.add(seqDDL);
-          log.info("constructed create sequence DDL:" + seqDDL);
-        } catch (SQLException e) {
-          log.error(e);
+          if (ThreadLocalErrorMonitor.isDebugMode()) {
+            log.info("constructed create sequence DDL:" + seqDDL);
+          }
         }
+      } catch (SQLException e) {
+        log.error(e);
       }
     } finally {
       rs.close();

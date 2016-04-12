@@ -18,6 +18,10 @@ public class ReadOnlyConnection {
     RealOnlyPreaparedStatement readOnlyPs = new RealOnlyPreaparedStatement(ps);
     return readOnlyPs;
   }
+  
+  public Connection getConnection() {
+    return this.con;
+  }
 
   public void close() throws SQLException {
     this.con.close();

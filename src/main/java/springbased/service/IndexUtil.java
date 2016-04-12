@@ -49,11 +49,13 @@ public class IndexUtil {
         String indName = rs.getString(2);
         String colName = rs.getString(3);
         if (colName.toUpperCase().contains("SYS_NC")) {
-          colName = translateSysNcToTableName(sourceSchema, colName,
-              sourceConnInfo, tabName);
+          colName = translateSysNcToTableName(sourceSchema, colName, sourceConn,
+              tabName);
         }
         tab2Ind.put(indName, tabName);
-        log.info("table vs index found:" + tabName + " vs " + indName);
+        if (ThreadLocalErrorMonitor.isDebugMode()) {
+          log.info(sourceSchema + "table vs index found:" + tabName + " vs " + indName);
+        }
         List<String> colList = cols2Ind.get(indName);
         if (colList == null) {
           colList = new ArrayList<String>();
@@ -83,14 +85,16 @@ public class IndexUtil {
       String indexDDL = "create index " + targetSchema + "." + indName + " on "
           + targetSchema + "." + tabName + " (" + colString + ")";
       if (tableList.contains(tabName)) {
-        log.info("constructed create index DDL :" + indexDDL);
+        if (ThreadLocalErrorMonitor.isDebugMode()) {
+          log.info("constructed create index DDL :" + indexDDL);
+        }
         indexList.add(indexDDL);
       }
     }
 
     // add indexes
-    Connection targetConn = MigrationService.getConnection(targetConnInfo);
     for (String indexDDL : indexList) {
+      Connection targetConn = MigrationService.getConnection(targetConnInfo);
       try {
         pstmt = targetConn.prepareStatement(indexDDL);
         pstmt.execute();
@@ -107,11 +111,10 @@ public class IndexUtil {
   }
 
   private static String translateSysNcToTableName(String owner,
-      String sysNcName, ConnectionInfo sourceConnInfo,
-      String tabName) throws SQLException {
+      String sysNcName, ReadOnlyConnection sourceConn, String tabName)
+      throws SQLException {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     try {
       pstmt = sourceConn.prepareStatement(
           "select DATA_DEFAULT from dba_tab_cols where owner = ? "
@@ -127,7 +130,6 @@ public class IndexUtil {
     } finally {
       rs.close();
       pstmt.close();
-      sourceConn.close();
     }
   }
 

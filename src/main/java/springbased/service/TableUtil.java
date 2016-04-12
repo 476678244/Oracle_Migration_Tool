@@ -50,9 +50,13 @@ public class TableUtil {
         tableList.add(tableName);
         String tempTable = rs.getString(2);
         tempTableList.put(tableName, tempTable);
-        log.info("find out table:" + tableName + " temporary:" + tempTable);
+        if (ThreadLocalErrorMonitor.isDebugMode()) {          
+          log.info(sourceSchema + "find out table:" + tableName + " temporary:" + tempTable);
+        }
       }
     } catch (SQLException e) {
+      log.error(e);
+    } finally {
       rs.close();
       pstmt.close();
       sourceConn.close();
@@ -96,6 +100,9 @@ public class TableUtil {
         }
         List<String> cols = pkmap.get(table_name);
         cols.add(column_name);
+        if (ThreadLocalErrorMonitor.isDebugMode()) {
+          log.info(sourceSchema + "find constraint_name:" + constraint_name);;
+        }
       }
     } catch (SQLException e) {
       log.error(e);
@@ -123,50 +130,47 @@ public class TableUtil {
       }
     }
 
-    try {
-      for (int i = 0; i < tableDDLList.size(); i++) {
-        Connection targetConn = MigrationService.getConnection(targetConnInfo);
-        PreparedStatement ps = null;
-        String tableDDL = null;
-        try {
-          tableDDL = tableDDLList.get(i);
-          // create table in HANA
-          ps = targetConn.prepareStatement(tableDDL);
-          ps.execute();
-          log.info("successfully run:" + tableDDL);
-        } catch (SQLException e) {
-          ThreadLocalErrorMonitor.add(tableDDL, e);
-          log.error(e);
-        } finally {
-          ps.close();
-          targetConn.close();
-        }
+    for (int i = 0; i < tableDDLList.size(); i++) {
+      Connection targetConn = MigrationService.getConnection(targetConnInfo);
+      PreparedStatement ps = null;
+      String tableDDL = null;
+      try {
+        tableDDL = tableDDLList.get(i);
+        // create table in HANA
+        ps = targetConn.prepareStatement(tableDDL);
+        ps.execute();
+        log.info("successfully run:" + tableDDL);
+      } catch (SQLException e) {
+        ThreadLocalErrorMonitor.add(tableDDL, e);
+        log.error(e);
+      } finally {
+        ps.close();
+        targetConn.close();
       }
+    }
 
-      for (int i = 0; i < pkDDLList.size(); i++) {
-        Connection targetConn = MigrationService.getConnection(targetConnInfo);
-        PreparedStatement ps = null;
-        String pkDDL = null;
-        try {
-          pkDDL = pkDDLList.get(i);
-          ps = targetConn.prepareStatement(pkDDL);
-          ps.execute();
-        } catch (SQLException e) {
-          ThreadLocalErrorMonitor.add(pkDDL, e);
-          log.error(e);
-        } finally {
-          ps.close();
-          targetConn.close();
-        }
+    for (int i = 0; i < pkDDLList.size(); i++) {
+      Connection targetConn = MigrationService.getConnection(targetConnInfo);
+      PreparedStatement ps = null;
+      String pkDDL = null;
+      try {
+        pkDDL = pkDDLList.get(i);
+        ps = targetConn.prepareStatement(pkDDL);
+        ps.execute();
+        log.info("successfully run:" + pkDDL);
+      } catch (SQLException e) {
+        ThreadLocalErrorMonitor.add(pkDDL, e);
+        log.error(e);
+      } finally {
+        ps.close();
+        targetConn.close();
       }
+    }
 
-      for (int i = 0; i < tableList.size(); i++) {
-        String tableName = tableList.get(i);
-        migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
-            targetConnInfo, scaleMap.get(tableName));
-      }
-    } finally {
-
+    for (int i = 0; i < tableList.size(); i++) {
+      String tableName = tableList.get(i);
+      migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
+          targetConnInfo, scaleMap.get(tableName));
     }
 
   }
@@ -243,6 +247,10 @@ public class TableUtil {
       if (isTempTable) {
         ddl += "ON COMMIT DELETE ROWS";
       }
+      if (ThreadLocalErrorMonitor.isDebugMode()) {      
+        log.info("create table DDL:" + ddl);
+      }
+      return ddl;
     } catch (SQLException e) {
       log.error(e);
     } finally {
@@ -250,10 +258,7 @@ public class TableUtil {
       pstmt.close();
       sourceConn.close();
     }
-    log.info("constructed create table DDL:");
-    log.info(ddl);
-    return ddl;
-
+    return null;
   }
 
   public static String addPKDDL(String tableName, String targetSchema,
@@ -289,8 +294,9 @@ public class TableUtil {
       colListString += ")";
     }
     sb.append(colListString);
-    log.info("constructed add primary key DDL:");
-    log.info(sb.toString());
+    if (ThreadLocalErrorMonitor.isDebugMode()) {
+      log.info("constructed add primary key DDL:" + sb.toString());
+    }
     return sb.toString();
   }
 
@@ -304,7 +310,7 @@ public class TableUtil {
     ResultSet queryResult = null;
     String insertString = null;
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
-    Connection targetConn = MigrationService.getConnection(targetConnInfo);
+    Connection targetConn = null;
     try {
       pstmt = sourceConn.prepareStatement(queryString);
 
@@ -319,8 +325,13 @@ public class TableUtil {
 
       insertString = "INSERT INTO " + targetSchema + "." + tableName
           + " VALUES (" + columns + ")";
+      if (sourceConnInfo.equals(targetConnInfo)) {
+        // prevent from dead lock
+        targetConn = sourceConn.getConnection();   
+      } else {
+        targetConn = MigrationService.getConnection(targetConnInfo);
+      }
       prepStmnt = targetConn.prepareStatement(insertString);
-      log.info("add batch:" + insertString);
 
       int cols = md.getColumnCount();
       int rows = 0;
@@ -419,6 +430,7 @@ public class TableUtil {
         }
         rows++;
         prepStmnt.addBatch();
+        log.info(targetSchema + "add batch:" + insertString);
         int logSize = 0;
         int batchSize = 100;
         if (batchSize > 0) {
@@ -431,7 +443,7 @@ public class TableUtil {
             if (rows % logSize == 0) {
               prepStmnt.executeBatch();
               targetConn.commit();
-              log.info("batch executed!");
+              log.info(targetSchema + "batch executed!");
               prepStmnt.clearBatch();
             }
           } catch (SQLException e) {
@@ -442,7 +454,7 @@ public class TableUtil {
       }
       prepStmnt.executeBatch();
       targetConn.commit();
-      log.info("batch executed!");
+      log.info(targetSchema + "batch executed!");
       prepStmnt.clearBatch();
       columns = null;
     } catch (SQLException e) {
@@ -453,7 +465,9 @@ public class TableUtil {
       pstmt.close();
       prepStmnt.close();
       sourceConn.close();
-      targetConn.close();
+      if (!sourceConnInfo.equals(targetConnInfo)) {
+        targetConn.close();
+      }
     }
   }
 

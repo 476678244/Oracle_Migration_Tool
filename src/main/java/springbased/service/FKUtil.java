@@ -44,7 +44,9 @@ public class FKUtil {
       pstmt.setString(2, sourceSchema.toUpperCase());
       pstmt.setString(3, sourceSchema.toUpperCase());
       pstmt.setString(4, sourceSchema.toUpperCase());
-      log.info("adding FK...");
+      if (ThreadLocalErrorMonitor.isDebugMode()) {
+        log.info("adding FK...");
+      }
       rs = pstmt.executeQuery();
       String sql = null;
       while (rs.next()) {
@@ -54,7 +56,9 @@ public class FKUtil {
         if (!"NO ACTION".equals(deleteRule)) {
           sql += " ON DELETE CASCADE";
         }
-        log.info("constructed add FK DDL:" + sql);
+        if (ThreadLocalErrorMonitor.isDebugMode()) {
+          log.info("constructed add FK DDL:" + sql);          
+        }
         sqls.add(sql);
         sql = null;
       }

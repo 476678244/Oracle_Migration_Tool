@@ -26,7 +26,7 @@ public class DataSourceFactory {
       ds.setMinIdle(0);
       ds.setMaxIdle(1);
       ds.setInitialSize(0);
-      ds.setMaxTotal(3);
+      ds.setMaxTotal(1);
       ds.setMaxOpenPreparedStatements(100);
       dataSources.put(connectionInfo, ds);
       return ds;

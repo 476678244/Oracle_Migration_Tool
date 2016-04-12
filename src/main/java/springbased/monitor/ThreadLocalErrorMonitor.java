@@ -35,4 +35,8 @@ public class ThreadLocalErrorMonitor {
   public static boolean isErrorsExisting() {
     return !monitor.get().isEmpty();
   }
+  
+  public static boolean isDebugMode() {
+    return true;
+  }
 }
