@@ -24,8 +24,6 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   private static final Logger log = Logger.getLogger(MigrationThread.class);
 
   private MigrationJob job;
-
-  private MigrationService migrationService;
   
   private MigrationJobDAO jobDAO;
 
@@ -33,7 +31,6 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       MigrationJobDAO jobDAO) {
     super();
     this.job = job;
-    this.migrationService = migrationService;
     this.jobDAO = jobDAO;
   }
 
@@ -104,9 +101,14 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   public void setFuture(Future<?> future) {
     this.future = future;
   }
-  
+
   @Override
-  public Future<?> getFuture() {
-    return this.future;
+  public void cancelJob() {
+    this.future.cancel(true);
+  }
+
+  @Override
+  public boolean isDone() {
+    return this.future.isDone();
   }
 }

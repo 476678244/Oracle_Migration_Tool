@@ -39,4 +39,8 @@ public class MigrationThreadPool {
   public MigrationRunnable getThreadInfo(long jobId) {
     return threadMapping.get(jobId);
   }
+  
+  public void cancelJob(long jobId) {
+    threadMapping.get(jobId).cancelJob();
+  }
 }

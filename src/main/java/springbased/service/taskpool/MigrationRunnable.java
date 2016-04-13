@@ -18,5 +18,7 @@ public interface MigrationRunnable extends Runnable {
   
   void setFuture(Future<?> future);
   
-  Future<?> getFuture();
+  void cancelJob();
+  
+  boolean isDone();
 }

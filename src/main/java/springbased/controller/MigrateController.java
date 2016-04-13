@@ -225,7 +225,7 @@ public class MigrateController {
         MigrationJobVO jobVO = new MigrationJobVO(job);
         jobVO.setInThreadPool(true);
         jobList.add(jobVO);
-        if (activeThread.getFuture().isDone()
+        if (activeThread.isDone()
             && !job.getStatus().equals(StatusEnum.FINISHED)) {
           job.setStatus(StatusEnum.FAILED);
         }
@@ -247,6 +247,6 @@ public class MigrateController {
   
   @RequestMapping("/cancelJob")
   public void cancelJob(@RequestParam("jobId") long jobId) { 
-    migrationThreadPool.getThreadInfo(jobId).getFuture().cancel(true);
+    migrationThreadPool.cancelJob(jobId);
   }
 }
