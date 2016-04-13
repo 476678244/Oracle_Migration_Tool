@@ -79,12 +79,13 @@
 }
 
 .validate-button-section .label-guide {
-  white-space: normal;
+  white-space: pre-wrap;
   line-height: 16px;
 }
 
 .validate-button-section .monitor-page-link {
   margin-top: 20px;
+  width: 149px;
 }
 
 .label-attribute-font {

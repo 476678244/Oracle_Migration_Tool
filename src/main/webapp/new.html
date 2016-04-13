@@ -66,12 +66,6 @@
       <div class="validate-button-section">
         <button type="button" class="btn btn-primary validate-button" ng-click="validate(true)">Validate Connection</button>
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateSourceConnectionButton"></ad-loading-icon><br>
-        <div>
-            <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts>
-            <label class="label label-success label-guide" ng-if="showToValidateButton()">Please "Validate Connection" for Source DB and Target DB at first.</label>
-            <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
-            <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
-        </div>
         <button type="button" class="btn btn-secondary monitor-page-link" ng-click="gotoMonitorPage()">Monitoring Page</button>
       </div>
     </dir>
@@ -129,15 +123,8 @@
             <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
             <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
         </div>
-        <button type="button" class="btn btn-secondary monitor-page-link" ng-click="gotoMonitorPage()">Monitoring Page</button>
       </div>
     </dir>
-  <div>
-      <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts>
-      <button type="button" class="btn btn-secondary btn-lg btn-block" ng-if="showToValidateButton()">Please "Validate Connection" for Source DB and Target DB at first.</button>
-      <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
-      <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
-  </div>
 
 </div>
   <script src="lib/common/jquery.min.js"></script>
