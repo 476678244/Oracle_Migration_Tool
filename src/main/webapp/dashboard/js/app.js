@@ -36,7 +36,7 @@ $(function() {
 });
 
 // oracle migration main module
-var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap']);
+var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'angular-confirm', 'ui.bootstrap.tpls']);
   oracleMigration.config(['$routeProvider', function($routeProvider){
     $routeProvider.when('/', {
       templateUrl : '../html/table/datatable.html',

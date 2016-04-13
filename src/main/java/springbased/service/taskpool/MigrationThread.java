@@ -104,7 +104,9 @@ public class MigrationThread extends Thread implements MigrationRunnable {
 
   @Override
   public void cancelJob() {
-    this.future.cancel(true);
+    if (!this.future.isCancelled()) {
+      this.future.cancel(true);
+    }
   }
 
   @Override

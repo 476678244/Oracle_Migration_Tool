@@ -1,5 +1,5 @@
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', function($scope, $http, adAlerts) {
+oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', '$confirm', function($scope, $http, adAlerts, $confirm) {
 	$scope.jobs = {
 	};
 
@@ -33,6 +33,21 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 
 	$scope.lineLengthSelectChanged = function() {
 		var b = 0;
+	};
+
+	$scope.confirmStop = function(jobId) {
+		$confirm({text: 'Are you sure you want to cancel this migration job?'}).then(function() {
+            $http({
+				method: 'GET',
+				url: '/springbased-1.0/cancelJob',
+				params: {
+					jobId: jobId
+				}
+			}).then(function successCallback(response) {
+				window.location.reload();
+			}, function errorCallback(response) {
+			});
+        });
 	}
 			
 }]);
