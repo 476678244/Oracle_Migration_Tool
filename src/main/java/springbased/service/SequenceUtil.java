@@ -33,6 +33,7 @@ public class SequenceUtil {
               + " from dba_sequences where upper(sequence_owner)=? order by sequence_name");
       try {
         pstmt.setString(1, sourceSchema.toUpperCase());
+        pstmt.setFetchSize(2000);
         rs = pstmt.executeQuery();
         while (rs.next()) {
           String seqName = rs.getString(1);

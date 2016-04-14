@@ -1246,3 +1246,7 @@ body.login-page {
 .clearBothForTop {
   clear: both;
 }
+
+.modal-dialog {
+  margin-top: 60px;
+}

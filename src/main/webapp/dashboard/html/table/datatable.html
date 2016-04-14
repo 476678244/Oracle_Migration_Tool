@@ -159,7 +159,7 @@
                                                 <td>{{job.job.target.url}}</td>
                                                 <td>{{job.job.targetSchema}}</td>
                                                 <td>{{job.startTime}}</td>
-                                                <td>{{job.job.status}}</td>
+                                                <td>{{job.job.status}} {{job.info.tableUtilState}} {{job.info.processRate}}</td>
                                                 <td>
                                                     <a href="#">
                                                         <i class="glyphicon glyphicon-minus-sign" ng-click="confirmStop(job.job.jobId)"></i>
@@ -174,6 +174,7 @@
                                                 <th>TargetSchema</th>
                                                 <th>Start date</th>
                                                 <th>Status</th>
+                                                <th></th>
                                             </tr>
                                         </tbody>
                                     </table>

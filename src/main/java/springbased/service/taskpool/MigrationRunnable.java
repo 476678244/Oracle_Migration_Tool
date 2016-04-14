@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 
 import springbased.bean.ConnectionInfo;
 import springbased.bean.StatusEnum;
+import springbased.monitor.Info;
 
 public interface MigrationRunnable extends Runnable {
 
@@ -21,4 +22,6 @@ public interface MigrationRunnable extends Runnable {
   void cancelJob();
   
   boolean isDone();
+  
+  Info getInfo();
 }

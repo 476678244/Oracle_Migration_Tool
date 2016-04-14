@@ -23,6 +23,10 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 			} else {
 				value.startTime = (new Date(date)).toString();
 			}
+			var processRate = value.info.processRate;
+			if (processRate.length > 0) {
+				value.info.processRate += '%';
+			}
 		});
 	}, function errorCallback(response) {
 	});

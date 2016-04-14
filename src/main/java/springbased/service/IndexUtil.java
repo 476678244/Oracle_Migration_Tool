@@ -42,6 +42,7 @@ public class IndexUtil {
               + " order by table_name,index_name, COLUMN_POSITION");
       pstmt.setString(1, sourceSchema.toUpperCase());
       // pstmt.setString(2, sourceSchema);
+      pstmt.setFetchSize(2000);
       rs = pstmt.executeQuery();
 
       while (rs.next()) {

@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import springbased.bean.ConnectionInfo;
 import springbased.monitor.ThreadLocalErrorMonitor;
+import springbased.monitor.ThreadLocalMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
 public class TableUtil {
@@ -31,6 +32,7 @@ public class TableUtil {
   public static void fetchDDLAndCopyData(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException {
+    ThreadLocalMonitor.getInfo().setTableUtilState("collecting table");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     //Connection targetConn = MigrationService.getConnection(targetConnInfo);
     PreparedStatement pstmt = null;
@@ -44,6 +46,7 @@ public class TableUtil {
               + " order by table_name");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, sourceSchema.toUpperCase());
+      pstmt.setFetchSize(2000);
       rs = pstmt.executeQuery();
       while (rs.next()) {
         String tableName = rs.getString(1);
@@ -62,8 +65,13 @@ public class TableUtil {
       sourceConn.close();
     }
 
-    copyDataToTable(targetConnInfo, targetSchema, sourceConnInfo, sourceSchema,
-        tableList, tempTableList);
+    try {
+      copyDataToTable(targetConnInfo, targetSchema, sourceConnInfo, sourceSchema,
+          tableList, tempTableList);
+    } catch (NullPointerException e ) {
+      log.error(e);
+      throw new NullPointerException(e.getMessage());
+    }
   }
 
   public static String timeString() {
@@ -74,6 +82,7 @@ public class TableUtil {
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList, HashMap<String, String> tempTableList)
           throws SQLException {
+    ThreadLocalMonitor.getInfo().setTableUtilState("collecting PK contrain");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     // get primary key info
     PreparedStatement pstmt = null;
@@ -88,6 +97,7 @@ public class TableUtil {
               + "and dc.constraint_type='P' order by dcc.table_name,position ");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, sourceSchema.toUpperCase());
+      pstmt.setFetchSize(2000);
       rs = pstmt.executeQuery();
 
       while (rs.next()) {
@@ -129,8 +139,10 @@ public class TableUtil {
         pkDDLList.add(pkDDL);
       }
     }
-
+    ThreadLocalMonitor.getInfo().setTableUtilState("creating table");
     for (int i = 0; i < tableDDLList.size(); i++) {
+      int rate = (i * 100 / tableDDLList.size());
+      ThreadLocalMonitor.getInfo().setProcessRate(new Integer(rate).toString());
       Connection targetConn = MigrationService.getConnection(targetConnInfo);
       PreparedStatement ps = null;
       String tableDDL = null;
@@ -148,8 +160,11 @@ public class TableUtil {
         targetConn.close();
       }
     }
-
+    ThreadLocalMonitor.getInfo().setProcessRate("");
+    ThreadLocalMonitor.getInfo().setTableUtilState("creating PK");
     for (int i = 0; i < pkDDLList.size(); i++) {
+      int rate = (i * 100 / pkDDLList.size());
+      ThreadLocalMonitor.getInfo().setProcessRate(new Integer(rate).toString());
       Connection targetConn = MigrationService.getConnection(targetConnInfo);
       PreparedStatement ps = null;
       String pkDDL = null;
@@ -166,18 +181,28 @@ public class TableUtil {
         targetConn.close();
       }
     }
-
+    ThreadLocalMonitor.getInfo().setProcessRate("");
+    ThreadLocalMonitor.getInfo().setTableUtilState("migrateTableData");
     for (int i = 0; i < tableList.size(); i++) {
+      int rate = (i * 100 / tableList.size());
+      ThreadLocalMonitor.getInfo().setProcessRate(new Integer(rate).toString());
       String tableName = tableList.get(i);
-      migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
+      try {
+        migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
           targetConnInfo, scaleMap.get(tableName));
+      } catch (NullPointerException e) {
+        log.error(e);
+        throw new NullPointerException(e.getMessage());
+      }
     }
-
+    ThreadLocalMonitor.getInfo().setProcessRate("");
+    ThreadLocalMonitor.getInfo().setTableUtilState("");
   }
 
   public static String constructTableDDL(String tableName, String sourceSchema,
       ConnectionInfo sourceConnInfo, String targetSchema,
       HashMap<String, String> tempTableList, Map<String, Integer> columnMap) throws SQLException {
+    ThreadLocalMonitor.getInfo().setTableUtilState("constructTableDDL");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -200,6 +225,7 @@ public class TableUtil {
               + "order by column_id");
       pstmt.setString(1, sourceSchema.toUpperCase());
       pstmt.setString(2, tableName.toUpperCase());
+      //pstmt.setFetchSize(5000);
       rs = pstmt.executeQuery();
       while (rs.next()) {
         String colname = rs.getString(1);
@@ -313,7 +339,7 @@ public class TableUtil {
     Connection targetConn = null;
     try {
       pstmt = sourceConn.prepareStatement(queryString);
-
+      pstmt.setFetchSize(500);
       queryResult = pstmt.executeQuery();
       ResultSetMetaData md = queryResult.getMetaData();
 

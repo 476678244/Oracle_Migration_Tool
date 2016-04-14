@@ -3,6 +3,7 @@ package springbased.service.taskpool;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -12,7 +13,9 @@ import springbased.bean.ConnectionInfo;
 import springbased.bean.MigrationJob;
 import springbased.bean.StatusEnum;
 import springbased.dao.impl.MigrationJobDAO;
+import springbased.monitor.Info;
 import springbased.monitor.ThreadLocalErrorMonitor;
+import springbased.monitor.ThreadLocalMonitor;
 import springbased.service.FKUtil;
 import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
@@ -26,6 +29,8 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   private MigrationJob job;
   
   private MigrationJobDAO jobDAO;
+  
+  private Info info = new Info();
 
   public MigrationThread(MigrationJob job, MigrationService migrationService,
       MigrationJobDAO jobDAO) {
@@ -36,43 +41,54 @@ public class MigrationThread extends Thread implements MigrationRunnable {
 
   @Override
   public void run() {
-    job.setStatus(StatusEnum.STARTED);
-    job.setStartTime(new Date());
-    this.jobDAO.save(job);
-    List<String> tableList = new ArrayList<String>();
+    ThreadLocalMonitor.setInfo(info);
     try {
-      job.setStatus(StatusEnum.TABLE);
+      job.setStatus(StatusEnum.STARTED);
+      job.setStartTime(new Date());
       this.jobDAO.save(job);
-      TableUtil.fetchDDLAndCopyData(job.getTarget(), job.getTargetSchema(), job.getSource(),
-          job.getSourceSchema(), tableList);
-      job.setStatus(StatusEnum.INDEX);
+      List<String> tableList = new ArrayList<String>();
+      try {
+        boolean test = false;
+        if (test) {
+          TableUtil.migrateTableData("EMP_COMP_INFO_T",
+              job.getSourceSchema(), job.getSource(),
+              job.getTargetSchema(), job.getTarget(), new HashMap<String, Integer>());
+        }
+        job.setStatus(StatusEnum.TABLE);
+        this.jobDAO.save(job);
+        TableUtil.fetchDDLAndCopyData(job.getTarget(), job.getTargetSchema(), job.getSource(),
+            job.getSourceSchema(), tableList);
+        job.setStatus(StatusEnum.INDEX);
+        this.jobDAO.save(job);
+        IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(), job.getSource(),
+            job.getSourceSchema(), tableList);
+        job.setStatus(StatusEnum.SEQUENCE);
+        this.jobDAO.save(job);
+        SequenceUtil.copySequence(job.getTarget(), job.getTargetSchema(), job.getSource(),
+            job.getSourceSchema(), tableList);
+        job.setStatus(StatusEnum.FK);
+        this.jobDAO.save(job);
+        FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), job.getSource(),
+            job.getTarget());
+      } catch (SQLException sqle) {
+        log.error("Migration process failed due to:");
+        log.error(sqle);
+      } finally {
+      }
+      if (ThreadLocalErrorMonitor.isErrorsExisting()) {
+        log.info("Migration process end successfully, but with some errors.");
+        log.info(
+            "Please modify and rerun these sqls to fix these errors manually. ");
+        log.info(ThreadLocalErrorMonitor.printErrors());
+      } else {
+        log.error("Migration process end successfully without any errors!");
+      }
+      job.setEndTime(new Date());
+      job.setStatus(StatusEnum.FINISHED);
       this.jobDAO.save(job);
-      IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(), job.getSource(),
-          job.getSourceSchema(), tableList);
-      job.setStatus(StatusEnum.SEQUENCE);
-      this.jobDAO.save(job);
-      SequenceUtil.copySequence(job.getTarget(), job.getTargetSchema(), job.getSource(),
-          job.getSourceSchema(), tableList);
-      job.setStatus(StatusEnum.FK);
-      this.jobDAO.save(job);
-      FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), job.getSource(),
-          job.getTarget());
-    } catch (SQLException sqle) {
-      log.error("Migration process failed due to:");
-      log.error(sqle);
-    } finally {
+    } catch (Exception e) {
+      log.error(e);
     }
-    if (ThreadLocalErrorMonitor.isErrorsExisting()) {
-      log.info("Migration process end successfully, but with some errors.");
-      log.info(
-          "Please modify and rerun these sqls to fix these errors manually. ");
-      log.info(ThreadLocalErrorMonitor.printErrors());
-    } else {
-      log.error("Migration process end successfully without any errors!");
-    }
-    job.setEndTime(new Date());
-    job.setStatus(StatusEnum.FINISHED);
-    this.jobDAO.save(job);
   }
 
   @Override
@@ -112,5 +128,10 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   @Override
   public boolean isDone() {
     return this.future.isDone();
+  }
+
+  @Override
+  public Info getInfo() {
+    return this.info;
   }
 }

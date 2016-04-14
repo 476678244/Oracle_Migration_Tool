@@ -141,6 +141,10 @@ public class MigrateController {
       @RequestParam("password") String password,
       @RequestParam("sid") String sid, @RequestParam("schema") String schema)
           throws SQLException {
+    boolean test = false;
+    if (test) {
+      return new ValidationResult();
+    }
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
     ConnectionInfo targetConInfo = new ConnectionInfo(username, password, url);
     Connection targetCon = null;
@@ -224,6 +228,7 @@ public class MigrateController {
         dbJobListIterator.remove();
         MigrationJobVO jobVO = new MigrationJobVO(job);
         jobVO.setInThreadPool(true);
+        jobVO.setInfo(activeThread.getInfo());
         jobList.add(jobVO);
         if (activeThread.isDone()
             && !job.getStatus().equals(StatusEnum.FINISHED)) {

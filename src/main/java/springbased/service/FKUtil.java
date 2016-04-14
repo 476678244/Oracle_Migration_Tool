@@ -47,6 +47,7 @@ public class FKUtil {
       if (ThreadLocalErrorMonitor.isDebugMode()) {
         log.info("adding FK...");
       }
+      pstmt.setFetchSize(2000);
       rs = pstmt.executeQuery();
       String sql = null;
       while (rs.next()) {
