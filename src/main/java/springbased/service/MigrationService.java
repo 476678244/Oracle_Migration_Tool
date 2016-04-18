@@ -24,17 +24,26 @@ public class MigrationService {
   }
 
   public static Connection getConnection(ConnectionInfo connectionInfo)
-      throws SQLException {
+      throws SQLException, InterruptedException {
     Connection connection = DataSourceFactory.getDataSource(connectionInfo)
         .getConnection();
+    if (connection == null) {
+      log.error("Connection is null");
+      throw new SQLException("Connection is null");
+    }
+    if (Thread.currentThread().isInterrupted()) {
+      throw new InterruptedException("Migration Job is interrupted");
+    }
     return connection;
   }
 
   public static ReadOnlyConnection getReadOnlyConnection(ConnectionInfo connectionInfo)
-      throws SQLException {
+      throws SQLException, InterruptedException {
     Connection connection = getConnection(connectionInfo);
-    if (connection == null)
-      return null;
+    if (connection == null) {
+      log.error("Connection is null");
+      throw new SQLException("Connection is null");
+    }
     return new ReadOnlyConnection(connection);
   }
 

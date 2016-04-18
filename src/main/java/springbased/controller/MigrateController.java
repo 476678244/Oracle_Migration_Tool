@@ -56,7 +56,7 @@ public class MigrateController {
   public void migrate(String sourceUsername, String sourcePassword,
       String sourceUrl, String sourceSchema, String targetUsername,
       String targetPassword, String targetUrl, String targetSchema)
-          throws SQLException {
+          throws SQLException, InterruptedException {
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
         sourcePassword, sourceUrl);
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
@@ -91,7 +91,7 @@ public class MigrateController {
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
       @RequestParam("sid") String sid, @RequestParam("schema") String schema)
-          throws SQLException {
+          throws SQLException, InterruptedException {
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
     ConnectionInfo sourceConInfo = new ConnectionInfo(username, password, url);
     ReadOnlyConnection sourceCon = null;
@@ -140,7 +140,7 @@ public class MigrateController {
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
       @RequestParam("sid") String sid, @RequestParam("schema") String schema)
-          throws SQLException {
+          throws SQLException, InterruptedException {
     boolean test = false;
     if (test) {
       return new ValidationResult();

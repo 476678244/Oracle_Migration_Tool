@@ -20,7 +20,7 @@ public class SequenceUtil {
 
   public static void copySequence(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
-      List<String> tableList) throws SQLException {
+      List<String> tableList) throws SQLException, InterruptedException {
     // migrate sequence
     ResultSet rs = null;
     PreparedStatement pstmt = null;

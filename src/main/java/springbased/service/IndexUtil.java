@@ -22,7 +22,7 @@ public class IndexUtil {
 
   public static void copyIndex(ConnectionInfo targetConnInfo, String targetSchema,
       ConnectionInfo sourceConnInfo, String sourceSchema,
-      List<String> tableList) throws SQLException {
+      List<String> tableList) throws SQLException, InterruptedException {
     // copy unique index
     List<String> indexList = new ArrayList<String>();
     HashMap<String, String> tab2Ind = new HashMap<String, String>();

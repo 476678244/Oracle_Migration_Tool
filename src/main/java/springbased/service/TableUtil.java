@@ -31,7 +31,7 @@ public class TableUtil {
 
   public static void fetchDDLAndCopyData(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
-      List<String> tableList) throws SQLException {
+      List<String> tableList) throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("collecting table");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     //Connection targetConn = MigrationService.getConnection(targetConnInfo);
@@ -81,7 +81,7 @@ public class TableUtil {
   private static void copyDataToTable(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList, HashMap<String, String> tempTableList)
-          throws SQLException {
+          throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("collecting PK contrain");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     // get primary key info
@@ -201,7 +201,8 @@ public class TableUtil {
 
   public static String constructTableDDL(String tableName, String sourceSchema,
       ConnectionInfo sourceConnInfo, String targetSchema,
-      HashMap<String, String> tempTableList, Map<String, Integer> columnMap) throws SQLException {
+      HashMap<String, String> tempTableList, Map<String, Integer> columnMap)
+      throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("constructTableDDL");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     PreparedStatement pstmt = null;
@@ -328,7 +329,7 @@ public class TableUtil {
 
   public static void migrateTableData(String tableName, String sourceSchema,
       ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
-      Map<String, Integer> columnScales) throws SQLException {
+      Map<String, Integer> columnScales) throws SQLException, InterruptedException {
 
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
     PreparedStatement pstmt = null;

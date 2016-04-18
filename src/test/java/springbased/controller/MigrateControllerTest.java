@@ -18,7 +18,7 @@ public class MigrateControllerTest {
   private MigrateController controller;
 
   @Test
-  public void test() throws SQLException {
+  public void test() throws SQLException, InterruptedException {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
     String sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";

@@ -19,7 +19,7 @@ public class FKUtil {
 
   public static void addFK(String sourceSchema, String targetSchema,
       ConnectionInfo sourceConnInfo, ConnectionInfo targetConnInfo)
-          throws SQLException {
+          throws SQLException, InterruptedException {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     ReadOnlyConnection sourceConn = MigrationService
