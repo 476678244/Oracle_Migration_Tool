@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import springbased.bean.ConnectionInfo;
 import springbased.monitor.ThreadLocalErrorMonitor;
+import springbased.monitor.ThreadLocalMonitor;
 import springbased.readonly.ReadOnlyConnection;
 
 public class IndexUtil {
@@ -49,6 +50,11 @@ public class IndexUtil {
         String tabName = rs.getString(1);
         String indName = rs.getString(2);
         String colName = rs.getString(3);
+        if (ThreadLocalMonitor.getUks() != null
+            && ThreadLocalMonitor.getUks().contains(indName)) {
+          // these indexes have already been created when creating uk constraint
+          continue;
+        }
         if (colName.toUpperCase().contains("SYS_NC")) {
           colName = translateSysNcToTableName(sourceSchema, colName, sourceConn,
               tabName);

@@ -28,6 +28,7 @@ import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
 import springbased.service.SequenceUtil;
 import springbased.service.TableUtil;
+import springbased.service.UKUtil;
 import springbased.service.idgenerate.IdService;
 import springbased.service.taskpool.MigrationRunnable;
 import springbased.service.taskpool.MigrationThreadPool;
@@ -63,13 +64,14 @@ public class MigrateController {
         targetPassword, targetUrl);
     List<String> tableList = new ArrayList<String>();
     try {
-      TableUtil.fetchDDLAndCopyData(targetConInfo, targetSchema, sourceConInfo,
-          sourceSchema, tableList);
-      IndexUtil.copyIndex(targetConInfo, targetSchema, sourceConInfo, sourceSchema,
-          tableList);
-      SequenceUtil.copySequence(targetConInfo, targetSchema, sourceConInfo,
-          sourceSchema, tableList);
-      FKUtil.addFK(sourceSchema, targetSchema, sourceConInfo, targetConInfo);
+//      TableUtil.fetchDDLAndCopyData(targetConInfo, targetSchema, sourceConInfo,
+//          sourceSchema, tableList);
+//      IndexUtil.copyIndex(targetConInfo, targetSchema, sourceConInfo, sourceSchema,
+//          tableList);
+//      SequenceUtil.copySequence(targetConInfo, targetSchema, sourceConInfo,
+//          sourceSchema, tableList);
+//      FKUtil.addFK(sourceSchema, targetSchema, sourceConInfo, targetConInfo);
+      UKUtil.execute(targetConInfo, targetSchema, sourceConInfo, sourceSchema);
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);
@@ -101,19 +103,6 @@ public class MigrateController {
           .validateSourceSchema(sourceCon, schema);
       if (result.getStatus() == ValidationResult.FAIL) {
         return result;
-      }
-      if (!sourceCon.isReadOnly()) {
-        return new ValidationResult() {
-          @Override
-          public int getStatus() {
-            return SUCCESSWITHWARNING;
-          }
-
-          @Override
-          public String getCause() {
-            return "Source DB connection is not read only.";
-          }
-        };
       }
       return new ValidationResult();
     } catch (SQLException e) {

@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import springbased.monitor.Info;
+import springbased.monitor.ThreadLocalMonitor;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class MigrateControllerTest {
@@ -29,6 +32,7 @@ public class MigrateControllerTest {
     String targetSchema = "sfuser_real";
     boolean test = false;
     if (test) {
+      ThreadLocalMonitor.setInfo(new Info());
       this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,
           sourceSchema, targetUsername, targetPassword, targetUrl,
           targetSchema);

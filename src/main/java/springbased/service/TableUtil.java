@@ -340,7 +340,7 @@ public class TableUtil {
     Connection targetConn = null;
     try {
       pstmt = sourceConn.prepareStatement(queryString);
-      pstmt.setFetchSize(500);
+      pstmt.setFetchSize(200);
       queryResult = pstmt.executeQuery();
       ResultSetMetaData md = queryResult.getMetaData();
 
@@ -458,16 +458,10 @@ public class TableUtil {
         rows++;
         prepStmnt.addBatch();
         log.info(targetSchema + "add batch:" + insertString);
-        int logSize = 0;
-        int batchSize = 100;
+        int batchSize = 2000;
         if (batchSize > 0) {
-          if (batchSize < 500) {
-            logSize = 500;
-          } else {
-            logSize = batchSize;
-          }
           try {
-            if (rows % logSize == 0) {
+            if (rows % batchSize == 0) {
               prepStmnt.executeBatch();
               targetConn.commit();
               log.info(targetSchema + "batch executed!");

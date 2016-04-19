@@ -44,6 +44,7 @@ public class MigrationService {
       log.error("Connection is null");
       throw new SQLException("Connection is null");
     }
+    connection.setReadOnly(true);
     return new ReadOnlyConnection(connection);
   }
 

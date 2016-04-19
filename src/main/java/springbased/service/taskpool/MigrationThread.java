@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
@@ -21,6 +22,7 @@ import springbased.service.IndexUtil;
 import springbased.service.MigrationService;
 import springbased.service.SequenceUtil;
 import springbased.service.TableUtil;
+import springbased.service.UKUtil;
 
 public class MigrationThread extends Thread implements MigrationRunnable {
 
@@ -58,6 +60,10 @@ public class MigrationThread extends Thread implements MigrationRunnable {
         this.jobDAO.save(job);
         TableUtil.fetchDDLAndCopyData(job.getTarget(), job.getTargetSchema(), job.getSource(),
             job.getSourceSchema(), tableList);
+        job.setStatus(StatusEnum.UK);
+        this.jobDAO.save(job);
+        UKUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
+            job.getSourceSchema());
         job.setStatus(StatusEnum.INDEX);
         this.jobDAO.save(job);
         IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(), job.getSource(),
