@@ -243,4 +243,21 @@ public class MigrateController {
   public void cancelJob(@RequestParam("jobId") long jobId) { 
     migrationThreadPool.cancelJob(jobId);
   }
+  
+  @RequestMapping("/recreateSchema")
+  public void recreateSchema(@RequestParam("ip") String ip,
+      @RequestParam("username") String username,
+      @RequestParam("password") String password,
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+      throws SQLException, InterruptedException {
+    String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
+    ConnectionInfo connInfo = new ConnectionInfo(username, password, url);
+    Connection conn = null;
+    try {
+      conn = MigrationService.getConnection(connInfo);
+      this.migrationService.recreateSchema(conn, schema);
+    } finally {
+      conn.close();
+    }
+  }
 }

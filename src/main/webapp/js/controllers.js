@@ -2,31 +2,8 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', []).
-  controller('MyCtrl1', ['$scope', function($scope) {
-	$scope.formInfo = {};
-	
-	$scope.saveData = function(){
-		$scope.nameRequired = '';
-		$scope.emailRequired = '';
-		$scope.passwordRequired = '';
-		if(!$scope.formInfo.Name){
-			$scope.nameRequired = 'Name Required';
-		}
-		if(!$scope.formInfo.Email){
-			$scope.emailRequired = 'Email Required';
-		}
-		if(!$scope.formInfo.Password){
-			$scope.passwordRequired = 'Password Required';
-		}
-	};
-  }])
-  .controller('MyCtrl2', [function() {
-
-  }]);
-
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '$window', function($scope, $http, adAlerts, $window) {
+oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '$window','$confirm', function($scope, $http, adAlerts, $window, $confirm) {
 	$scope.sourceIp = "10.58.100.66";
 	$scope.sourceUsername = "sfuser";
 	$scope.sourcePassword = "sfuser";
@@ -44,7 +21,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 
 	$scope.targetValidateResult = 0;
 	$scope.showLoadingIconForValidateTargetConnectionButton = false;
-
+	$scope.showLoadingIconForRecreate = false;
 	$scope.showLoadingIcon = false;
 	$scope.successfullyFired = false;
 
@@ -216,5 +193,25 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 
     $scope.gotoMonitorPage = function() {
     	$window.location.href = 'dashboard/html/table/datatable.html';
-    }
+    };
+
+    $scope.recreateSchema = function() {
+    	$confirm({text: 'Are you sure you want to delete and create this schema?'}).then(function() {
+    		$scope.showLoadingIconForRecreate = true;
+			$http({
+				method: 'GET',
+				url: '/springbased-1.0/recreateSchema',
+				params: {
+					ip: $scope.targetIp,
+					username: $scope.targetUsername,
+					password: $scope.targetPassword,
+					sid: $scope.targetSID,
+					schema: $scope.targetSchema
+				}
+			}).then(function successCallback(response) {
+				$scope.showLoadingIconForRecreate = false;
+			}, function errorCallback(response) {
+			});
+        });
+    };
 }]);

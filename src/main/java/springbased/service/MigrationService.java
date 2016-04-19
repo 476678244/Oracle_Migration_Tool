@@ -129,5 +129,27 @@ public class MigrationService {
     }
     return new ValidationResult();
   }
+  
+  public void recreateSchema(Connection connection,
+      String schema) throws SQLException {
+    PreparedStatement ps = null;
+    try {
+      ps = connection.prepareStatement(
+          " drop user " + schema +" cascade");
+      ps.execute();
+    } finally {
+      ps.close();
+    }
+    try {
+      ps = connection.prepareStatement(
+          " CREATE USER " + schema + " IDENTIFIED BY sfuser "
+              + " DEFAULT TABLESPACE DATA_01 " + " TEMPORARY TABLESPACE TEMP "
+              + " QUOTA UNLIMITED ON DATA_01 " + " QUOTA UNLIMITED ON INDEX_01 "
+              + " QUOTA UNLIMITED ON LOB_01 " + " QUOTA UNLIMITED ON MVIEW_01 ");
+      ps.execute();
+    } finally {
+      ps.close();
+    }
+  }
 
 }

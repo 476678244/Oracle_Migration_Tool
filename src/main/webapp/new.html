@@ -123,6 +123,8 @@
             <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
             <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
         </div>
+        <button type="button" class="btn btn-secondary monitor-page-link" ng-click="recreateSchema()">Recreate Schema</button>
+        <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForRecreate"></ad-loading-icon><br>
       </div>
     </dir>
 
@@ -136,6 +138,8 @@
   <script src="lib/common/angular-dropdowns.min.js"></script>
   <script src="lib/common/adapt-strap.min.js"></script>
   <script src="lib/common/adapt-strap.tpl.min.js"></script>
+  <script type="text/javascript" src="lib/common/ui-bootstrap-tpls-1.3.1.js"></script>
+  <script type="text/javascript" src="lib/common/angular-confirm.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
