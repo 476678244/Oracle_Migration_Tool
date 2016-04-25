@@ -25,6 +25,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 	$scope.showLoadingIcon = false;
 	$scope.successfullyFired = false;
 
+	$scope.recreateSuccess = false;
 	$scope.validate = function (source) {
 		if (source) {
 			$scope.showLoadingIconForValidateSourceConnectionButton = true;
@@ -198,6 +199,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
     $scope.recreateSchema = function() {
     	$confirm({text: 'Are you sure you want to delete and create this schema?'}).then(function() {
     		$scope.showLoadingIconForRecreate = true;
+    		$scope.recreateSuccess = false;
 			$http({
 				method: 'GET',
 				url: '/springbased-1.0/recreateSchema',
@@ -210,6 +212,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 				}
 			}).then(function successCallback(response) {
 				$scope.showLoadingIconForRecreate = false;
+				$scope.recreateSuccess = true;
 			}, function errorCallback(response) {
 			});
         });

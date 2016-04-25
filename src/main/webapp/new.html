@@ -124,6 +124,7 @@
             <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
         </div>
         <button type="button" class="btn btn-secondary monitor-page-link" ng-click="recreateSchema()">Recreate Schema</button>
+        <label ng-if="recreateSuccess" class="label label-success">Success!</label>
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForRecreate"></ad-loading-icon><br>
       </div>
     </dir>
