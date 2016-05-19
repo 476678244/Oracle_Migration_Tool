@@ -3,6 +3,7 @@ package springbased.controller;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -64,26 +65,12 @@ public class MigrateController {
         targetPassword, targetUrl);
     List<String> tableList = new ArrayList<String>();
     try {
-//      TableUtil.fetchDDLAndCopyData(targetConInfo, targetSchema, sourceConInfo,
-//          sourceSchema, tableList);
-//      IndexUtil.copyIndex(targetConInfo, targetSchema, sourceConInfo, sourceSchema,
-//          tableList);
-//      SequenceUtil.copySequence(targetConInfo, targetSchema, sourceConInfo,
-//          sourceSchema, tableList);
-//      FKUtil.addFK(sourceSchema, targetSchema, sourceConInfo, targetConInfo);
-      UKUtil.execute(targetConInfo, targetSchema, sourceConInfo, sourceSchema);
+      TableUtil.execute(targetConInfo, targetSchema, sourceConInfo,
+          sourceSchema, tableList);
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);
     } finally {
-    }
-    if (ThreadLocalErrorMonitor.isErrorsExisting()) {
-      log.info("Migration process end successfully, but with some errors.");
-      log.info(
-          "Please modify and rerun these sqls to fix these errors manually. ");
-      log.info(ThreadLocalErrorMonitor.printErrors());
-    } else {
-      log.error("Migration process end successfully without any errors!");
     }
 
   }

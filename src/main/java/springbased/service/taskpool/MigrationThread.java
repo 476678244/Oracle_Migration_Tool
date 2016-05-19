@@ -50,15 +50,9 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       this.jobDAO.save(job);
       List<String> tableList = new ArrayList<String>();
       try {
-        boolean test = false;
-        if (test) {
-          TableUtil.migrateTableData("EMP_COMP_INFO_T",
-              job.getSourceSchema(), job.getSource(),
-              job.getTargetSchema(), job.getTarget(), new HashMap<String, Integer>());
-        }
         job.setStatus(StatusEnum.TABLE);
         this.jobDAO.save(job);
-        TableUtil.fetchDDLAndCopyData(job.getTarget(), job.getTargetSchema(), job.getSource(),
+        TableUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
             job.getSourceSchema(), tableList);
         job.setStatus(StatusEnum.UK);
         this.jobDAO.save(job);
@@ -92,6 +86,9 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       job.setEndTime(new Date());
       job.setStatus(StatusEnum.FINISHED);
       this.jobDAO.save(job);
+    } catch (InterruptedException ie) {
+      log.error(ie);
+      ThreadLocalMonitor.getThreadPool().shutdown();
     } catch (Exception e) {
       log.error(e);
     }

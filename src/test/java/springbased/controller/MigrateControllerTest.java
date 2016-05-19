@@ -29,7 +29,7 @@ public class MigrateControllerTest {
     String targetUsername = "sfuser";
     String targetPassword = "sfuser";
     String targetUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
-    String targetSchema = "sfuser_temp";
+    String targetSchema = "sfuser_real";
     String ip = "10.58.100.66";
     String sid = "dbpool1";
     boolean test = false;

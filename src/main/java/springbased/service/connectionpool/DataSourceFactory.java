@@ -24,10 +24,10 @@ public class DataSourceFactory {
       ds.setPassword(connectionInfo.getPassword());
       ds.setUrl(connectionInfo.getUrl());
       ds.setMinIdle(0);
-      ds.setMaxIdle(3);
+      ds.setMaxIdle(5);
       ds.setInitialSize(1);
-      ds.setMaxTotal(5);
-      ds.setMaxOpenPreparedStatements(100);
+      ds.setMaxTotal(20);
+      ds.setMaxOpenPreparedStatements(200);
       dataSources.put(connectionInfo, ds);
       return ds;
     }

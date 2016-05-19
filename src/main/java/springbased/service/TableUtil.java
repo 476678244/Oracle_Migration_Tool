@@ -13,8 +13,13 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +34,7 @@ public class TableUtil {
 
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
 
-  public static void fetchDDLAndCopyData(ConnectionInfo targetConnInfo,
+  public static void execute(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
       List<String> tableList) throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("collecting table");
@@ -127,18 +132,28 @@ public class TableUtil {
 
     for (int i = 0; i < tableList.size(); i++) {
       String tableName = tableList.get(i);
-      // construct table DDL
-      Map<String, Integer> columnMap = new HashMap<String, Integer>();
-      String tableDDL = constructTableDDL(tableName, sourceSchema, sourceConnInfo,
-          targetSchema, tempTableList, columnMap);
-      // add primary key DDL
-      String pkDDL = addPKDDL(tableName, targetSchema, pkmap, pktable2namemap);
-      scaleMap.put(tableName, columnMap);
-      tableDDLList.add(tableDDL);
-      if (pkDDL != null) {
-        pkDDLList.add(pkDDL);
-      }
+      ThreadLocalMonitor.getFutures().add(ThreadLocalMonitor.getThreadPool().submit(() -> {
+        try {
+          // construct table DDL
+          Map<String, Integer> columnMap = new HashMap<String, Integer>();
+          String tableDDL = constructTableDDL(tableName, sourceSchema,
+              sourceConnInfo, targetSchema, tempTableList, columnMap);
+          // add primary key DDL
+          String pkDDL = addPKDDL(tableName, targetSchema, pkmap,
+              pktable2namemap);
+          scaleMap.put(tableName, columnMap);
+          tableDDLList.add(tableDDL);
+          if (pkDDL != null) {
+            pkDDLList.add(pkDDL);
+          }
+        } catch (Exception e) {
+          log.error(e);
+        }
+      }));
     }
+    // monitor threads
+    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
+    
     ThreadLocalMonitor.getInfo().setTableUtilState("creating table");
     for (int i = 0; i < tableDDLList.size(); i++) {
       int rate = (i * 100 / tableDDLList.size());
@@ -148,7 +163,7 @@ public class TableUtil {
       String tableDDL = null;
       try {
         tableDDL = tableDDLList.get(i);
-        // create table in HANA
+        // create table
         ps = targetConn.prepareStatement(tableDDL);
         ps.execute();
         log.info("successfully run:" + tableDDL);
@@ -183,18 +198,34 @@ public class TableUtil {
     }
     ThreadLocalMonitor.getInfo().setProcessRate("");
     ThreadLocalMonitor.getInfo().setTableUtilState("migrateTableData");
+    
+    // multi-thread processing
+    ExecutorService threadPool = ThreadLocalMonitor.getThreadPool();
+    Set<Future<?>> futures = ThreadLocalMonitor.getFutures();
     for (int i = 0; i < tableList.size(); i++) {
-      int rate = (i * 100 / tableList.size());
-      ThreadLocalMonitor.getInfo().setProcessRate(new Integer(rate).toString());
       String tableName = tableList.get(i);
       try {
-        migrateTableData(tableName, sourceSchema, sourceConnInfo, targetSchema,
-          targetConnInfo, scaleMap.get(tableName));
+        ThreadLocalMonitor.getFutures()
+            .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
+              try {
+                if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
+                  Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+                  ThreadLocalMonitor.setThreadPool(threadPool);
+                  ThreadLocalMonitor.setFutures(futures);
+                }
+                migrateTableData(tableName, sourceSchema, sourceConnInfo,
+                    targetSchema, targetConnInfo, scaleMap.get(tableName), 0);
+              } catch (Exception e) {
+                log.error(e);
+              }
+            }));
       } catch (NullPointerException e) {
         log.error(e);
         throw new NullPointerException(e.getMessage());
       }
     }
+    // monitor
+    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
     ThreadLocalMonitor.getInfo().setProcessRate("");
     ThreadLocalMonitor.getInfo().setTableUtilState("");
   }
@@ -329,9 +360,16 @@ public class TableUtil {
 
   public static void migrateTableData(String tableName, String sourceSchema,
       ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
-      Map<String, Integer> columnScales) throws SQLException, InterruptedException {
-
+      Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
+    int rows = 0;
+    
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
+    if (start > 0) {
+      queryString = "select * from " + sourceSchema + "." + tableName
+          + " where ROWNUM <=500 and  FORM_CONTENT_ID > " + start
+          + " order by form_content_id asc ";
+      Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+    }
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
     ResultSet queryResult = null;
@@ -340,7 +378,7 @@ public class TableUtil {
     Connection targetConn = null;
     try {
       pstmt = sourceConn.prepareStatement(queryString);
-      pstmt.setFetchSize(200);
+      pstmt.setFetchSize(300);
       queryResult = pstmt.executeQuery();
       ResultSetMetaData md = queryResult.getMetaData();
 
@@ -361,10 +399,9 @@ public class TableUtil {
       prepStmnt = targetConn.prepareStatement(insertString);
 
       int cols = md.getColumnCount();
-      int rows = 0;
-
+      
       while (queryResult.next()) {
-
+        
         for (int i = 1; i <= cols; i++) {
           int type = md.getColumnType(i);
           if (type == Types.DECIMAL || type == Types.DOUBLE
@@ -445,8 +482,13 @@ public class TableUtil {
             prepStmnt.setString(i, nclob);
 
           } else if (type == Types.BLOB) {
-            byte[] s = queryResult.getBytes(i);
-            prepStmnt.setBytes(i, s);
+            if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
+              prepStmnt.setBytes(i, new byte[]{});
+            } else {
+              Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+              byte[] s = queryResult.getBytes(i);
+              prepStmnt.setBytes(i, s);
+            }
           } else if (type == Types.VARBINARY || type == Types.BINARY) {
             byte[] s = queryResult.getBytes(i);
             prepStmnt.setBytes(i, s);
@@ -456,9 +498,22 @@ public class TableUtil {
           }
         }
         rows++;
+        if (rows > 300 && start >0) {
+          int startValue = queryResult.getInt(1);
+          ThreadLocalMonitor.getFutures()
+              .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
+                try {
+                  TableUtil.migrateTableData(tableName, sourceSchema,
+                      sourceConnInfo, targetSchema, targetConnInfo,
+                      columnScales, startValue);
+                } catch (Exception e) {
+                  log.error(e);
+                }
+              }));
+        }
         prepStmnt.addBatch();
         log.info(targetSchema + "add batch:" + insertString);
-        int batchSize = 2000;
+        int batchSize = 300;
         if (batchSize > 0) {
           try {
             if (rows % batchSize == 0) {
@@ -488,6 +543,27 @@ public class TableUtil {
       sourceConn.close();
       if (!sourceConnInfo.equals(targetConnInfo)) {
         targetConn.close();
+      }
+    }
+  }
+  
+  private static void monitor(Set<Future<?>> futures, int totalSize)
+      throws InterruptedException {
+    // monitor threads
+    while (!futures.isEmpty()) {
+      if (Thread.currentThread().isInterrupted()) {
+        futures.forEach((future) -> {
+          future.cancel(true);
+        });
+        throw new InterruptedException("Migration Job is interrupted");
+      }
+      ThreadLocalMonitor.getInfo().setProcessRate(
+          String.valueOf(100 - (futures.size() * 100 / totalSize)));
+      Iterator<Future<?>> itFuture = futures.iterator();
+      while (itFuture.hasNext()) {
+        if (itFuture.next().isDone()) {
+          itFuture.remove();
+        }
       }
     }
   }
