@@ -1,7 +1,6 @@
 package springbased.controller;
 
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +33,6 @@ public class MigrateControllerTest {
     String ip = "192.168.248.135";
     String sid = "dbpool1";
     long cost = 0;
-    boolean getBytes = ThreadLocalMonitor.turnOnGetBytes;
     boolean test = false;
     if (test) {
       long start = System.currentTimeMillis(), end =0;

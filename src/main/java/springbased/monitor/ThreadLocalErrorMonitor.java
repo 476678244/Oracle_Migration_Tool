@@ -21,7 +21,7 @@ public class ThreadLocalErrorMonitor {
     getMonitor().add(error);
   }
   
-  public static void add(String sql, SQLException e) {
+  public static void add(String sql, Exception e) {
     SQLError error = new SQLError();
     error.setSql(sql);
     error.setExceptionMessage(e.getMessage());

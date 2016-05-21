@@ -1,8 +1,8 @@
 package springbased.service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -15,12 +15,10 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
@@ -169,6 +167,24 @@ public class TableUtil {
         ps = targetConn.prepareStatement(tableDDL);
         ps.execute();
         log.info("successfully run:" + tableDDL);
+        // specially for form_content table, can copy data for this table from now
+        if (tableDDL.contains(".FORM_CONTENT (")) {
+          try {
+            ThreadLocalMonitor.getFutures()
+                .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
+                  try {
+                    migrateTableData("FORM_CONTENT", sourceSchema,
+                        sourceConnInfo, targetSchema, targetConnInfo,
+                        scaleMap.get("FORM_CONTENT"), 0);
+                  } catch (Exception e) {
+                    log.error(e);
+                  }
+                }));
+          } catch (NullPointerException e) {
+            log.error(e);
+            throw new NullPointerException(e.getMessage());
+          }
+        }
       } catch (SQLException e) {
         ThreadLocalErrorMonitor.add(tableDDL, e);
         log.error(e);
@@ -202,10 +218,10 @@ public class TableUtil {
     ThreadLocalMonitor.getInfo().setTableUtilState("migrateTableData");
     
     // multi-thread processing
-    ExecutorService threadPool = ThreadLocalMonitor.getThreadPool();
-    Set<Future<?>> futures = ThreadLocalMonitor.getFutures();
     for (int i = 0; i < tableList.size(); i++) {
       String tableName = tableList.get(i);
+      if (tableName.equals("FORM_CONTENT"))
+        continue;
       try {
         ThreadLocalMonitor.getFutures()
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
@@ -360,7 +376,9 @@ public class TableUtil {
       Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
     int rows = 0;
     int batchSize = 300;
-    
+    if (tableName.equals("COMPETENCY")) {
+      boolean test = true;
+    }
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
@@ -475,24 +493,21 @@ public class TableUtil {
 
           } else if (type == Types.BLOB) {
             //Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-            long startTime = System.currentTimeMillis(), endTime =0;
-            InputStream input = queryResult.getBinaryStream(i);
-            long lenght = queryResult.getBlob(i).length();
+            //long startTime = System.currentTimeMillis(), endTime =0;
+            Blob blob = queryResult.getBlob(i);
+            //InputStream input = blob.getBinaryStream();
+            long lenght = blob.length();
             byte[] bytes = new byte[Long.valueOf(lenght).intValue()];
             try {
-              input.read(bytes);
+              blob.getBinaryStream().read(bytes);
             } catch (IOException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              log.error(e);
             }
             
-            endTime = System.currentTimeMillis();
-            ThreadLocalMonitor.getBytesTime.addAndGet(endTime - startTime);
-            //prepStmnt.setBinaryStream(i, input, Long.valueOf(lenght).intValue());
-            
+            //endTime = System.currentTimeMillis();
+            //ThreadLocalMonitor.getBytesTime.addAndGet(endTime - startTime);
              //byte[] bytes = queryResult.getBytes(i);
-              prepStmnt.setBytes(i, bytes);
-            
+            prepStmnt.setBytes(i, bytes);
           } else if (type == Types.VARBINARY || type == Types.BINARY) {
             byte[] s = queryResult.getBytes(i);
             prepStmnt.setBytes(i, s);
@@ -509,7 +524,7 @@ public class TableUtil {
           try {
             if (rows % batchSize == 0) {
               prepStmnt.executeBatch();
-              targetConn.commit();
+              //targetConn.commit();
               log.info(targetSchema + "batch executed!");
               prepStmnt.clearBatch();
             }
@@ -520,13 +535,16 @@ public class TableUtil {
         }
       }
       prepStmnt.executeBatch();
-      targetConn.commit();
+      //targetConn.commit();
       log.info(targetSchema + "batch executed!");
       prepStmnt.clearBatch();
       columns = null;
     } catch (SQLException e) {
       log.error(e);
       ThreadLocalErrorMonitor.add(insertString, e);
+    } catch (Exception e) {
+      ThreadLocalErrorMonitor.add(tableName, e);
+      log.error(e);
     } finally {
       queryResult.close();
       pstmt.close();
