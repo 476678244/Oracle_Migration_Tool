@@ -7,8 +7,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ThreadLocalMonitor {
+  
+  public static final boolean turnOnGetBytes = true;
+  
+  public static AtomicLong getBytesTime = new AtomicLong(0L);
+  
+  public static AtomicLong setBytesTime = new AtomicLong(0L);
 
   private static final ThreadLocal<Info> info = new ThreadLocal<Info>() {
 
@@ -34,7 +41,7 @@ public class ThreadLocalMonitor {
 
     @Override
     protected ExecutorService initialValue() {
-      return new ThreadPoolExecutor(10, 10, 0L,
+      return new ThreadPoolExecutor(4, 4, 0L,
           TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     }
     

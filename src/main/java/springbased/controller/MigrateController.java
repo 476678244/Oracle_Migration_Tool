@@ -243,6 +243,8 @@ public class MigrateController {
     try {
       conn = MigrationService.getConnection(connInfo);
       this.migrationService.recreateSchema(conn, schema);
+    } catch (SQLException sqle) {
+      log.error(sqle);
     } finally {
       conn.close();
     }

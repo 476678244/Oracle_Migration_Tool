@@ -1,5 +1,7 @@
 package springbased.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -152,7 +154,7 @@ public class TableUtil {
       }));
     }
     // monitor threads
-    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
+    monitorAndBlock(ThreadLocalMonitor.getFutures(), tableList.size());
     
     ThreadLocalMonitor.getInfo().setTableUtilState("creating table");
     for (int i = 0; i < tableDDLList.size(); i++) {
@@ -208,11 +210,6 @@ public class TableUtil {
         ThreadLocalMonitor.getFutures()
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
               try {
-                if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
-                  Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-                  ThreadLocalMonitor.setThreadPool(threadPool);
-                  ThreadLocalMonitor.setFutures(futures);
-                }
                 migrateTableData(tableName, sourceSchema, sourceConnInfo,
                     targetSchema, targetConnInfo, scaleMap.get(tableName), 0);
               } catch (Exception e) {
@@ -225,7 +222,7 @@ public class TableUtil {
       }
     }
     // monitor
-    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
+    monitorAndBlock(ThreadLocalMonitor.getFutures(), tableList.size());
     ThreadLocalMonitor.getInfo().setProcessRate("");
     ThreadLocalMonitor.getInfo().setTableUtilState("");
   }
@@ -362,14 +359,9 @@ public class TableUtil {
       ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
       Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
     int rows = 0;
+    int batchSize = 300;
     
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
-    if (start > 0) {
-      queryString = "select * from " + sourceSchema + "." + tableName
-          + " where ROWNUM <=500 and  FORM_CONTENT_ID > " + start
-          + " order by form_content_id asc ";
-      Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-    }
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
     ResultSet queryResult = null;
@@ -482,13 +474,25 @@ public class TableUtil {
             prepStmnt.setString(i, nclob);
 
           } else if (type == Types.BLOB) {
-            if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
-              prepStmnt.setBytes(i, new byte[]{});
-            } else {
-              Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-              byte[] s = queryResult.getBytes(i);
-              prepStmnt.setBytes(i, s);
+            //Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            long startTime = System.currentTimeMillis(), endTime =0;
+            InputStream input = queryResult.getBinaryStream(i);
+            long lenght = queryResult.getBlob(i).length();
+            byte[] bytes = new byte[Long.valueOf(lenght).intValue()];
+            try {
+              input.read(bytes);
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
             }
+            
+            endTime = System.currentTimeMillis();
+            ThreadLocalMonitor.getBytesTime.addAndGet(endTime - startTime);
+            //prepStmnt.setBinaryStream(i, input, Long.valueOf(lenght).intValue());
+            
+             //byte[] bytes = queryResult.getBytes(i);
+              prepStmnt.setBytes(i, bytes);
+            
           } else if (type == Types.VARBINARY || type == Types.BINARY) {
             byte[] s = queryResult.getBytes(i);
             prepStmnt.setBytes(i, s);
@@ -498,22 +502,9 @@ public class TableUtil {
           }
         }
         rows++;
-        if (rows > 300 && start >0) {
-          int startValue = queryResult.getInt(1);
-          ThreadLocalMonitor.getFutures()
-              .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
-                try {
-                  TableUtil.migrateTableData(tableName, sourceSchema,
-                      sourceConnInfo, targetSchema, targetConnInfo,
-                      columnScales, startValue);
-                } catch (Exception e) {
-                  log.error(e);
-                }
-              }));
-        }
         prepStmnt.addBatch();
         log.info(targetSchema + "add batch:" + insertString);
-        int batchSize = 300;
+        
         if (batchSize > 0) {
           try {
             if (rows % batchSize == 0) {
@@ -547,7 +538,7 @@ public class TableUtil {
     }
   }
   
-  private static void monitor(Set<Future<?>> futures, int totalSize)
+  private static void monitorAndBlock(Set<Future<?>> futures, int totalSize)
       throws InterruptedException {
     // monitor threads
     while (!futures.isEmpty()) {
