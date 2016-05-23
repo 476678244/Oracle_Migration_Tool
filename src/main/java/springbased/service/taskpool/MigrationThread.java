@@ -3,9 +3,7 @@ package springbased.service.taskpool;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
@@ -91,6 +89,8 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       ThreadLocalMonitor.getThreadPool().shutdown();
     } catch (Exception e) {
       log.error(e);
+    } finally {
+      ThreadLocalMonitor.getThreadPool().shutdown();
     }
   }
 
