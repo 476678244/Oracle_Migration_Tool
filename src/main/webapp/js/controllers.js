@@ -213,6 +213,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 			}).then(function successCallback(response) {
 				$scope.showLoadingIconForRecreate = false;
 				$scope.recreateSuccess = true;
+				$scope.targetValidateResult = 1;
 			}, function errorCallback(response) {
 			});
         });

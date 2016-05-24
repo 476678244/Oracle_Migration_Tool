@@ -1,0 +1,60 @@
+{
+  "name": "angular-aria",
+  "version": "1.5.5",
+  "description": "AngularJS module for making accessibility easy",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angular/angular.js.git"
+  },
+  "keywords": [
+    "angular",
+    "framework",
+    "browser",
+    "accessibility",
+    "a11y",
+    "client-side"
+  ],
+  "author": {
+    "name": "Angular Core Team",
+    "email": "angular-core+npm@google.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/angular/angular.js/issues"
+  },
+  "homepage": "http://angularjs.org",
+  "gitHead": "14b2c85469a2656e8921cb9f58974ba530abb3c1",
+  "_id": "angular-aria@1.5.5",
+  "_shasum": "2cb4cf9426372b6dd20f3a195f4157aaead571ff",
+  "_from": "angular-aria@>=1.3.0 <1.6.0",
+  "_npmVersion": "2.15.1",
+  "_nodeVersion": "4.4.3",
+  "_npmUser": {
+    "name": "angularcore",
+    "email": "angular-core+npm@google.com"
+  },
+  "dist": {
+    "shasum": "2cb4cf9426372b6dd20f3a195f4157aaead571ff",
+    "tarball": "https://registry.npmjs.org/angular-aria/-/angular-aria-1.5.5.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "angularcore",
+      "email": "angular-core+npm@google.com"
+    },
+    {
+      "name": "petebd",
+      "email": "pete@bacondarwin.com"
+    }
+  ],
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/angular-aria-1.5.5.tgz_1460972939277_0.6276932591572404"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/angular-aria/-/angular-aria-1.5.5.tgz"
+}

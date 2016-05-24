@@ -43,7 +43,9 @@
   clear: both;
   padding-top: 20px;
   padding-left: 10px;
+  padding-right:20px;
   border: 6px solid #ddd;
+  height: 500px;
   /*border: 1px groove;*/
   border-radius: 8px;
 }
@@ -71,7 +73,6 @@
 .validate-button-section {
   width: 20%;
   float: left;
-  margin-left: -20px;
 }
 
 .validate-button-section .validate-button {
@@ -111,4 +112,59 @@
 
 .wrap-dd-select {
   width: 385px;
+}
+.md-whiteframe-z1 {
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
+}
+.indigo {
+    background-color: #3f51b5;
+}
+.no-radius {
+    border-radius: 0!important;
+}
+.navbar{
+  color: white;
+}
+.navbar .navbar-item{
+  padding:0 16px;
+  line-height: 64px;
+}
+.pull-left{
+  float:left!important;
+}
+.h4{
+  font-size:18px;
+  margin:0;
+}
+.define{
+  border:none;
+  border-radius: 0;
+  margin-bottom: 24px;
+  background-color: rgba(0,0,0,0.15);
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.monitor-page-link{
+  float:right!important;
+  padding-left: 0;
+  margin-bottom: 0;
+  color:white;
+  font-size:12px;
+}
+.monitor-page-link:hover{
+ color:white;
+}
+.monitor-page-link.icon{
+  background-image: url('../img/monitor.jpg');
+}
+.fire-button-section{
+  float:left;
+}
+.fireInfo{
+  color:white;
+  font-weight: 400;
+}
+.firebtn{
+  width:250px;
+  display: inline-block;
 }

@@ -12,13 +12,27 @@
   <link rel="stylesheet" href="css/angular-dropdowns.min.css"/>
   <link rel="stylesheet" href="css/app.css"/>
 
+  <link href="js/node_modules/angular-material/angular-material.css" rel="stylesheet" />
+  <script src="js/node_modules/angular/angular.js" type="text/javascript" ></script>
+  <script src="js/node_modules/angular-animate/angular-animate.js" type="text/javascript" ></script>
+  <script src="js/node_modules/angular-aria/angular-aria.js" type="text/javascript" ></script>
+  <script src="js/node_modules/angular-material/angular-material.js" type="text/javascript" ></script>
+
 </head>
 
-<body class="migration-container">
-
-<div ng-controller="ConfigController">
-    <dir class="config-section row">
+<body ng-app='starterApp' layout='column' class="migration-container">
+<md-toolbar class='navbar md-whiteframe-z1 no-radius indigo'>    
+      <div class='navbar-item pull-left h4 ng-binding'>Oracle Migration Tool
+        <a  class="monitor-page-link" href='dashboard/html/table/datatable.html' ng-click="gotoMonitorPage()">
+        <i class="icon"></i>Monitoring Page</a>
+      </div>
+    </md-toolbar>
+<div flex layout='row' ng-controller="ConfigController">
+    <dir flex class="col-lg-7 config-section define">
       <div class="config-detail ">
+          <label ng-if="validateSuccess(sourceValidateResult)" class="label-success label-valideInfo">Validate Successfully!</label>
+          <label ng-if="validateFail(sourceValidateResult)" class="label-danger label-fail-wrap label-valideInfo">Validate Failed, cause: {{sourceValidateMessage}}</label>
+          <label ng-if="validateWarn(sourceValidateResult)" class="label-warning label-valideInfo">Validate Success, but with warning: {{sourceValidateMessage}}</label>
         <div class="input-detail">
           <div class="form-group row">
             <label class="col-sm-3 label label-pill label-warning label-db-font">Source DB</label>
@@ -28,7 +42,7 @@
               </div>
             </div>
           </div>
-          <div class="form-group row">
+           <div class="form-group row">
             <label class="col-sm-3 form-control-label label-pill label label-info label-attribute-font">IP:</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="inputEmail3" value="{{sourceIp}}" ng-model="sourceIp" ng-change="sourceInputChanged()">
@@ -55,22 +69,25 @@
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label label-pill label-info label-attribute-font">Schema:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="{{sourceSchema}}" ng-model="sourceSchema" ng-change="sourceInputChanged(true)">
+              <input type="text" class="form-control" id="inputEmail3" placeholder='Please input source schema name'value="{{sourceSchema}}" ng-model="sourceSchema" ng-change="sourceInputChanged(true)">
             </div>
           </div>
-          <label ng-if="validateSuccess(sourceValidateResult)" class="label label-success">Validate Successfully!</label>
-          <label ng-if="validateFail(sourceValidateResult)" class="label label-danger label-fail-wrap">Validate Failed, cause: {{sourceValidateMessage}}</label>
-          <label ng-if="validateWarn(sourceValidateResult)" class="label label-warning">Validate Success, but with warning: {{sourceValidateMessage}}</label>
         </div>
       </div>
-      <div class="validate-button-section">
+     <div class="validate-button-section">
         <button type="button" class="btn btn-primary validate-button" ng-click="validate(true)">Validate Connection</button>
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateSourceConnectionButton"></ad-loading-icon><br>
-        <button type="button" class="btn btn-secondary monitor-page-link" ng-click="gotoMonitorPage()">Monitoring Page</button>
-      </div>
+     </div>
     </dir>
-    <dir class="config-section row">
+    <dir flex class="config-section row define">
       <div class="config-detail ">
+        <label ng-if="validateSuccess(targetValidateResult)" class="label-success label-valideInfo">Validate Successfully!</label>
+          <div ng-if="validateFail(targetValidateResult)">
+            <label class="label-danger label-fail-wrap label-valideInfo">Validate Failed, cause: {{targetValidateMessage}}
+            <a ng-if ='targetValidateMessage=="Tables exit in target schema, please recreate this schema at first!"' type="link" id='recreatBtn' class="label-success label-valideInfo" ng-click="recreateSchema()">Recreate Schema</a></label>
+          </div>
+          <label ng-if="recreateSuccess" class="label-success label-valideInfo">Recreate Schema Success!</label>
+          <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForRecreate"></ad-loading-icon>
         <div class="input-detail">
           <div class="form-group row">
             <label class="col-sm-3 label label-pill label-warning label-db-font">Target DB</label>
@@ -107,25 +124,21 @@
           <div class="form-group row">
             <label class="col-sm-3 form-control-label label  label-pill label-info label-attribute-font">Schema:</label>
             <div class="col-sm-9">
-              <input type="text" class="form-control" id="inputEmail3" value="{{targetSchema}}" ng-model="targetSchema" ng-change="targetInputChanged(true)">
+              <input type="text" class="form-control" id="inputEmail3" value="{{targetSchema}}" placeholder='Please input target schema name'ng-model="targetSchema" ng-change="targetInputChanged(true)">
             </div>
           </div>
-          <label ng-if="validateSuccess(targetValidateResult)" class="label label-success">Validate Successfully!</label>
-          <label ng-if="validateFail(targetValidateResult)" class="label label-danger label-fail-wrap">Validate Failed, cause: {{targetValidateMessage}}</label>
         </div>
       </div>
-      <div class="validate-button-section">
+       <div class="validate-button-section">
         <button type="button" class="btn btn-primary validate-button" ng-click="validate(false)">Validate Connection</button>
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateTargetConnectionButton"></ad-loading-icon><br>
-        <div>
-            <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts>
-            <label class="label label-success label-guide" ng-if="showToValidateButton()">Please "Validate Connection" for Source DB and Target DB at first.</label>
-            <button type="button" class="btn btn-primary btn-lg btn-block" ng-if="showToMigrateButton()" ng-click="fireMigration()">Fire Migration</button>
-            <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon><br>
+      </div> 
+      <div class="fire-button-section">
+            <button type="button" ng-disabled = "!showToMigrateButton()" class="firebtn btn btn-primary btn-lg btn-block" ng-click="fireMigration()">Fire Migration</button>
+            <label class="fireInfo">(Please "Validate Connection" for Source DB and Target DB at first.)</label>
+            <ad-alerts timeout="timeoutValue" custom-classes="thick-border"></ad-alerts> 
+            <ad-loading-icon ng-show="showLoadingIcon" loading-icon-size="26px" loading-icon-class="glyphicon glyphicon-refresh ad-spin"></ad-loading-icon>
         </div>
-        <button type="button" class="btn btn-secondary monitor-page-link" ng-click="recreateSchema()">Recreate Schema</button>
-        <label ng-if="recreateSuccess" class="label label-success">Success!</label>
-        <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForRecreate"></ad-loading-icon><br>
       </div>
     </dir>
 

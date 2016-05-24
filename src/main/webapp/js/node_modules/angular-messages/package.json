@@ -1,0 +1,58 @@
+{
+  "name": "angular-messages",
+  "version": "1.5.5",
+  "description": "AngularJS module that provides enhanced support for displaying messages within templates",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angular/angular.js.git"
+  },
+  "keywords": [
+    "angular",
+    "framework",
+    "browser",
+    "client-side"
+  ],
+  "author": {
+    "name": "Angular Core Team",
+    "email": "angular-core+npm@google.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/angular/angular.js/issues"
+  },
+  "homepage": "http://angularjs.org",
+  "gitHead": "d83ee89bf667cd6dc5453c1f42e2e639fa765f85",
+  "_id": "angular-messages@1.5.5",
+  "_shasum": "2a126d34e90580c45212aeb4d04152147771e6af",
+  "_from": "angular-messages@>=1.3.0 <1.6.0",
+  "_npmVersion": "2.15.1",
+  "_nodeVersion": "4.4.3",
+  "_npmUser": {
+    "name": "angularcore",
+    "email": "angular-core+npm@google.com"
+  },
+  "dist": {
+    "shasum": "2a126d34e90580c45212aeb4d04152147771e6af",
+    "tarball": "https://registry.npmjs.org/angular-messages/-/angular-messages-1.5.5.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "angularcore",
+      "email": "angular-core+npm@google.com"
+    },
+    {
+      "name": "petebd",
+      "email": "pete@bacondarwin.com"
+    }
+  ],
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/angular-messages-1.5.5.tgz_1460972990401_0.7499208080116659"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/angular-messages/-/angular-messages-1.5.5.tgz"
+}
