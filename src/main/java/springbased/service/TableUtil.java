@@ -1,6 +1,8 @@
 package springbased.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -13,12 +15,10 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
@@ -152,7 +152,7 @@ public class TableUtil {
       }));
     }
     // monitor threads
-    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
+    monitorAndBlock(ThreadLocalMonitor.getFutures(), tableList.size());
     
     ThreadLocalMonitor.getInfo().setTableUtilState("creating table");
     for (int i = 0; i < tableDDLList.size(); i++) {
@@ -167,6 +167,24 @@ public class TableUtil {
         ps = targetConn.prepareStatement(tableDDL);
         ps.execute();
         log.info("successfully run:" + tableDDL);
+        // specially for form_content table, can copy data for this table from now
+        if (tableDDL.contains(".FORM_CONTENT (")) {
+          try {
+            ThreadLocalMonitor.getFutures()
+                .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
+                  try {
+                    migrateTableData("FORM_CONTENT", sourceSchema,
+                        sourceConnInfo, targetSchema, targetConnInfo,
+                        scaleMap.get("FORM_CONTENT"), 0);
+                  } catch (Exception e) {
+                    log.error(e);
+                  }
+                }));
+          } catch (NullPointerException e) {
+            log.error(e);
+            throw new NullPointerException(e.getMessage());
+          }
+        }
       } catch (SQLException e) {
         ThreadLocalErrorMonitor.add(tableDDL, e);
         log.error(e);
@@ -200,19 +218,14 @@ public class TableUtil {
     ThreadLocalMonitor.getInfo().setTableUtilState("migrateTableData");
     
     // multi-thread processing
-    ExecutorService threadPool = ThreadLocalMonitor.getThreadPool();
-    Set<Future<?>> futures = ThreadLocalMonitor.getFutures();
     for (int i = 0; i < tableList.size(); i++) {
       String tableName = tableList.get(i);
+      if (tableName.equals("FORM_CONTENT"))
+        continue;
       try {
         ThreadLocalMonitor.getFutures()
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
               try {
-                if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
-                  Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-                  ThreadLocalMonitor.setThreadPool(threadPool);
-                  ThreadLocalMonitor.setFutures(futures);
-                }
                 migrateTableData(tableName, sourceSchema, sourceConnInfo,
                     targetSchema, targetConnInfo, scaleMap.get(tableName), 0);
               } catch (Exception e) {
@@ -225,7 +238,7 @@ public class TableUtil {
       }
     }
     // monitor
-    monitor(ThreadLocalMonitor.getFutures(), tableList.size());
+    monitorAndBlock(ThreadLocalMonitor.getFutures(), tableList.size());
     ThreadLocalMonitor.getInfo().setProcessRate("");
     ThreadLocalMonitor.getInfo().setTableUtilState("");
   }
@@ -362,14 +375,11 @@ public class TableUtil {
       ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
       Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
     int rows = 0;
-    
-    String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
-    if (start > 0) {
-      queryString = "select * from " + sourceSchema + "." + tableName
-          + " where ROWNUM <=500 and  FORM_CONTENT_ID > " + start
-          + " order by form_content_id asc ";
-      Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+    int batchSize = 300;
+    if (tableName.equals("COMPETENCY")) {
+      boolean test = true;
     }
+    String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
     ResultSet queryResult = null;
@@ -482,13 +492,22 @@ public class TableUtil {
             prepStmnt.setString(i, nclob);
 
           } else if (type == Types.BLOB) {
-            if ("FORM_CONTENT".equalsIgnoreCase(tableName)) {
-              prepStmnt.setBytes(i, new byte[]{});
-            } else {
-              Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-              byte[] s = queryResult.getBytes(i);
-              prepStmnt.setBytes(i, s);
+            //Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            //long startTime = System.currentTimeMillis(), endTime =0;
+            Blob blob = queryResult.getBlob(i);
+            //InputStream input = blob.getBinaryStream();
+            long lenght = blob.length();
+            byte[] bytes = new byte[Long.valueOf(lenght).intValue()];
+            try {
+              blob.getBinaryStream().read(bytes);
+            } catch (IOException e) {
+              log.error(e);
             }
+            
+            //endTime = System.currentTimeMillis();
+            //ThreadLocalMonitor.getBytesTime.addAndGet(endTime - startTime);
+             //byte[] bytes = queryResult.getBytes(i);
+            prepStmnt.setBytes(i, bytes);
           } else if (type == Types.VARBINARY || type == Types.BINARY) {
             byte[] s = queryResult.getBytes(i);
             prepStmnt.setBytes(i, s);
@@ -498,27 +517,14 @@ public class TableUtil {
           }
         }
         rows++;
-        if (rows > 300 && start >0) {
-          int startValue = queryResult.getInt(1);
-          ThreadLocalMonitor.getFutures()
-              .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
-                try {
-                  TableUtil.migrateTableData(tableName, sourceSchema,
-                      sourceConnInfo, targetSchema, targetConnInfo,
-                      columnScales, startValue);
-                } catch (Exception e) {
-                  log.error(e);
-                }
-              }));
-        }
         prepStmnt.addBatch();
         log.info(targetSchema + "add batch:" + insertString);
-        int batchSize = 300;
+        
         if (batchSize > 0) {
           try {
             if (rows % batchSize == 0) {
               prepStmnt.executeBatch();
-              targetConn.commit();
+              //targetConn.commit();
               log.info(targetSchema + "batch executed!");
               prepStmnt.clearBatch();
             }
@@ -529,13 +535,16 @@ public class TableUtil {
         }
       }
       prepStmnt.executeBatch();
-      targetConn.commit();
+      //targetConn.commit();
       log.info(targetSchema + "batch executed!");
       prepStmnt.clearBatch();
       columns = null;
     } catch (SQLException e) {
       log.error(e);
       ThreadLocalErrorMonitor.add(insertString, e);
+    } catch (Exception e) {
+      ThreadLocalErrorMonitor.add(tableName, e);
+      log.error(e);
     } finally {
       queryResult.close();
       pstmt.close();
@@ -547,7 +556,7 @@ public class TableUtil {
     }
   }
   
-  private static void monitor(Set<Future<?>> futures, int totalSize)
+  private static void monitorAndBlock(Set<Future<?>> futures, int totalSize)
       throws InterruptedException {
     // monitor threads
     while (!futures.isEmpty()) {

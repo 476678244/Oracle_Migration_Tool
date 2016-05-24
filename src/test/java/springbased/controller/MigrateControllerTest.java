@@ -24,21 +24,26 @@ public class MigrateControllerTest {
   public void test() throws SQLException, InterruptedException {
     String sourceUsername = "sfuser";
     String sourcePassword = "sfuser";
-    String sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
-    String sourceSchema = "sfuser_tree";
+    String sourceUrl = "jdbc:oracle:thin:@192.168.248.135:1521:dbpool1";
+    String sourceSchema = "sfuser_yyhrbp";
     String targetUsername = "sfuser";
     String targetPassword = "sfuser";
-    String targetUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
-    String targetSchema = "sfuser_real";
-    String ip = "10.58.100.66";
+    String targetUrl = "jdbc:oracle:thin:@192.168.248.135:1521:dbpool1";
+    String targetSchema = "sfuser_jdm";
+    String ip = "192.168.248.135";
     String sid = "dbpool1";
+    long cost = 0;
     boolean test = false;
     if (test) {
+      long start = System.currentTimeMillis(), end =0;
       ThreadLocalMonitor.setInfo(new Info());
       this.controller.migrate(sourceUsername, sourcePassword, sourceUrl,
           sourceSchema, targetUsername, targetPassword, targetUrl,
           targetSchema);
+      end = System.currentTimeMillis();
+      cost = end - start;
     }
+    long get = ThreadLocalMonitor.getBytesTime.longValue();
     boolean test1 = false;
     if (test1) {
       this.controller.recreateSchema(ip, targetUsername, targetPassword, sid,

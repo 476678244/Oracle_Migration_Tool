@@ -132,6 +132,8 @@ public class MigrationService {
   
   public void recreateSchema(Connection connection,
       String schema) throws SQLException {
+    if (!schema.contains("_"))
+       return ;
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement(

@@ -45,4 +45,8 @@ public class MigrationThreadPool {
       threadMapping.get(jobId).cancelJob();
     }
   }
+  
+  public void shutdown() {
+    executorService.shutdown();
+  }
 }
