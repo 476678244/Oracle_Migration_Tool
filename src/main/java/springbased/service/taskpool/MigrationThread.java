@@ -48,8 +48,7 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       this.jobDAO.save(job);
       List<String> tableList = new ArrayList<String>();
       try {
-        job.setStatus(StatusEnum.TABLE);
-        this.jobDAO.save(job);
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.TABLE);
         TableUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
             job.getSourceSchema(), tableList);
         job.setStatus(StatusEnum.UK);
@@ -86,7 +85,6 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       this.jobDAO.save(job);
     } catch (InterruptedException ie) {
       log.error(ie);
-      ThreadLocalMonitor.getThreadPool().shutdown();
     } catch (Exception e) {
       log.error(e);
     } finally {

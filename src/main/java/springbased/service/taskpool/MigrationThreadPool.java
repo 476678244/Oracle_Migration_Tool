@@ -46,7 +46,7 @@ public class MigrationThreadPool {
     }
   }
   
-  public void shutdown() {
+  public static void shutdown() {
     executorService.shutdown();
   }
 }
