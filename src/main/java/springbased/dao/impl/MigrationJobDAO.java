@@ -1,6 +1,7 @@
 package springbased.dao.impl;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.springframework.stereotype.Repository;
 
@@ -28,5 +29,14 @@ public class MigrationJobDAO extends AbstractDAO<MigrationJob> {
     this.basicDAO.update(this.basicDAO.createQuery().filter("jobId", jobId),
         this.basicDAO.createUpdateOperations().set("status", statusEnum));
   }
+  
+  public void updateStartTime(long jobId, Date startTime) {
+    this.basicDAO.update(this.basicDAO.createQuery().filter("jobId", jobId),
+        this.basicDAO.createUpdateOperations().set("startTime", startTime));
+  }
 
+  public void updateEndTime(long jobId, Date endTime) {
+    this.basicDAO.update(this.basicDAO.createQuery().filter("jobId", jobId),
+        this.basicDAO.createUpdateOperations().set("endTime", endTime));
+  }
 }

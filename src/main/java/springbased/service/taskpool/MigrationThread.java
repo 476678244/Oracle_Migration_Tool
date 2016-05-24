@@ -27,9 +27,9 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   private static final Logger log = Logger.getLogger(MigrationThread.class);
 
   private MigrationJob job;
-  
+
   private MigrationJobDAO jobDAO;
-  
+
   private Info info = new Info();
 
   public MigrationThread(MigrationJob job, MigrationService migrationService,
@@ -43,30 +43,25 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   public void run() {
     ThreadLocalMonitor.setInfo(info);
     try {
-      job.setStatus(StatusEnum.STARTED);
-      job.setStartTime(new Date());
-      this.jobDAO.save(job);
+      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.TABLE);
+      this.jobDAO.updateStartTime(job.getJobId(), new Date());
       List<String> tableList = new ArrayList<String>();
       try {
         this.jobDAO.updateStatus(job.getJobId(), StatusEnum.TABLE);
-        TableUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
-            job.getSourceSchema(), tableList);
-        job.setStatus(StatusEnum.UK);
-        this.jobDAO.save(job);
+        TableUtil.execute(job.getTarget(), job.getTargetSchema(),
+            job.getSource(), job.getSourceSchema(), tableList);
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.UK);
         UKUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
             job.getSourceSchema());
-        job.setStatus(StatusEnum.INDEX);
-        this.jobDAO.save(job);
-        IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(), job.getSource(),
-            job.getSourceSchema(), tableList);
-        job.setStatus(StatusEnum.SEQUENCE);
-        this.jobDAO.save(job);
-        SequenceUtil.copySequence(job.getTarget(), job.getTargetSchema(), job.getSource(),
-            job.getSourceSchema(), tableList);
-        job.setStatus(StatusEnum.FK);
-        this.jobDAO.save(job);
-        FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(), job.getSource(),
-            job.getTarget());
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.INDEX);
+        IndexUtil.copyIndex(job.getTarget(), job.getTargetSchema(),
+            job.getSource(), job.getSourceSchema(), tableList);
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.SEQUENCE);
+        SequenceUtil.copySequence(job.getTarget(), job.getTargetSchema(),
+            job.getSource(), job.getSourceSchema(), tableList);
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FK);
+        FKUtil.addFK(job.getSourceSchema(), job.getTargetSchema(),
+            job.getSource(), job.getTarget());
       } catch (SQLException sqle) {
         log.error("Migration process failed due to:");
         log.error(sqle);
@@ -80,12 +75,12 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       } else {
         log.error("Migration process end successfully without any errors!");
       }
-      job.setEndTime(new Date());
-      job.setStatus(StatusEnum.FINISHED);
-      this.jobDAO.save(job);
+      this.jobDAO.updateEndTime(job.getJobId(), new Date());
+      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FINISHED);
     } catch (InterruptedException ie) {
       log.error(ie);
     } catch (Exception e) {
+      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FAILED);
       log.error(e);
     } finally {
       ThreadLocalMonitor.getThreadPool().shutdown();
@@ -113,7 +108,7 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   }
 
   private Future<?> future;
-  
+
   @Override
   public void setFuture(Future<?> future) {
     this.future = future;

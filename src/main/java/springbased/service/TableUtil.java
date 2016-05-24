@@ -411,6 +411,10 @@ public class TableUtil {
       int cols = md.getColumnCount();
       
       while (queryResult.next()) {
+        if (Thread.currentThread().isInterrupted()) {
+          throw new InterruptedException(
+              "migrateTableData thread is interrupted");
+        }
         
         for (int i = 1; i <= cols; i++) {
           int type = md.getColumnType(i);
@@ -544,6 +548,7 @@ public class TableUtil {
       ThreadLocalErrorMonitor.add(insertString, e);
     } catch (Exception e) {
       ThreadLocalErrorMonitor.add(tableName, e);
+      log.error("exception caught when copying data of table:" + tableName);
       log.error(e);
     } finally {
       queryResult.close();
