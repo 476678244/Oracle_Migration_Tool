@@ -496,22 +496,19 @@ public class TableUtil {
             prepStmnt.setString(i, nclob);
 
           } else if (type == Types.BLOB) {
-            //Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-            //long startTime = System.currentTimeMillis(), endTime =0;
             Blob blob = queryResult.getBlob(i);
-            //InputStream input = blob.getBinaryStream();
-            long lenght = blob.length();
-            byte[] bytes = new byte[Long.valueOf(lenght).intValue()];
-            try {
-              blob.getBinaryStream().read(bytes);
-            } catch (IOException e) {
-              log.error(e);
+            if (blob == null) {
+              prepStmnt.setNull(i, Types.BLOB);
+            } else {
+              long lenght = blob.length();
+              byte[] bytes = new byte[Long.valueOf(lenght).intValue()];
+              try {
+                blob.getBinaryStream().read(bytes);
+              } catch (IOException e) {
+                log.error(e);
+              }
+              prepStmnt.setBytes(i, bytes);
             }
-            
-            //endTime = System.currentTimeMillis();
-            //ThreadLocalMonitor.getBytesTime.addAndGet(endTime - startTime);
-             //byte[] bytes = queryResult.getBytes(i);
-            prepStmnt.setBytes(i, bytes);
           } else if (type == Types.VARBINARY || type == Types.BINARY) {
             byte[] s = queryResult.getBytes(i);
             prepStmnt.setBytes(i, s);
