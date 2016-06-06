@@ -558,7 +558,7 @@ public class TableUtil {
     // monitor threads
     while (!futures.isEmpty()) {
       if (Thread.currentThread().isInterrupted()) {
-        ThreadLocalMonitor.getThreadPool().shutdown();
+        ThreadLocalMonitor.getThreadPool().shutdownNow();
         throw new InterruptedException("Migration Job is interrupted");
       } else {
         Thread.yield();
