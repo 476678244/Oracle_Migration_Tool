@@ -83,7 +83,8 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FAILED);
       log.error(e);
     } finally {
-      ThreadLocalMonitor.getThreadPool().shutdown();
+      if (!ThreadLocalMonitor.getThreadPool().isShutdown())
+        ThreadLocalMonitor.getThreadPool().shutdown();
     }
   }
 

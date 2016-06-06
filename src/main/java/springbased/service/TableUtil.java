@@ -376,9 +376,6 @@ public class TableUtil {
       Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
     int rows = 0;
     int batchSize = 300;
-    if (tableName.equals("COMPETENCY")) {
-      boolean test = true;
-    }
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
@@ -551,10 +548,8 @@ public class TableUtil {
       queryResult.close();
       pstmt.close();
       prepStmnt.close();
+      targetConn.close();
       sourceConn.close();
-      if (!sourceConnInfo.equals(targetConnInfo)) {
-        targetConn.close();
-      }
     }
   }
   
@@ -563,10 +558,10 @@ public class TableUtil {
     // monitor threads
     while (!futures.isEmpty()) {
       if (Thread.currentThread().isInterrupted()) {
-        futures.forEach((future) -> {
-          future.cancel(true);
-        });
+        ThreadLocalMonitor.getThreadPool().shutdown();
         throw new InterruptedException("Migration Job is interrupted");
+      } else {
+        Thread.yield();
       }
       ThreadLocalMonitor.getInfo().setProcessRate(
           String.valueOf(100 - (futures.size() * 100 / totalSize)));

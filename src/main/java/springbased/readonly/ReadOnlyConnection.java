@@ -24,7 +24,8 @@ public class ReadOnlyConnection {
   }
 
   public void close() throws SQLException {
-    this.con.close();
+    if (!this.con.isClosed())
+      this.con.close();
   }
   
   public boolean isReadOnly() {
