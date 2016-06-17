@@ -69,6 +69,7 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       }
       this.jobDAO.updateEndTime(job.getJobId(), new Date());
       this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FINISHED);
+      job.setStatus(StatusEnum.FINISHED);
       if (ThreadLocalErrorMonitor.isErrorsExisting()) {
         log.info("Migration process end successfully, but with some errors.");
         log.info(
@@ -80,7 +81,9 @@ public class MigrationThread extends Thread implements MigrationRunnable {
     } catch (InterruptedException ie) {
       log.error(ie);
     } catch (Exception e) {
-      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FAILED);
+      if (job.getStatus() != StatusEnum.FINISHED) {
+        this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FAILED);
+      }
       log.error(e);
     } finally {
       if (!ThreadLocalMonitor.getThreadPool().isShutdown())
