@@ -67,6 +67,8 @@ public class MigrationThread extends Thread implements MigrationRunnable {
         log.error(sqle);
       } finally {
       }
+      this.jobDAO.updateEndTime(job.getJobId(), new Date());
+      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FINISHED);
       if (ThreadLocalErrorMonitor.isErrorsExisting()) {
         log.info("Migration process end successfully, but with some errors.");
         log.info(
@@ -75,8 +77,6 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       } else {
         log.error("Migration process end successfully without any errors!");
       }
-      this.jobDAO.updateEndTime(job.getJobId(), new Date());
-      this.jobDAO.updateStatus(job.getJobId(), StatusEnum.FINISHED);
     } catch (InterruptedException ie) {
       log.error(ie);
     } catch (Exception e) {
@@ -84,7 +84,8 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       log.error(e);
     } finally {
       if (!ThreadLocalMonitor.getThreadPool().isShutdown())
-        ThreadLocalMonitor.getThreadPool().shutdown();
+        ThreadLocalMonitor.getThreadPool().shutdownNow();
+      ThreadLocalMonitor.clear();
     }
   }
 

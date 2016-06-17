@@ -56,6 +56,13 @@ public class ThreadLocalMonitor {
   public static ExecutorService getThreadPool() {
     return pool.get();
   }
+
+  public static void clear() {
+    info.remove();
+    uks.remove();
+    futures.remove();
+    pool.remove();
+  }
   
   public static void setThreadPool(ExecutorService threadPool) {
     pool.set(threadPool);

@@ -75,6 +75,7 @@ public class MigrationService {
       rs.close();
       ps.close();
     }
+    log.info("validate for " + schema + " success!");
     return new ValidationResult();
   }
 
@@ -127,6 +128,7 @@ public class MigrationService {
       rs.close();
       ps.close();
     }
+    log.info("validate for " + schema + " success!");
     return new ValidationResult();
   }
   
