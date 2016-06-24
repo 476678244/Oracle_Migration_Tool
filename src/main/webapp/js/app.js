@@ -1,7 +1,8 @@
 'use strict';
 
 // oracle migration main module
-var oracleMigration = angular.module('oracleMigration', ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'ngDropdowns', 'angular-confirm', 'ui.bootstrap.tpls']);
+var oracleMigration = angular.module('oracleMigration', 
+    ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'ngDropdowns', 'angular-confirm', 'ui.bootstrap.tpls', 'ngDialog']);
   oracleMigration.config(['$routeProvider', function($routeProvider){
     $routeProvider.when('/', {
       templateUrl : './new.html',
