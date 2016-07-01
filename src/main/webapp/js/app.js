@@ -5,8 +5,14 @@ var oracleMigration = angular.module('oracleMigration',
     ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'ngDropdowns', 'angular-confirm', 'ui.bootstrap.tpls', 'ngDialog']);
   oracleMigration.config(['$routeProvider', function($routeProvider){
     $routeProvider.when('/', {
+      templateUrl : './index.html',
+      controller  : 'IndexController'
+    }).when('/home', {
       templateUrl : './new.html',
       controller  : 'ConfigController'
+    }).when('/manageData', {
+      templateUrl : './managedata.html',
+      controller  : 'ManageDataController'
     });
   }]);
 

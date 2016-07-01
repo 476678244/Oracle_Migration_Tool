@@ -24,12 +24,10 @@
 
 </head>
 
-<body ng-app='starterApp' layout='column' class="migration-container">
+<body layout='column' class="migration-container">
 <div ng-controller="ConfigController">
   <md-toolbar class='navbar md-whiteframe-z1 no-radius indigo'>    
     <div class='navbar-item pull-left h4 ng-binding'>Oracle Migration Tool
-      <a  class="manage-page-link" href='#' ng-click="selectSchema()">
-      <i class="icon"></i>Data Manage</a>
       <a  class="monitor-page-link" href='dashboard/html/table/datatable.html' ng-click="gotoMonitorPage()">
       <i class="icon"></i>Monitoring Page</a>
     </div>
@@ -83,6 +81,7 @@
       </div>
      <div class="validate-button-section">
         <button type="button" class="btn btn-primary validate-button" ng-click="validate(true)">Validate Connection</button>
+        <button type="button" class="btn btn-primary validate-button" ng-click="selectSchema()" ng-if="validateSuccess(sourceValidateResult)">Manage Data</button>
         <ad-loading-icon loading-icon-size="20px" loading-icon-class="glyphicon glyphicon-refresh ad-spin" ng-show="showLoadingIconForValidateSourceConnectionButton"></ad-loading-icon><br>
      </div>
     </dir>
