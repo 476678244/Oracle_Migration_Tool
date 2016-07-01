@@ -5,5 +5,6 @@
 var oracleMigration = window.oracleMigration;
 oracleMigration.controller('IndexController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location',
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location) {
-	$location.path('/home');
+	//$location.path('/home');
+	$window.location.href = 'new.html';
 }]);
