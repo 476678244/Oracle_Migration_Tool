@@ -221,7 +221,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
     };
 
     $scope.selectSchema = function () {
-        //$location.path('/manageData');
-        $window.location.href = 'managedata.html';
+        $location.path('/manageData');
+        //$window.location.href = 'managedata.html';
     };
 }]);
