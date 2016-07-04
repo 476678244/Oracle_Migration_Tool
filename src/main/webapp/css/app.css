@@ -36,6 +36,11 @@
   background-position: bottom;
 }
 
+.populate-background {
+  background-color: cadetblue;
+  height: 400px;
+}
+
 .config-section {
   margin-left: auto;
   margin-right: auto;
@@ -182,4 +187,24 @@
 }
 input.form-control {
   font-family: inherit;
+}
+
+/*manage data page*/
+.function-area {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80%;
+}
+
+.option-select {
+  margin-top: 2%;
+  margin-bottom: 2%；
+}
+
+.values-input {
+  margin-left: -15px;
+}
+
+.condition-input {
+  max-width: 60%;
 }
