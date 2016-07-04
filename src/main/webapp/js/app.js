@@ -2,7 +2,7 @@
 
 // oracle migration main module
 var oracleMigration = angular.module('oracleMigration', 
-    ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'ngDropdowns', 'angular-confirm', 'ui.bootstrap.tpls', 'ngDialog']);
+    ['ngRoute', 'ngSanitize', 'adaptv.adaptStrap', 'ngDropdowns', 'angular-confirm', 'ui.bootstrap.tpls', 'ngDialog', 'jsonFormatter']);
   oracleMigration.config(['$routeProvider', function($routeProvider){
     $routeProvider.when('/', {
       templateUrl : './tmpl/config.html',
