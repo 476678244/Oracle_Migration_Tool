@@ -30,7 +30,9 @@
 }
 
 .migration-container {
-  background-image: url('../img/bg.jpg');
+  /*background-image: url('../img/bg.jpg');*/
+  /*background-color: lightslategray;*/
+  background-color: darkseagreen;
   background-position: bottom;
 }
 
@@ -77,6 +79,7 @@
 
 .validate-button-section .validate-button {
   margin-bottom: 20px;
+  font-family: inherit;
 }
 
 .validate-button-section .label-guide {
@@ -117,7 +120,8 @@
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26);
 }
 .indigo {
-    background-color: #3f51b5;
+    /*background-color: cornflowerblue;*/
+    background-color: cadetblue;
 }
 .no-radius {
     border-radius: 0!important;
@@ -175,4 +179,7 @@
 .firebtn{
   width:250px;
   display: inline-block;
+}
+input.form-control {
+  font-family: inherit;
 }
