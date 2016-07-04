@@ -28,73 +28,74 @@
 		<div role="table-select" class="option-select">
 			<div class="dropdown">
 			  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    Table
+			    {{ tableSelected || "Select Table" }}
 			    <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-			    <li><a href="#">Action</a></li>
-			    <li><a href="#">Another action</a></li>
-			    <li><a href="#">Something else here</a></li>
+			  	<li ng-repeat="tableName in tableNames">
+			  		<a ng-click="tableNameSelected(this)"> {{ tableName.name }} </a>
+			  	</li>
 			  </ul>
 			</div>
-		</div>
+		</div> <!-- table-select -->
 		<div role="column-select" class="option-select">
 			<div class="dropdown">
 			  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    Column
+			    {{ columnSelected || "Select Column" }}
 			    <span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-			    <li><a href="#">Action</a></li>
-			    <li><a href="#">Another action</a></li>
-			    <li><a href="#">Something else here</a></li>
+			  	<li ng-repeat="columnName in columnNames">
+			  		<a ng-click="columnNameSelected(this)"> {{ columnName.name }} </a>
+			  	</li>
 			  </ul>
 			</div>
-		</div>
+		</div> <!-- column-select -->
 		
 		<div role="values-input" class="option-select values-input">
+			<!-- condition1 -->
 			<div class="col-lg-6 condition-input">
 			    <div class="input-group ">
 			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Operator <span class="caret"></span></button>
+			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp1 || "Select Operator" }} <span class="caret"></span></button>
 			        <ul class="dropdown-menu">
-					    <li><a href="#">></a></li>
-					    <li><a href="#"><</a></li>
-					    <li><a href="#">=</a></li>
+					  	<li ng-repeat="conditionOp in conditionOps">
+					  		<a ng-click="conditionOp1Selected(this)"> {{ conditionOp.name }} </a>
+					  	</li>
 			        </ul>
 			      </div><!-- /btn-group -->
-			      <input type="text" class="form-control" aria-label="...">
+			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue1}}" ng-model="conditionValue1">
 			    </div><!-- /input-group -->
 			</div><!-- /.col-lg-6 -->
+			<!-- condition2 -->
 			<div class="col-lg-6 condition-input">
 			    <div class="input-group ">
 			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Operator <span class="caret"></span></button>
+			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp2 || "Select Operator" }} <span class="caret"></span></button>
 			        <ul class="dropdown-menu">
-			          <li><a href="#">Action</a></li>
-			          <li><a href="#">Another action</a></li>
-			          <li><a href="#">Something else here</a></li>
+						<li ng-repeat="conditionOp in conditionOps">
+					  		<a ng-click="conditionOp2Selected(this)"> {{ conditionOp.name }} </a>
+					  	</li>
 			        </ul>
 			      </div><!-- /btn-group -->
-			      <input type="text" class="form-control" aria-label="...">
+			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue2}}" ng-model="conditionValue2">
 			    </div><!-- /input-group -->
 			</div><!-- /.col-lg-6 -->
+			<!-- condition3 -->
 			<div class="col-lg-6 condition-input">
 			    <div class="input-group ">
 			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Operator <span class="caret"></span></button>
+			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp2 || "Select Operator" }} <span class="caret"></span></button>
 			        <ul class="dropdown-menu">
-			          <li><a href="#">Action</a></li>
-			          <li><a href="#">Another action</a></li>
-			          <li><a href="#">Something else here</a></li>
-			          <li role="separator" class="divider"></li>
-			          <li><a href="#">Separated link</a></li>
+						<li ng-repeat="conditionOp in conditionOps">
+					  		<a ng-click="conditionOp3Selected(this)"> {{ conditionOp.name }} </a>
+					  	</li>
 			        </ul>
 			      </div><!-- /btn-group -->
-			      <input type="text" class="form-control" aria-label="...">
+			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue3}}" ng-model="conditionValue3">
 			    </div><!-- /input-group -->
 			</div><!-- /.col-lg-6 -->
-		</div>
+		</div> <!-- values-input -->
 		<div role="search-button" class="option-select">
 			<button type="button" class="btn btn-success">Search</button>
 		</div>

@@ -206,5 +206,6 @@ input.form-control {
 }
 
 .condition-input {
-  max-width: 60%;
+  max-width: 400px;
+  margin-bottom: 1%;
 }
