@@ -1,0 +1,34 @@
+package springbased.service;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import springbased.bean.ConnectionInfo;
+import springbased.service.connectionpool.DataSourceFactory;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by I303152 on 7/5/2016.
+ */
+@Service
+public class ManageDataQueryService {
+
+    private static final Logger log = Logger.getLogger(ManageDataQueryService.class);
+
+    public List<Map<String, Object>> query(String sql, ConnectionInfo connectionInfo, Object... bindVars) {
+        JdbcTemplate template = new JdbcTemplate(DataSourceFactory.getDataSource(connectionInfo));
+        List<Map<String, Object>> result = template.queryForList(sql, bindVars);
+        return result;
+    }
+
+    public String toSql(String schema, String table, String column, String operator, String value) {
+        String sql = "select * from " + schema + "." + table;
+        if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
+            sql += " where " + column + " " + operator + " ? ";
+        }
+        return sql;
+    }
+}

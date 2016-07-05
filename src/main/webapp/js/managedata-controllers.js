@@ -6,7 +6,10 @@ var oracleMigration = window.oracleMigration;
 oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location',
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location) {
 
-	$scope.schema = "";
+	$scope.schema = "sfuser_real";
+	$scope.sourceUsername = "sfuser";
+	$scope.sourcePassword = "sfuser";
+	$scope.sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
     $scope.tableSelected = undefined;
     $scope.columnSelected = undefined;
     $scope.conditionOp1 = undefined;
@@ -45,14 +48,6 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
     $scope.conditionOp1Selected = function(selected) {
     	$scope.conditionOp1 = selected.conditionOp.name;
-    };
-
-    $scope.conditionOp2Selected = function(selected) {
-    	$scope.conditionOp2 = selected.conditionOp.name;
-    };
-
-    $scope.conditionOp3Selected = function(selected) {
-    	$scope.conditionOp3 = selected.conditionOp.name;
     };
 
     $scope.fetchTableNameOptions = function(schema) {
@@ -112,6 +107,9 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			method: 'GET',
 			url: '/springbased-1.0/tableDataInJson',
 			params: {
+				"sourceUsername": $scope.sourceUsername,
+				"sourcePassword": $scope.sourcePassword,
+				"sourceUrl": $scope.sourceUrl,
 				"schema": $scope.schema,
 				"table": $scope.tableSelected,
 				"column": $scope.columnSelected,

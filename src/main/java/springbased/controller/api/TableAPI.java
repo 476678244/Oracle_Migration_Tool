@@ -1,12 +1,17 @@
 package springbased.controller.api;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springbased.bean.ConnectionInfo;
+import springbased.service.ManageDataQueryService;
 
 import java.util.*;
 
@@ -17,6 +22,9 @@ import java.util.*;
 public class TableAPI {
 
     private static final Logger log = Logger.getLogger(TableAPI.class);
+
+    @Autowired
+    private ManageDataQueryService queryService;
 
     @RequestMapping("/table")
     public List<String> tables(@RequestParam(value = "schema", defaultValue = "") String schema) {
@@ -52,17 +60,27 @@ public class TableAPI {
     }
 
     @RequestMapping("/tableDataInJson")
-    public String tableDataInJson(@RequestParam(value = "schema", defaultValue = "") String schema,
+    public String tableDataInJson(@RequestParam("sourceUsername") String sourceUsername,
+                                  @RequestParam("sourcePassword") String sourcePassword,
+                                  @RequestParam("sourceUrl") String sourceUrl,
+                                  @RequestParam(value = "schema", defaultValue = "") String schema,
                                   @RequestParam(value = "table", defaultValue = "") String table,
                                   @RequestParam(value = "column", defaultValue = "") String column,
                                   @RequestParam(value = "columnOperator", defaultValue = "") String columnOperator,
                                   @RequestParam(value = "value", defaultValue = "") String value) {
-        Map<String, Object> data = new HashMap<String, Object>() ;
-        data.put("role_id", 1);
-        data.put("role_name", "role1");
-        data.put("description", "role1 description");
-        data.put("last_modified_date", new Date());
-        JSONObject json = new JSONObject(data);
-        return json.toString();
+        List<Object> bindVars = new ArrayList<>();
+        if (!StringUtils.isBlank(value)) {
+            bindVars.add(value);
+        }
+        List<Map<String, Object>> list = this.queryService.query(
+                this.queryService.toSql(schema, table, column, columnOperator, value),
+                new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl), bindVars.toArray());
+        //JSONObject json = new JSONObject(list)
+        JSONArray jsonArray = new JSONArray();
+        for (Map<String, Object> map : list) {
+            JSONObject jsonMap = new JSONObject(map);
+            jsonArray.put(jsonMap);
+        }
+        return jsonArray.toString();
     }
 }
