@@ -15,9 +15,14 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.conditionValue1 = "";
     $scope.conditionValue2 = "";
     $scope.conditionValue3 = "";
+    $scope.jsonResult = {};
 
 	$scope.gotoMonitorPage = function() {
     	$window.location.href = 'dashboard/html/table/datatable.html';
+    };
+
+    $scope.backToMigratePage = function() {
+    	$location.path("/");
     };
 
     $scope.tableNames = [
@@ -98,6 +103,24 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			    obj.name = value;
 			    $scope.conditionOps.push(obj);
 			});
+		}, function errorCallback(response) {
+		});
+    };
+
+    $scope.query = function() {
+    	$http({
+			method: 'GET',
+			url: '/springbased-1.0/tableDataInJson',
+			params: {
+				"schema": $scope.schema,
+				"table": $scope.tableSelected,
+				"column": $scope.columnSelected,
+				"columnOperator": $scope.conditionOp1,
+				"value": $scope.conditionValue1
+			}
+		}).then(function successCallback(response) {
+			var data = response.data;
+			$scope.jsonResult = data;
 		}, function errorCallback(response) {
 		});
     };

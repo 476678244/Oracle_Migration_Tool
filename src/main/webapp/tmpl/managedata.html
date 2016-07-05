@@ -10,7 +10,8 @@
 		        <span class="icon-bar"></span>
 		        <span class="icon-bar"></span>
 		      </button>
-		      <a class="navbar-brand" href="#">Oracle Migration Tool</a>
+		      <a class="navbar-brand" href="" ng-click="backToMigratePage()">Oracle Migration Tool</a>
+		      <a class="navbar-brand">Manage Data</a>
 		    </div>
 
 		    <!-- Collect the nav links, forms, and other content for toggling -->
@@ -67,41 +68,13 @@
 			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue1}}" ng-model="conditionValue1">
 			    </div><!-- /input-group -->
 			</div><!-- /.col-lg-6 -->
-			<!-- condition2 -->
-			<div class="col-lg-6 condition-input">
-			    <div class="input-group ">
-			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp2 || "Select Operator" }} <span class="caret"></span></button>
-			        <ul class="dropdown-menu">
-						<li ng-repeat="conditionOp in conditionOps">
-					  		<a ng-click="conditionOp2Selected(this)"> {{ conditionOp.name }} </a>
-					  	</li>
-			        </ul>
-			      </div><!-- /btn-group -->
-			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue2}}" ng-model="conditionValue2">
-			    </div><!-- /input-group -->
-			</div><!-- /.col-lg-6 -->
-			<!-- condition3 -->
-			<div class="col-lg-6 condition-input">
-			    <div class="input-group ">
-			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp2 || "Select Operator" }} <span class="caret"></span></button>
-			        <ul class="dropdown-menu">
-						<li ng-repeat="conditionOp in conditionOps">
-					  		<a ng-click="conditionOp3Selected(this)"> {{ conditionOp.name }} </a>
-					  	</li>
-			        </ul>
-			      </div><!-- /btn-group -->
-			      <input type="text" class="form-control" aria-label="..." value="{{conditionValue3}}" ng-model="conditionValue3">
-			    </div><!-- /input-group -->
-			</div><!-- /.col-lg-6 -->
 		</div> <!-- values-input -->
 		<div role="search-button" class="option-select">
-			<button type="button" class="btn btn-success">Search</button>
+			<button type="button" class="btn btn-success" ng-click="query()">Search</button>
 		</div>
 	</div>
-	<div role="result-showing">
-		<json-formatter open="1" json="{my: 'json'}"></json-formatter>
+	<div role="result-showing" class="option-select result-area">
+		<json-formatter open="1" json="jsonResult"></json-formatter>
 	</div>
 </section>
 
