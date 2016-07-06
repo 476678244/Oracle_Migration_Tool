@@ -55,6 +55,9 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			method: 'GET',
 			url: '/springbased-1.0/table',
 			params: {
+				"sourceUsername": $scope.sourceUsername,
+				"sourcePassword": $scope.sourcePassword,
+				"sourceUrl": $scope.sourceUrl,
 				"schema" : schema
 			}
 		}).then(function successCallback(response) {

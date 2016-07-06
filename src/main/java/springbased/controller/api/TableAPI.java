@@ -27,19 +27,19 @@ public class TableAPI {
     private ManageDataQueryService queryService;
 
     @RequestMapping("/table")
-    public List<String> tables(@RequestParam(value = "schema", defaultValue = "") String schema) {
-        List<String> tables = new ArrayList<>();
-        tables.add("rbp_perm_role");
-        tables.add("rbp_perm_rule");
-        tables.add("users_group");
-        tables.add("users_sysinfo");
-        tables.add("usrgrp_map");
-        tables.add("permission");
-        return tables;
+    public List<String> tables(@RequestParam("sourceUsername") String sourceUsername,
+                               @RequestParam("sourcePassword") String sourcePassword,
+                               @RequestParam("sourceUrl") String sourceUrl,
+                               @RequestParam(value = "schema", defaultValue = "") String schema) {
+        return this.queryService.queryTableNames(
+                schema, new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
     }
 
     @RequestMapping("/column")
-    public List<String> columns(@RequestParam(value = "schema", defaultValue = "") String schema,
+    public List<String> columns(@RequestParam("sourceUsername") String sourceUsername,
+                                @RequestParam("sourcePassword") String sourcePassword,
+                                @RequestParam("sourceUrl") String sourceUrl,
+                                @RequestParam(value = "schema", defaultValue = "") String schema,
                                 @RequestParam(value = "table", defaultValue = "") String table) {
         List<String> columns = new ArrayList<>();
         columns.add("role_id");

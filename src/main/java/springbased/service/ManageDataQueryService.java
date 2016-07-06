@@ -3,10 +3,13 @@ package springbased.service;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import springbased.bean.ConnectionInfo;
 import springbased.service.connectionpool.DataSourceFactory;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +32,23 @@ public class ManageDataQueryService {
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
             sql += " where " + column + " " + operator + " ? ";
         }
+        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 20";
+        return limitRowNumSql;
+    }
+
+    public String queryTablesSQL() {
+        String sql = "select table_name from dba_tables dt where upper(owner)= ? ";
         return sql;
+    }
+
+    public List<String> queryTableNames(String schema, ConnectionInfo connectionInfo) {
+        List<String> names = new JdbcTemplate(
+                DataSourceFactory.getDataSource(connectionInfo)).query(
+                this.queryTablesSQL(), new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString(1);
+                    }
+                }, schema.toUpperCase());
+        return names;
     }
 }
