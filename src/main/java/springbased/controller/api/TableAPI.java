@@ -41,12 +41,8 @@ public class TableAPI {
                                 @RequestParam("sourceUrl") String sourceUrl,
                                 @RequestParam(value = "schema", defaultValue = "") String schema,
                                 @RequestParam(value = "table", defaultValue = "") String table) {
-        List<String> columns = new ArrayList<>();
-        columns.add("role_id");
-        columns.add("role_name");
-        columns.add("description");
-        columns.add("last_modified_date");
-        return columns;
+        return this.queryService.queryColumnNames(
+                schema, table, new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
     }
 
     @RequestMapping("/columnOperator")

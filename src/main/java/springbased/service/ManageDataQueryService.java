@@ -32,7 +32,7 @@ public class ManageDataQueryService {
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
             sql += " where " + column + " " + operator + " ? ";
         }
-        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 20";
+        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 50";
         return limitRowNumSql;
     }
 
@@ -49,6 +49,22 @@ public class ManageDataQueryService {
                         return rs.getString(1);
                     }
                 }, schema.toUpperCase());
+        return names;
+    }
+
+    public String queryTableColumnsSQL() {
+        String sql =  " select column_name from dba_tab_columns where Owner = ? and table_name = ? ";
+        return sql;
+    }
+
+    public List<String> queryColumnNames(String schema, String tableName, ConnectionInfo connectionInfo) {
+        List<String> names = new JdbcTemplate(
+                DataSourceFactory.getDataSource(connectionInfo)).query(
+                this.queryTableColumnsSQL(), new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString(1);
+                    }
+                }, schema.toUpperCase(), tableName.toUpperCase());
         return names;
     }
 }

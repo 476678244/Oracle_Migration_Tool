@@ -13,11 +13,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.tableSelected = undefined;
     $scope.columnSelected = undefined;
     $scope.conditionOp1 = undefined;
-    $scope.conditionOp2 = undefined;
-    $scope.conditionOp3 = undefined;
     $scope.conditionValue1 = "";
-    $scope.conditionValue2 = "";
-    $scope.conditionValue3 = "";
     $scope.jsonResult = {};
 
 	$scope.gotoMonitorPage = function() {
@@ -28,17 +24,20 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     	$location.path("/");
     };
 
-    $scope.tableNames = [
-    ];
+    $scope.tableNames = [];
 
-    $scope.columnNames = [
-    ];
+    $scope.columnNames = [];
 
-    $scope.conditionOps = [
-    ];
+    $scope.conditionOps = [];
 
     $scope.tableNameSelected = function(selected) {
     	$scope.tableSelected = selected.tableName.name;
+    	// init
+    	$scope.columnNames = [];
+    	$scope.columnSelected = undefined;
+    	$scope.conditionOp1 = undefined;
+    	$scope.conditionValue1 = "";
+    	// fetch columns
     	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
     };
 
@@ -76,6 +75,9 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			method: 'GET',
 			url: '/springbased-1.0/column',
 			params: {
+				"sourceUsername": $scope.sourceUsername,
+				"sourcePassword": $scope.sourcePassword,
+				"sourceUrl": $scope.sourceUrl,
 				"schema": schema,
 				"table": tableName
 			}
