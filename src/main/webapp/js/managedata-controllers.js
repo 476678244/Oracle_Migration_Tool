@@ -16,6 +16,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.conditionOp1 = undefined;
     $scope.conditionValue1 = "";
     $scope.jsonResult = {};
+    $scope.urlSelected = "{}";
 
 	$scope.gotoMonitorPage = function() {
     	$window.location.href = 'dashboard/html/table/datatable.html';
@@ -31,6 +32,8 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
     $scope.conditionOps = [];
 
+    $scope.urls = [];
+
     $scope.$watch('tableSelected',function(){
         // init
     	$scope.columnNames = [];
@@ -40,7 +43,14 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     	$scope.conditionValue1 = "";
     	// fetch columns
     	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
-    })
+    });
+
+    $scope.$watch('urlSelected',function(){
+    	var obj = JSON.parse($scope.urlSelected); 
+    	$scope.sourceUsername = obj.username;
+		$scope.sourcePassword = obj.password;
+		$scope.sourceUrl = obj.url;
+    });
 
     $scope.columnNameSelected = function(selected) {
     	$scope.columnSelected = selected.columnName.name;
@@ -134,6 +144,24 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		});
     };
 
+	$scope.getQuickSelectionOptions = function() {
+		$http({
+			method: 'GET',
+			url: '/springbased-1.0/connections'
+		}).then(function successCallback(response) {
+			angular.forEach(response.data, function(value, key) {
+				var quickSelectOption = {};
+				quickSelectOption.username = value.username;
+				quickSelectOption.password = value.password;
+				quickSelectOption.ip = value.url.replace('jdbc:oracle:thin:@','').replace(/:1521:.*/,'');
+				quickSelectOption.sid = value.url.replace(/jdbc:oracle:thin:@.*:1521:/,'');
+				quickSelectOption.url = value.url;
+				$scope.urls.push(quickSelectOption);
+			});
+		}, function errorCallback(response) {
+		});
+	};
+	$scope.getQuickSelectionOptions();
     // fetch all table name options at first step
     $scope.fetchTableNameOptions($scope.schema);
     $scope.fetchConditionOps();
