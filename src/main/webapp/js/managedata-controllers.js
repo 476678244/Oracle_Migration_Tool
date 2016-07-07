@@ -12,6 +12,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	$scope.sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
     $scope.tableSelected = undefined;
     $scope.columnSelected = undefined;
+    $scope.orderByColumnSelected = undefined;
     $scope.conditionOp1 = undefined;
     $scope.conditionValue1 = "";
     $scope.jsonResult = {};
@@ -34,6 +35,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
         // init
     	$scope.columnNames = [];
     	$scope.columnSelected = undefined;
+    	$scope.orderByColumnSelected = undefined;
     	$scope.conditionOp1 = undefined;
     	$scope.conditionValue1 = "";
     	// fetch columns
@@ -44,6 +46,10 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     	$scope.columnSelected = selected.columnName.name;
     };
 
+    $scope.orderByColumnNameSelected = function(selected) {
+    	$scope.orderByColumnSelected = selected.columnName.name;
+    };
+    
     $scope.conditionOp1Selected = function(selected) {
     	$scope.conditionOp1 = selected.conditionOp.name;
     };
@@ -118,7 +124,8 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 				"table": $scope.tableSelected,
 				"column": $scope.columnSelected,
 				"columnOperator": $scope.conditionOp1,
-				"value": $scope.conditionValue1
+				"value": $scope.conditionValue1,
+				"orderBy": $scope.orderByColumnSelected
 			}
 		}).then(function successCallback(response) {
 			var data = response.data;

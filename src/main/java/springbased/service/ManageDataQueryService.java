@@ -27,12 +27,15 @@ public class ManageDataQueryService {
         return result;
     }
 
-    public String toSql(String schema, String table, String column, String operator, String value) {
+    public String toSql(String schema, String table, String column, String operator, String value, String orderBy) {
         String sql = "select * from " + schema + "." + table;
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
             sql += " where " + column + " " + operator + " ? ";
         }
-        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 50";
+        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 50 ";
+        if (!StringUtils.isBlank(orderBy)) {
+            limitRowNumSql += "order by " + orderBy;
+        }
         return limitRowNumSql;
     }
 

@@ -63,13 +63,14 @@ public class TableAPI {
                                   @RequestParam(value = "table", defaultValue = "") String table,
                                   @RequestParam(value = "column", defaultValue = "") String column,
                                   @RequestParam(value = "columnOperator", defaultValue = "") String columnOperator,
-                                  @RequestParam(value = "value", defaultValue = "") String value) {
+                                  @RequestParam(value = "value", defaultValue = "") String value,
+                                  @RequestParam(value = "orderBy", defaultValue = "") String orderBy) {
         List<Object> bindVars = new ArrayList<>();
         if (!StringUtils.isBlank(value)) {
             bindVars.add(value);
         }
         List<Map<String, Object>> list = this.queryService.query(
-                this.queryService.toSql(schema, table, column, columnOperator, value),
+                this.queryService.toSql(schema, table, column, columnOperator, value, orderBy),
                 new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl), bindVars.toArray());
         //JSONObject json = new JSONObject(list)
         JSONArray jsonArray = new JSONArray();
