@@ -30,16 +30,15 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
     $scope.conditionOps = [];
 
-    $scope.tableNameSelected = function(selected) {
-    	$scope.tableSelected = selected.tableName.name;
-    	// init
+    $scope.$watch('tableSelected',function(){
+        // init
     	$scope.columnNames = [];
     	$scope.columnSelected = undefined;
     	$scope.conditionOp1 = undefined;
     	$scope.conditionValue1 = "";
     	// fetch columns
     	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
-    };
+    })
 
     $scope.columnNameSelected = function(selected) {
     	$scope.columnSelected = selected.columnName.name;

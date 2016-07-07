@@ -28,15 +28,11 @@
 	<div role="function-area" class="function-area">
 		<div role="table-select" class="option-select">
 			<div class="dropdown">
-			  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    {{ tableSelected || "Select Table" }}
-			    <span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-			  	<li ng-repeat="tableName in tableNames">
-			  		<a ng-click="tableNameSelected(this)"> {{ tableName.name }} </a>
-			  	</li>
-			  </ul>
+			  <select class="js-example-basic-single js-states form-control" id="id_label_single" ng-model="tableSelected">
+				<option ng-repeat="tableName in tableNames" value="{{tableName.name}}">
+					<a> {{ tableName.name }} </a>
+				</option>
+			  </select>
 			</div>
 		</div> <!-- table-select -->
 		<div role="column-select" class="option-select">
