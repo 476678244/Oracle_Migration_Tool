@@ -1,11 +1,36 @@
-<section layout='column' class="migration-container">
+<section layout='column' class="migration-container config-background">
 <div ng-controller="ConfigController">
-  <md-toolbar class='navbar md-whiteframe-z1 no-radius indigo'>    
+<!--   <md-toolbar class='navbar md-whiteframe-z1 no-radius indigo'>    
     <div class='navbar-item pull-left h4 ng-binding'>Oracle Migration Tool
       <a  class="monitor-page-link" href='dashboard/html/table/datatable.html' ng-click="gotoMonitorPage()">
       <i class="icon"></i>Monitoring Page</a>
     </div>
-  </md-toolbar>
+  </md-toolbar> -->
+  <div role="navbar">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="" ng-click="backToMigratePage()">Oracle Migration Tool</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Migrate<span class="sr-only">(current)</span></a></li>
+            <li ><a ng-click="gotoMangeData()">Manage Data <span class="sr-only">(current)</span></a></li>
+            <li ><a href='dashboard/html/table/datatable.html' ng-click="gotoMonitorPage()">Monitor<span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+  </div>
   <div flex layout='row'>
     <dir flex class="col-lg-7 config-section define">
       <div class="config-detail ">
@@ -17,7 +42,7 @@
             <label class="col-sm-3 label label-pill label-warning label-db-font">Source DB</label>
             <div class="col-sm-9"> 
               <div dropdown-select="quickSelectOptions" dropdown-model="sourceQuickSelectOptionsSelected"
-               dropdown-item-label="url" dropdown-onchange="sourceQuickSelectionChange(selected)">
+               dropdown-item-label="urlLabel" dropdown-onchange="sourceQuickSelectionChange(selected)" class="quickSelctionDropdown">
               </div>
             </div>
           </div>
@@ -73,7 +98,7 @@
             <label class="col-sm-3 label label-pill label-warning label-db-font">Target DB</label>
             <div class="col-sm-9">
               <div dropdown-select="quickSelectOptions" dropdown-model="targetQuickSelectOptionsSelected"
-               dropdown-item-label="url" dropdown-onchange="targetQuickSelectionChange(selected)">
+               dropdown-item-label="urlLabel" dropdown-onchange="targetQuickSelectionChange(selected)">
               </div>
             </div>
           </div>
@@ -123,5 +148,5 @@
     </dir>
   </div>
 </div>
-<div class="populate-background"/>
+<div class="populate-background config-background"/>
 </section> 

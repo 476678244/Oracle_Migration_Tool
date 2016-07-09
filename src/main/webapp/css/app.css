@@ -32,12 +32,10 @@
 .migration-container {
   /*background-image: url('../img/bg.jpg');*/
   /*background-color: lightslategray;*/
-  background-color: darkseagreen;
   background-position: bottom;
 }
 
 .populate-background {
-  background-color: cadetblue;
   height: 400px;
 }
 
@@ -80,6 +78,8 @@
 .validate-button-section {
   width: 20%;
   float: left;
+  margin-left: 28px;
+  margin-top: -10px;
 }
 
 .validate-button-section .validate-button {
@@ -126,7 +126,6 @@
 }
 .indigo {
     /*background-color: cornflowerblue;*/
-    background-color: cadetblue;
 }
 .no-radius {
     border-radius: 0!important;
@@ -187,6 +186,14 @@
 }
 input.form-control {
   font-family: inherit;
+}
+
+.quickSelctionDropdown {
+  max-width: 145%;
+}
+
+.config-background {
+  background-color: lightgrey;
 }
 
 /*manage data page*/

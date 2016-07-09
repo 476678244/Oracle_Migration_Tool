@@ -164,6 +164,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 				quickSelectOption.ip = value.url.replace('jdbc:oracle:thin:@','').replace(/:1521:.*/,'');
 				quickSelectOption.sid = value.url.replace(/jdbc:oracle:thin:@.*:1521:/,'');
 				quickSelectOption.url = value.url;
+				quickSelectOption.urlLabel = value.url.replace('jdbc:oracle:thin:@','');
 				$scope.quickSelectOptions.push(quickSelectOption);
 				$scope.sourceQuickSelectOptionsSelected = quickSelectOption;
 				$scope.targetQuickSelectOptionsSelected = quickSelectOption;
@@ -223,5 +224,9 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
     $scope.selectSchema = function () {
         $location.path('/manageData');
         //$window.location.href = 'managedata.html';
+    };
+
+    $scope.gotoMangeData = function () {
+    	$location.path('/manageData');
     };
 }]);
