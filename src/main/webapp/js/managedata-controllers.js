@@ -6,11 +6,12 @@ var oracleMigration = window.oracleMigration;
 oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location',
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location) {
 
-	$scope.schema = "sfuser_real";
-	$scope.sourceUsername = "sfuser";
-	$scope.sourcePassword = "sfuser";
-	$scope.sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
+	// $scope.schema = "sfuser_real";
+	// $scope.sourceUsername = "sfuser";
+	// $scope.sourcePassword = "sfuser";
+	// $scope.sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
     $scope.tableSelected = undefined;
+    $scope.schemaSelected = undefined;
     $scope.columnSelected = undefined;
     $scope.orderByColumnSelected = undefined;
     $scope.conditionOp1 = undefined;
@@ -18,15 +19,13 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.jsonResult = {};
     $scope.urlSelected = "{}";
 
-	$scope.gotoMonitorPage = function() {
-    	$window.location.href = 'dashboard/html/table/datatable.html';
-    };
-
     $scope.backToMigratePage = function() {
     	$location.path("/");
     };
 
     $scope.tableNames = [];
+
+    $scope.schemaNames = [];
 
     $scope.columnNames = [];
 
@@ -34,23 +33,59 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
     $scope.urls = [];
 
-    $scope.$watch('tableSelected',function(){
+    $scope.$watch('urlSelected',function(){
+    	if ($scope.urlSelected == "{}") {
+    		return;
+    	}
+    	var obj = JSON.parse($scope.urlSelected); 
+    	$scope.sourceUsername = obj.username;
+		$scope.sourcePassword = obj.password;
+		$scope.sourceUrl = obj.url;
         // init
+        $scope.initFromSchemaLayer();
+    	// fetch tables
+    	$scope.fetchSchemaNameOptions($scope.urlSelected);
+    });
+
+    $scope.$watch('schemaSelected',function(){
+    	if ($scope.schemaSelected === undefined) {
+    		return ;
+    	}  
+        // init
+        $scope.initFromTableLayer();
+    	// fetch tables
+    	$scope.fetchTableNameOptions($scope.schemaSelected);
+    });
+
+    $scope.$watch('tableSelected',function(){
+    	if ($scope.tableSelected === undefined) {
+    		return ;
+    	}  
+        // init
+ 		$scope.initFromColumnLayer();
+    	// fetch columns
+    	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
+    });
+
+	$scope.initFromSchemaLayer = function() {
+		$scope.schemaNames = [];
+		$scope.schemaSelected = undefined;
+		$scope.initFromTableLayer();
+	};
+
+	$scope.initFromTableLayer = function() {
+		$scope.tableNames = [];
+		$scope.tableSelected = undefined;
+		$scope.initFromColumnLayer();
+	};
+
+    $scope.initFromColumnLayer = function() {
     	$scope.columnNames = [];
     	$scope.columnSelected = undefined;
     	$scope.orderByColumnSelected = undefined;
     	$scope.conditionOp1 = undefined;
     	$scope.conditionValue1 = "";
-    	// fetch columns
-    	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
-    });
-
-    $scope.$watch('urlSelected',function(){
-    	var obj = JSON.parse($scope.urlSelected); 
-    	$scope.sourceUsername = obj.username;
-		$scope.sourcePassword = obj.password;
-		$scope.sourceUrl = obj.url;
-    });
+    };
 
     $scope.columnNameSelected = function(selected) {
     	$scope.columnSelected = selected.columnName.name;
@@ -62,6 +97,26 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     
     $scope.conditionOp1Selected = function(selected) {
     	$scope.conditionOp1 = selected.conditionOp.name;
+    };
+
+    $scope.fetchSchemaNameOptions = function(url) {
+    	$http({
+			method: 'GET',
+			url: '/springbased-1.0/schema',
+			params: {
+				"sourceUsername": $scope.sourceUsername,
+				"sourcePassword": $scope.sourcePassword,
+				"sourceUrl": $scope.sourceUrl
+			}
+		}).then(function successCallback(response) {
+			var data = response.data;
+			angular.forEach(data, function(value, key){
+			    var obj = {};
+			    obj.name = value;
+			    $scope.schemaNames.push(obj);
+			});
+		}, function errorCallback(response) {
+		});
     };
 
     $scope.fetchTableNameOptions = function(schema) {
@@ -163,7 +218,6 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	};
 	$scope.getQuickSelectionOptions();
     // fetch all table name options at first step
-    $scope.fetchTableNameOptions($scope.schema);
     $scope.fetchConditionOps();
 
 }]);

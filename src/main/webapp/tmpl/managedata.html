@@ -40,6 +40,16 @@
 		</div>
 	</div>
 	<div role="function-area" class="function-area">
+		<div role="schema-select" class="option-select">
+			<h5><span class="label label-default">Schema</span></h5>
+			<div class="dropdown">
+			  <select class="js-example-basic-single js-states form-control" id="id_label_single" ng-model="schemaSelected">
+				<option ng-repeat="schemaName in schemaNames" value="{{schemaName.name}}">
+					<a> {{ schemaName.name }} </a>
+				</option>
+			  </select>
+			</div>
+		</div> <!-- table-select -->
 		<div role="table-select" class="option-select">
 			<h5><span class="label label-default">From</span></h5>
 			<div class="dropdown">
