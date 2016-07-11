@@ -70,4 +70,21 @@ public class ManageDataQueryService {
                 }, schema.toUpperCase(), tableName.toUpperCase());
         return names;
     }
+
+    public String querySchemaSQL(){
+        String sql = "select username from DBA_USERS where account_status = 'OPEN'";
+        return sql;
+    }
+
+    public List<String> querySchemas(ConnectionInfo connectionInfo) {
+        List<String> names = new JdbcTemplate(
+                DataSourceFactory.getDataSource(connectionInfo)).query(
+                this.querySchemaSQL(), new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString(1);
+                    }
+                });
+        return names;
+    }
+
 }

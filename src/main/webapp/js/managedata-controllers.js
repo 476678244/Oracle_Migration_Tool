@@ -64,7 +64,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
         // init
  		$scope.initFromColumnLayer();
     	// fetch columns
-    	$scope.fetchColumnNameOptions($scope.schema, $scope.tableSelected);
+    	$scope.fetchColumnNameOptions($scope.schemaSelected, $scope.tableSelected);
     });
 
 	$scope.initFromSchemaLayer = function() {
@@ -185,7 +185,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 				"sourceUsername": $scope.sourceUsername,
 				"sourcePassword": $scope.sourcePassword,
 				"sourceUrl": $scope.sourceUrl,
-				"schema": $scope.schema,
+				"schema": $scope.schemaSelected,
 				"table": $scope.tableSelected,
 				"column": $scope.columnSelected,
 				"columnOperator": $scope.conditionOp1,
