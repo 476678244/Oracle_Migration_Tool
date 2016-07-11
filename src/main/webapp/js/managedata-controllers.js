@@ -30,7 +30,8 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	      return {
         	sourceUsername: $scope.sourceUsername,
 			sourcePassword: $scope.sourcePassword,
-			sourceUrl: $scope.sourceUrl
+			sourceUrl: $scope.sourceUrl,
+			key: params.term
 	      };
 	    },
 	    processResults: function (data, params) {
@@ -66,7 +67,8 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
         	sourceUsername: $scope.sourceUsername,
 			sourcePassword: $scope.sourcePassword,
 			sourceUrl: $scope.sourceUrl,
-			schema : $scope.schemaSelected
+			schema: $scope.schemaSelected,
+			key: params.term
 	      };
 	    },
 	    processResults: function (data, params) {

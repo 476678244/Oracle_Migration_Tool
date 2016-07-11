@@ -11,6 +11,7 @@ import springbased.service.ManageDataQueryService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by I303152 on 7/1/2016.
@@ -26,15 +27,11 @@ public class SchemaAPI {
     @RequestMapping("/schema")
     public List<String> schemas(@RequestParam("sourceUsername") String sourceUsername,
                                 @RequestParam("sourcePassword") String sourcePassword,
-                                @RequestParam("sourceUrl") String sourceUrl) {
-        boolean test = false;
-        if (test) {
-            List<String> schemas = new ArrayList<String>();
-            for (int i =0; i < 1500 ; i ++) {
-                schemas.add("sfuser_temp" + i);
-            }
-            return schemas;
-        }
-        return this.queryService.querySchemas(new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
+                                @RequestParam("sourceUrl") String sourceUrl,
+                                @RequestParam(value = "key", defaultValue = "") String key) {
+        List<String> schemas =  this.queryService.querySchemas(
+                new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
+        return schemas.stream().filter(
+                schema -> schema.toUpperCase().contains(key.toUpperCase())).collect(Collectors.toList());
     }
 }

@@ -1,6 +1,7 @@
 package springbased.controller.api;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import springbased.bean.ConnectionInfo;
 import springbased.service.ManageDataQueryService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by I303152 on 7/1/2016.
@@ -30,9 +32,12 @@ public class TableAPI {
     public List<String> tables(@RequestParam("sourceUsername") String sourceUsername,
                                @RequestParam("sourcePassword") String sourcePassword,
                                @RequestParam("sourceUrl") String sourceUrl,
-                               @RequestParam(value = "schema", defaultValue = "") String schema) {
-        return this.queryService.queryTableNames(
+                               @RequestParam(value = "schema", defaultValue = "") String schema,
+                               @RequestParam(value = "key", defaultValue = "") String key) {
+        List<String> tables = this.queryService.queryTableNames(
                 schema, new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
+        return tables.stream().filter(
+                table -> table.toUpperCase().contains(key.toUpperCase())).collect(Collectors.toList());
     }
 
     @RequestMapping("/column")
