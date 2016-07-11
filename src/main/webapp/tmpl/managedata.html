@@ -1,4 +1,4 @@
-<section ng-controller="ManageDataController">
+<section>
 	<div role="navbar">
 		<nav class="navbar navbar-default">
 		  <div class="container-fluid">
@@ -41,21 +41,13 @@
 		<div role="schema-select" class="option-select">
 			<h5><span class="label label-default">Schema</span></h5>
 			<div class="dropdown">
-			  <select class="js-example-basic-single js-states form-control" id="id_label_single" ng-model="schemaSelected">
-				<option ng-repeat="schemaName in schemaNames" value="{{schemaName.name}}">
-					<a> {{ schemaName.name }} </a>
-				</option>
-			  </select>
+			  	<select class="js-data-schema-ajax js-states form-control"></select>
 			</div>
 		</div> <!-- schema-select -->
 		<div role="table-select" class="option-select">
 			<h5><span class="label label-default">From</span></h5>
 			<div class="dropdown">
-			  <select class="js-example-basic-single js-states form-control" id="id_label_single" ng-model="tableSelected">
-				<option ng-repeat="tableName in tableNames" value="{{tableName.name}}">
-					<a> {{ tableName.name }} </a>
-				</option>
-			  </select>
+			  <select class="js-data-table-ajax js-states form-control"></select>
 			</div>
 		</div> <!-- table-select -->
 		<div role="column-select" class="option-select">

@@ -27,7 +27,7 @@ public class SchemaAPI {
     public List<String> schemas(@RequestParam("sourceUsername") String sourceUsername,
                                 @RequestParam("sourcePassword") String sourcePassword,
                                 @RequestParam("sourceUrl") String sourceUrl) {
-        boolean test = true;
+        boolean test = false;
         if (test) {
             List<String> schemas = new ArrayList<String>();
             for (int i =0; i < 1500 ; i ++) {

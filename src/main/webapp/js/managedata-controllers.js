@@ -6,10 +6,92 @@ var oracleMigration = window.oracleMigration;
 oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location', '$q',
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location, $q) {
 
-	// $scope.schema = "sfuser_real";
-	// $scope.sourceUsername = "sfuser";
-	// $scope.sourcePassword = "sfuser";
-	// $scope.sourceUrl = "jdbc:oracle:thin:@10.58.100.66:1521:dbpool1";
+	var $schemaSelect = $(".js-data-schema-ajax");
+	$schemaSelect.on("select2:select", function (e) {
+		$scope.schemaSelected = e.currentTarget.value; 
+		$scope.initFromTableLayer();
+	});
+
+	var $tableSelect = $(".js-data-table-ajax");
+	$tableSelect.on("select2:select", function (e) {
+		$scope.tableSelected = e.currentTarget.value; 
+		// init
+		$scope.initFromColumnLayer();
+		// fetch columns
+		$scope.fetchColumnNameOptions($scope.schemaSelected, $scope.tableSelected);
+	});
+
+	$(".js-data-schema-ajax").select2({
+	  ajax: {
+	    url: "/springbased-1.0/schema",
+	    dataType: 'json',
+	    delay: 250,
+	    data: function (params) {
+	      return {
+        	sourceUsername: $scope.sourceUsername,
+			sourcePassword: $scope.sourcePassword,
+			sourceUrl: $scope.sourceUrl
+	      };
+	    },
+	    processResults: function (data, params) {
+	      params.page = params.page || 1;
+			var items = [];
+			for (var i = 0; i < data.length; i ++) {
+				var item = {};
+				var s = data[i];
+				item.id = s;
+				item.text = s;
+				items.push(item);
+			};
+	      return {
+	        results: items,
+	        pagination: {
+	          more: (params.page * 30) < data.total_count
+	        }
+	      };
+	    },
+	    cache: true
+	  },
+	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+	  minimumInputLength: 1
+	});
+
+	$(".js-data-table-ajax").select2({
+	  ajax: {
+	    url: "/springbased-1.0/table",
+	    dataType: 'json',
+	    delay: 250,
+	    data: function (params) {
+	      return {
+        	sourceUsername: $scope.sourceUsername,
+			sourcePassword: $scope.sourcePassword,
+			sourceUrl: $scope.sourceUrl,
+			schema : $scope.schemaSelected
+	      };
+	    },
+	    processResults: function (data, params) {
+	      params.page = params.page || 1;
+			var items = [];
+			for (var i = 0; i < data.length; i ++) {
+				var item = {};
+				var s = data[i];
+				item.id = s;
+				item.text = s;
+				items.push(item);
+			};
+	      return {
+	        results: items,
+	        pagination: {
+	          more: (params.page * 30) < data.total_count
+	        }
+	      };
+	    },
+	    cache: true
+	  },
+	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+	  minimumInputLength: 1
+	});
+
     $scope.tableSelected = undefined;
     $scope.schemaSelected = undefined;
     $scope.columnSelected = undefined;
@@ -22,10 +104,6 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.backToMigratePage = function() {
     	$location.path("/");
     };
-
-    $scope.tableNames = [];
-
-    $scope.schemaNames = [];
 
     $scope.columnNames = [];
 
@@ -41,40 +119,11 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     	$scope.sourceUsername = obj.username;
 		$scope.sourcePassword = obj.password;
 		$scope.sourceUrl = obj.url;
-        // init
-        $scope.initFromSchemaLayer();
     	// fetch tables
-    	$scope.fetchSchemaNameOptions($scope.urlSelected);
+    	//$scope.fetchSchemaNameOptions($scope.urlSelected);
     });
-
-    $scope.$watch('schemaSelected',function(){
-    	if ($scope.schemaSelected === undefined) {
-    		return ;
-    	}  
-        // init
-        $scope.initFromTableLayer();
-    	// fetch tables
-    	$scope.fetchTableNameOptions($scope.schemaSelected);
-    });
-
-    $scope.$watch('tableSelected',function(){
-    	if ($scope.tableSelected === undefined) {
-    		return ;
-    	}  
-        // init
- 		$scope.initFromColumnLayer();
-    	// fetch columns
-    	$scope.fetchColumnNameOptions($scope.schemaSelected, $scope.tableSelected);
-    });
-
-	$scope.initFromSchemaLayer = function() {
-		$scope.schemaNames = [];
-		$scope.schemaSelected = undefined;
-		$scope.initFromTableLayer();
-	};
 
 	$scope.initFromTableLayer = function() {
-		$scope.tableNames = [];
 		$scope.tableSelected = undefined;
 		$scope.initFromColumnLayer();
 	};
@@ -97,51 +146,6 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     
     $scope.conditionOp1Selected = function(selected) {
     	$scope.conditionOp1 = selected.conditionOp.name;
-    };
-
-    $scope.fetchSchemaNameOptions = function(url) {
-    	$http({
-			method: 'GET',
-			url: '/springbased-1.0/schema',
-			params: {
-				"sourceUsername": $scope.sourceUsername,
-				"sourcePassword": $scope.sourcePassword,
-				"sourceUrl": $scope.sourceUrl
-			}
-		}).then(function successCallback(response) {
-			var data = response.data;
-			var schemaNames = [];
-			angular.forEach(data, function(value, key){
-			    var obj = {};
-			    obj.name = value;
-			    schemaNames.push(obj);
-			});
-			$q.all(schemaNames).then(function () {
-	            $scope.schemaNames = schemaNames;
-	        });
-		}, function errorCallback(response) {
-		});
-    };
-
-    $scope.fetchTableNameOptions = function(schema) {
-    	$http({
-			method: 'GET',
-			url: '/springbased-1.0/table',
-			params: {
-				"sourceUsername": $scope.sourceUsername,
-				"sourcePassword": $scope.sourcePassword,
-				"sourceUrl": $scope.sourceUrl,
-				"schema" : schema
-			}
-		}).then(function successCallback(response) {
-			var data = response.data;
-			angular.forEach(data, function(value, key){
-			    var obj = {};
-			    obj.name = value;
-			    $scope.tableNames.push(obj);
-			});
-		}, function errorCallback(response) {
-		});
     };
 
     $scope.fetchColumnNameOptions = function(schema, tableName) {
