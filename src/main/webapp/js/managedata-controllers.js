@@ -3,8 +3,8 @@
 /* Controllers */
 
 var oracleMigration = window.oracleMigration;
-oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location',
-		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location) {
+oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location', '$q',
+		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location, $q) {
 
 	// $scope.schema = "sfuser_real";
 	// $scope.sourceUsername = "sfuser";
@@ -110,11 +110,15 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			}
 		}).then(function successCallback(response) {
 			var data = response.data;
+			var schemaNames = [];
 			angular.forEach(data, function(value, key){
 			    var obj = {};
 			    obj.name = value;
-			    $scope.schemaNames.push(obj);
+			    schemaNames.push(obj);
 			});
+			$q.all(schemaNames).then(function () {
+	            $scope.schemaNames = schemaNames;
+	        });
 		}, function errorCallback(response) {
 		});
     };

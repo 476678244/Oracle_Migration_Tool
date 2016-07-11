@@ -72,7 +72,7 @@ public class ManageDataQueryService {
     }
 
     public String querySchemaSQL(){
-        String sql = "select username from DBA_USERS where account_status = 'OPEN'";
+        String sql = "select username from DBA_USERS where account_status = 'OPEN' and ROWNUM < 10";
         return sql;
     }
 
