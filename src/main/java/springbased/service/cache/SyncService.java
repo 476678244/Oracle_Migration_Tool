@@ -19,13 +19,13 @@ public class SyncService {
 
     public void syncSchemasToCache(ConnectionInfo connectionInfo) {
         this.cacheService.addCache(CacheTypeEnum.SCHEMANAMES,
-                CacheTypeEnum.SCHEMANAMES.generateKey(connectionInfo),
+                this.cacheService.generateCacheKey(connectionInfo),
                 this.queryService.querySchemas(connectionInfo));
     }
 
     public void syncTablesToCache(String schema, ConnectionInfo connectionInfo) {
         this.cacheService.addCache(CacheTypeEnum.TABLENAMES,
-                CacheTypeEnum.TABLENAMES.generateKey(connectionInfo),
+                this.cacheService.generateCacheKey(schema, connectionInfo),
                 this.queryService.queryTableNames(schema, connectionInfo));
     }
 

@@ -1,5 +1,7 @@
 package springbased.service.cache;
 
+import springbased.bean.ConnectionInfo;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,10 +10,6 @@ import java.util.Map;
  */
 public enum CacheTypeEnum {
     SCHEMANAMES, TABLENAMES;
-
-    public String generateKey(Object keys) {
-        return keys.toString();
-    }
 
     private Map<String, Object> caches = new HashMap<>();
 

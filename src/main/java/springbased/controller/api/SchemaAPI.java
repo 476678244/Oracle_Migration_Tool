@@ -40,8 +40,8 @@ public class SchemaAPI {
                                 @RequestParam(value = "key", defaultValue = "") String key) {
         ConnectionInfo connectionInfo = new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl);
         List<String> schemas = (List<String>)this.cacheService.getCache(
-                CacheTypeEnum.SCHEMANAMES, CacheTypeEnum.SCHEMANAMES.generateKey(connectionInfo));
-        if (schemas == null) {
+                CacheTypeEnum.SCHEMANAMES, this.cacheService.generateCacheKey(connectionInfo));
+         if (schemas == null) {
             new Thread(()-> {
                 this.syncService.syncSchemasToCache(connectionInfo);
             }).start();

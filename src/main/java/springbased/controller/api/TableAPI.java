@@ -45,12 +45,12 @@ public class TableAPI {
                                @RequestParam(value = "key", defaultValue = "") String key) {
         ConnectionInfo connectionInfo = new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl);
         List<String> tables = (List<String>)this.cacheService.getCache(
-                CacheTypeEnum.TABLENAMES, CacheTypeEnum.TABLENAMES.generateKey(connectionInfo));
+                CacheTypeEnum.TABLENAMES, this.cacheService.generateCacheKey(schema, connectionInfo));
         if (tables == null) {
             new Thread(()-> {
                 this.syncService.syncTablesToCache(schema, connectionInfo);
             }).start();
-            this.queryService.queryTableNames(schema, connectionInfo, key);
+            tables = this.queryService.queryTableNames(schema, connectionInfo, key);
         }
         return tables.stream().filter(
                 table -> table.toUpperCase().contains(key.toUpperCase())).collect(Collectors.toList());
