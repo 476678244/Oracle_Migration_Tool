@@ -55,6 +55,17 @@ public class ManageDataQueryService {
         return names;
     }
 
+    public List<String> queryTableNames(String schema, ConnectionInfo connectionInfo, String key) {
+        List<String> names = new JdbcTemplate(
+                DataSourceFactory.getDataSource(connectionInfo)).query(
+                this.queryTablesSQL() + " and table_name like ? ", new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString(1);
+                    }
+                }, schema.toUpperCase(), "%" + key.toUpperCase() + "%");
+        return names;
+    }
+
     public String queryTableColumnsSQL() {
         String sql =  " select column_name from dba_tab_columns where Owner = ? and table_name = ? ";
         return sql;
@@ -72,7 +83,7 @@ public class ManageDataQueryService {
     }
 
     public String querySchemaSQL(){
-        String sql = "select username from DBA_USERS where account_status = 'OPEN' ";
+        String sql = "select username from DBA_USERS where initial_rsrc_consumer_group = 'DEFAULT_CONSUMER_GROUP' ";
         return sql;
     }
 
@@ -84,6 +95,17 @@ public class ManageDataQueryService {
                         return rs.getString(1);
                     }
                 });
+        return names;
+    }
+
+    public List<String> querySchemas(ConnectionInfo connectionInfo, String key) {
+        List<String> names = new JdbcTemplate(
+                DataSourceFactory.getDataSource(connectionInfo)).query(
+                this.querySchemaSQL() + " and username like ?", new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString(1);
+                    }
+                }, "%" + key.toUpperCase() + "%");
         return names;
     }
 

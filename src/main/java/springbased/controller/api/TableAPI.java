@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springbased.bean.ConnectionInfo;
 import springbased.service.ManageDataQueryService;
+import springbased.service.cache.CacheService;
+import springbased.service.cache.CacheTypeEnum;
+import springbased.service.cache.SyncService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,14 +31,27 @@ public class TableAPI {
     @Autowired
     private ManageDataQueryService queryService;
 
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private SyncService syncService;
+
     @RequestMapping("/table")
     public List<String> tables(@RequestParam("sourceUsername") String sourceUsername,
                                @RequestParam("sourcePassword") String sourcePassword,
                                @RequestParam("sourceUrl") String sourceUrl,
                                @RequestParam(value = "schema", defaultValue = "") String schema,
                                @RequestParam(value = "key", defaultValue = "") String key) {
-        List<String> tables = this.queryService.queryTableNames(
-                schema, new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
+        ConnectionInfo connectionInfo = new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl);
+        List<String> tables = (List<String>)this.cacheService.getCache(
+                CacheTypeEnum.TABLENAMES, CacheTypeEnum.TABLENAMES.generateKey(connectionInfo));
+        if (tables == null) {
+            new Thread(()-> {
+                this.syncService.syncTablesToCache(schema, connectionInfo);
+            }).start();
+            this.queryService.queryTableNames(schema, connectionInfo, key);
+        }
         return tables.stream().filter(
                 table -> table.toUpperCase().contains(key.toUpperCase())).collect(Collectors.toList());
     }

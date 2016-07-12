@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springbased.bean.ConnectionInfo;
 import springbased.service.ManageDataQueryService;
+import springbased.service.cache.CacheService;
+import springbased.service.cache.CacheTypeEnum;
+import springbased.service.cache.SyncService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +27,26 @@ public class SchemaAPI {
     @Autowired
     private ManageDataQueryService queryService;
 
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private SyncService syncService;
+
     @RequestMapping("/schema")
     public List<String> schemas(@RequestParam("sourceUsername") String sourceUsername,
                                 @RequestParam("sourcePassword") String sourcePassword,
                                 @RequestParam("sourceUrl") String sourceUrl,
                                 @RequestParam(value = "key", defaultValue = "") String key) {
-        List<String> schemas =  this.queryService.querySchemas(
-                new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl));
+        ConnectionInfo connectionInfo = new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl);
+        List<String> schemas = (List<String>)this.cacheService.getCache(
+                CacheTypeEnum.SCHEMANAMES, CacheTypeEnum.SCHEMANAMES.generateKey(connectionInfo));
+        if (schemas == null) {
+            new Thread(()-> {
+                this.syncService.syncSchemasToCache(connectionInfo);
+            }).start();
+            schemas = this.queryService.querySchemas(connectionInfo, key);
+        }
         return schemas.stream().filter(
                 schema -> schema.toUpperCase().contains(key.toUpperCase())).collect(Collectors.toList());
     }
