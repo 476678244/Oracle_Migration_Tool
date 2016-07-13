@@ -218,6 +218,7 @@ input.form-control {
   overflow: auto;
   background: #333;
   width: 80%;
+  border-radius: 1em;
 }
 
 .option-select {
