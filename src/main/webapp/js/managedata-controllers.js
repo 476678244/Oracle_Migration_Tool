@@ -7,13 +7,13 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location, $q) {
 
 	var $schemaSelect = $(".js-data-schema-ajax");
-	$schemaSelect.on("select2:select", function (e) {
+	$schemaSelect.on("select2:close", function (e) {
 		$scope.schemaSelected = e.currentTarget.value; 
 		$scope.initFromTableLayer();
 	});
 
 	var $tableSelect = $(".js-data-table-ajax");
-	$tableSelect.on("select2:select", function (e) {
+	$tableSelect.on("select2:close", function (e) {
 		$scope.tableSelected = e.currentTarget.value; 
 		// init
 		$scope.initFromColumnLayer();
