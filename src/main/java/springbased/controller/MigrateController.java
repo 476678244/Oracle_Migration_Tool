@@ -142,12 +142,12 @@ public class MigrateController {
 
   @PostConstruct
   public void init() throws Exception {
-    try {
-      Class.forName("oracle.jdbc.driver.OracleDriver");
-    } catch (ClassNotFoundException e) {
-      log.error(e);
-      throw new Exception(e);
-    }
+//    try {
+//      Class.forName("oracle.jdbc.driver.OracleDriver");
+//    } catch (ClassNotFoundException e) {
+//      log.error(e);
+//      throw new Exception(e);
+//    }
   }
   
   @RequestMapping("/fireMigration")

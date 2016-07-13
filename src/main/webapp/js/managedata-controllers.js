@@ -24,7 +24,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
 	$(".js-data-schema-ajax").select2({
 	  ajax: {
-	    url: "/springbased-1.0/schema",
+	    url: "./schema",
 	    dataType: 'json',
 	    delay: 250,
 	    data: function (params) {
@@ -60,7 +60,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
 	$(".js-data-table-ajax").select2({
 	  ajax: {
-	    url: "/springbased-1.0/table",
+	    url: "./table",
 	    dataType: 'json',
 	    delay: 250,
 	    data: function (params) {
@@ -156,7 +156,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.fetchColumnNameOptions = function(schema, tableName) {
     	$http({
 			method: 'GET',
-			url: '/springbased-1.0/column',
+			url: './column',
 			params: {
 				"sourceUsername": $scope.sourceUsername,
 				"sourcePassword": $scope.sourcePassword,
@@ -193,7 +193,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.query = function() {
     	$http({
 			method: 'GET',
-			url: '/springbased-1.0/tableDataInJson',
+			url: './tableDataInJson',
 			params: {
 				"sourceUsername": $scope.sourceUsername,
 				"sourcePassword": $scope.sourcePassword,
@@ -215,7 +215,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	$scope.getQuickSelectionOptions = function() {
 		$http({
 			method: 'GET',
-			url: '/springbased-1.0/connections'
+			url: './connections'
 		}).then(function successCallback(response) {
 			angular.forEach(response.data, function(value, key) {
 				var quickSelectOption = {};
