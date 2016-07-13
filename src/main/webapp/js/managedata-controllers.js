@@ -8,6 +8,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
 	var $schemaSelect = $(".js-data-schema-ajax");
 	$schemaSelect.on("select2:close", function (e) {
+		$('.js-data-table-ajax').empty();
 		$scope.schemaSelected = e.currentTarget.value; 
 		$scope.initFromTableLayer();
 	});
@@ -127,7 +128,9 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 
 	$scope.initFromTableLayer = function() {
 		$scope.tableSelected = undefined;
-		$scope.initFromColumnLayer();
+		$scope.$apply(function() {
+			$scope.initFromColumnLayer();
+		});
 	};
 
     $scope.initFromColumnLayer = function() {
