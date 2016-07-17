@@ -27,8 +27,9 @@ public class ManageDataQueryService {
         return result;
     }
 
-    public String toSql(String schema, String table, String column, String operator, String value, String orderBy) {
-        String sql = "select * from " + schema + "." + table;
+    public String toSql(String schema, String table, String column, String operator,
+                        String value, String orderBy, String selectColumns) {
+        String sql = "select " + selectColumns + " from " + schema + "." + table;
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
             sql += " where " + column + " " + operator + " ? ";
         }

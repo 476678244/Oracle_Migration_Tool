@@ -22,6 +22,15 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		$scope.fetchColumnNameOptions($scope.schemaSelected, $scope.tableSelected);
 	});
 
+	var $selctColumnSelect = $(".js-data-selectcolumn-ajax");
+	$selctColumnSelect.on("select2:select", function (e) {
+		$scope.selectColumns.add(e.params.data.id);
+	});
+
+	$selctColumnSelect.on("select2:unselect", function (e) {
+		$scope.selectColumns.delete(e.params.data.id);
+	});
+
 	$(".js-data-schema-ajax").select2({
 	  ajax: {
 	    url: "./schema",
@@ -37,14 +46,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	    },
 	    processResults: function (data, params) {
 	      params.page = params.page || 1;
-			var items = [];
-			for (var i = 0; i < data.length; i ++) {
-				var item = {};
-				var s = data[i];
-				item.id = s;
-				item.text = s;
-				items.push(item);
-			};
+			var items = dataToItems(data);
 	      return {
 	        results: items,
 	        pagination: {
@@ -55,7 +57,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	    cache: true
 	  },
 	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-	  minimumInputLength: 1
+	  minimumInputLength: 0
 	});
 
 	$(".js-data-table-ajax").select2({
@@ -73,15 +75,50 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	      };
 	    },
 	    processResults: function (data, params) {
+	        params.page = params.page || 1;
+		    var items = dataToItems(data);
+	        return {
+			        results: items,
+			        pagination: {
+			        more: (params.page * 30) < data.total_count
+			    }
+		    };
+	    },
+	    cache: true
+	  },
+	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+	  minimumInputLength: 0
+	});
+
+	var dataToItems = function(data) {
+		var items = [];
+		for (var i = 0; i < data.length; i ++) {
+			var item = {};
+			var s = data[i];
+			item.id = s;
+			item.text = s;
+			items.push(item);
+		};
+		return items;
+	}
+
+	$(".js-data-selectcolumn-ajax").select2({
+	  ajax: {
+	    url: "./column",
+	    dataType: 'json',
+	    delay: 250,
+	    data: function (params) {
+	      return {
+        	sourceUsername: $scope.sourceUsername,
+			sourcePassword: $scope.sourcePassword,
+			sourceUrl: $scope.sourceUrl,
+			schema: $scope.schemaSelected,
+			table: $scope.tableSelected
+	      };
+	    },
+	    processResults: function (data, params) {
 	      params.page = params.page || 1;
-			var items = [];
-			for (var i = 0; i < data.length; i ++) {
-				var item = {};
-				var s = data[i];
-				item.id = s;
-				item.text = s;
-				items.push(item);
-			};
+			var items = dataToItems(data);
 	      return {
 	        results: items,
 	        pagination: {
@@ -92,8 +129,13 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 	    cache: true
 	  },
 	  escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-	  minimumInputLength: 1
+	  minimumInputLength: 0,
+	  templateSelection: templateSelection2
 	});
+
+	var templateSelection2 = function(select) {
+		var s = select;
+	};
 
     $scope.tableSelected = undefined;
     $scope.schemaSelected = undefined;
@@ -103,6 +145,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
     $scope.conditionValue1 = "";
     $scope.jsonResult = {};
     $scope.urlSelected = "{}";
+    $scope.selectColumns = new Set();
 
     $scope.backToMigratePage = function() {
     	$location.path("/");
@@ -190,6 +233,17 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		});
     };
 
+    $scope.selectColumnsSetToString = function() {
+    	if ($scope.selectColumns.size == 0) {
+    		return "*";
+    	}
+    	var selectColumnSql = " ";
+    	for (let column of $scope.selectColumns) {
+    		selectColumnSql += column + ", ";
+    	}
+    	return selectColumnSql.substring(0, selectColumnSql.length - 2);
+    };
+
     $scope.query = function() {
     	$http({
 			method: 'GET',
@@ -203,7 +257,8 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 				"column": $scope.columnSelected,
 				"columnOperator": $scope.conditionOp1,
 				"value": $scope.conditionValue1,
-				"orderBy": $scope.orderByColumnSelected
+				"orderBy": $scope.orderByColumnSelected,
+				"selectColumns": $scope.selectColumnsSetToString()
 			}
 		}).then(function successCallback(response) {
 			var data = response.data;
