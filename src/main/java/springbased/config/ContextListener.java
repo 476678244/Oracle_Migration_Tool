@@ -6,10 +6,7 @@ import javax.servlet.annotation.WebListener;
 
 import org.apache.log4j.Logger;
 
-import springbased.service.connectionpool.DataSourceFactory;
 import springbased.service.taskpool.MigrationThreadPool;
-
-import java.sql.SQLException;
 
 @WebListener
 public class ContextListener implements ServletContextListener {
@@ -24,11 +21,6 @@ public class ContextListener implements ServletContextListener {
   @Override
   public void contextDestroyed(ServletContextEvent event) {
     MigrationThreadPool.shutdown();
-    try {
-      DataSourceFactory.destroyDataSources();
-    } catch (SQLException e) {
-      log.error("destroy data sources failed!");
-    }
     log.info("The application stopped");
   }
 }
