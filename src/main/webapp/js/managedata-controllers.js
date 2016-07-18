@@ -148,6 +148,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		$scope.urlSelected = "{}";
 		$scope.selectColumns = new Set();
 		$scope.distinct = false;
+		$scope.desc = false;
 
 		$scope.backToMigratePage = function() {
 			$location.path("/");
@@ -247,6 +248,19 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			return selectColumnSql.substring(0, selectColumnSql.length - 2);
 		};
 
+		var prepareOrderBySql = function() {
+			var orderBySql = "";
+			if (!($scope.orderByColumnSelected === undefined)) {
+				orderBySql += $scope.orderByColumnSelected;
+				if ($scope.desc) {
+					orderBySql += " desc ";
+				} else {
+					orderBySql += " asc ";
+				}
+			}
+			return orderBySql;
+		};
+
 		$scope.query = function() {
 			$http({
 				method: 'GET',
@@ -260,7 +274,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 					"column": $scope.columnSelected,
 					"columnOperator": $scope.conditionOp1,
 					"value": $scope.conditionValue1,
-					"orderBy": $scope.orderByColumnSelected,
+					"orderBy": prepareOrderBySql(),
 					"selectColumns": $scope.selectColumnsSetToString()
 				}
 			}).then(function successCallback(response) {

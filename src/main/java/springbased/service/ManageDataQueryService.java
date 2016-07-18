@@ -36,8 +36,9 @@ public class ManageDataQueryService {
         if (!StringUtils.isBlank(orderBy)) {
             sql += " order by " + orderBy;
         }
-        String selectColumnSql = " select " + selectColumns + " from ( " + sql + " ) where ROWNUM < 50 ";
-        return selectColumnSql;
+        String selectColumnSql = " select " + selectColumns + " from ( " + sql + " ) ";
+        String limitNumberSql = " select * from ( " + selectColumnSql + " ) where ROWNUM < 50 ";
+        return limitNumberSql;
     }
 
     public String queryTablesSQL() {

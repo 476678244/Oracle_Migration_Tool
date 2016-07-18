@@ -54,7 +54,7 @@
 			<div role="selectcolumn-select" class="option-select">
 				<h5>
 					<span class="label label-default">Select Column</span>
-					<div class="checkbox">
+					<div class="checkbox inline">
 						<label>
 							<input type="checkbox" ng-model="distinct"> distinct
 						</label>
@@ -100,7 +100,7 @@
 					<!-- order by section -->
 			<div role="column-select" class="option-select">
 				<h5><span class="label label-default">Order By</span></h5>
-				<div class="dropdown">
+				<div class="dropdown inline">
 				  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 				    {{ orderByColumnSelected || "Orderby Column" }}
 				    <span class="caret"></span>
@@ -110,6 +110,11 @@
 				  		<a ng-click="orderByColumnNameSelected(this)"> {{ columnName.name }} </a>
 				  	</li>
 				  </ul>
+				</div>
+				<div class="checkbox inline">
+					<label>
+						<input type="checkbox" ng-model="desc"> desc
+					</label>
 				</div>
 			</div> <!-- column-select -->
 			<div role="search-button" class="option-select">

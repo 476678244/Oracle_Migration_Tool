@@ -248,3 +248,7 @@ input.form-control {
   /*max-width: 150em;*/
   float: left;
 }
+
+.inline {
+  display: inline;
+}

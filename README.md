@@ -21,3 +21,11 @@ mvn install:install-file -Dfile=ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojd
 
 mvn tomcat7:redeploy
 
+open questions :
+
+ select distinct USERS_GROUP_ID from ( select * from SFUSER_TREE.USRGRP_MAP order by USERS_group_ID );
+
+ select distinct USERS_GROUP_ID from ( select * from SFUSER_TREE.USRGRP_MAP order by USERS_group_ID ) where ROWNUM < 50 ;
+
+ select distinct USERS_GROUP_ID from (  select * from SFUSER_TREE.USRGRP_MAP order by USERS_sys_ID desc  ) where ROWNUM < 50 ;
+
