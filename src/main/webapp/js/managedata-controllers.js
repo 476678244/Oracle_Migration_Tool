@@ -251,6 +251,11 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		var prepareOrderBySql = function() {
 			var orderBySql = "";
 			if (!($scope.orderByColumnSelected === undefined)) {
+				// can only order by a selected column
+				if ($scope.selectColumns.size > 0) {
+					// add this column to selected in case it not exist
+					$scope.selectColumns.add($scope.orderByColumnSelected);
+				}
 				orderBySql += $scope.orderByColumnSelected;
 				if ($scope.desc) {
 					orderBySql += " desc ";

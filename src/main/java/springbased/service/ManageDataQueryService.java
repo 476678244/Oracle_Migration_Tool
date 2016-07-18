@@ -29,16 +29,19 @@ public class ManageDataQueryService {
 
     public String toSql(String schema, String table, String column, String operator,
                         String value, String orderBy, String selectColumns) {
-        String sql = " select * from " + schema + "." + table;
+        String sql = " select " + selectColumns + " from " + schema + "." + table;
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
-            sql += " where " + column + " " + operator + " ? ";
+            sql += " where " + column + " " + operator + " ? " ;
+        }
+        if (!selectColumns.contains("distinct")) {
+            sql += " where ROWNUM < 30 ";
+        } else {
+            // currently, distinct does not work well with limit
         }
         if (!StringUtils.isBlank(orderBy)) {
             sql += " order by " + orderBy;
         }
-        String selectColumnSql = " select " + selectColumns + " from ( " + sql + " ) ";
-        String limitNumberSql = " select * from ( " + selectColumnSql + " ) where ROWNUM < 50 ";
-        return limitNumberSql;
+        return sql;
     }
 
     public String queryTablesSQL() {

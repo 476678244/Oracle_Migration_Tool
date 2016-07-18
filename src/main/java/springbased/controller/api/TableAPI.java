@@ -94,6 +94,9 @@ public class TableAPI {
         List<Map<String, Object>> list = this.queryService.query(
                 this.queryService.toSql(schema, table, column, columnOperator, value, orderBy, selectColumns),
                 new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl), bindVars.toArray());
+        if (selectColumns.contains("distinct") && list.size() > 29) {
+            list = list.subList(0, 29);
+        }
         //JSONObject json = new JSONObject(list)
         JSONArray jsonArray = new JSONArray();
         for (Map<String, Object> map : list) {
