@@ -147,6 +147,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		$scope.jsonResult = {};
 		$scope.urlSelected = "{}";
 		$scope.selectColumns = new Set();
+		$scope.distinct = false;
 
 		$scope.backToMigratePage = function() {
 			$location.path("/");
@@ -239,6 +240,9 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 			var selectColumnSql = " ";
 			for (let column of $scope.selectColumns) {
 				selectColumnSql += column + ", ";
+			}
+			if ($scope.distinct) {
+				return "distinct" + selectColumnSql.substring(0, selectColumnSql.length - 2);
 			}
 			return selectColumnSql.substring(0, selectColumnSql.length - 2);
 		};

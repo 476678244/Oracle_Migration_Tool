@@ -29,15 +29,15 @@ public class ManageDataQueryService {
 
     public String toSql(String schema, String table, String column, String operator,
                         String value, String orderBy, String selectColumns) {
-        String sql = "select " + selectColumns + " from " + schema + "." + table;
+        String sql = " select * from " + schema + "." + table;
         if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
             sql += " where " + column + " " + operator + " ? ";
         }
-        String limitRowNumSql = " select * from ( " + sql + " ) where ROWNUM < 50 ";
         if (!StringUtils.isBlank(orderBy)) {
-            limitRowNumSql += "order by " + orderBy;
+            sql += " order by " + orderBy;
         }
-        return limitRowNumSql;
+        String selectColumnSql = " select " + selectColumns + " from ( " + sql + " ) where ROWNUM < 50 ";
+        return selectColumnSql;
     }
 
     public String queryTablesSQL() {

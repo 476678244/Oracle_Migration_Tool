@@ -52,16 +52,24 @@
 				</div>
 			</div> <!-- table-select -->
 			<div role="selectcolumn-select" class="option-select">
-				<h5><span class="label label-default">Select Column</span></h5>
+				<h5>
+					<span class="label label-default">Select Column</span>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" ng-model="distinct"> distinct
+						</label>
+					</div>
+				</h5>
 				<div class="dropdown">
 				  <select class="js-data-selectcolumn-ajax js-states form-control" multiple="multiple"></select>
 				</div>
+				
 			</div> <!-- selectcolumn-select -->
 			<div role="column-select" class="option-select">
 				<h5><span class="label label-default">Where</span></h5>
 				<div class="dropdown">
 				  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-				    {{ columnSelected || "Select Column" }}
+				    {{ columnSelected || "Column" }}
 				    <span class="caret"></span>
 				  </button>
 				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -77,7 +85,7 @@
 				<div class="col-lg-6 condition-input">
 				    <div class="input-group ">
 				      <div class="input-group-btn">
-				        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp1 || "Select Operator" }} <span class="caret"></span></button>
+				        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp1 || "Operator" }} <span class="caret"></span></button>
 				        <ul class="dropdown-menu">
 						  	<li ng-repeat="conditionOp in conditionOps">
 						  		<a ng-click="conditionOp1Selected(this)"> {{ conditionOp.name }} </a>
