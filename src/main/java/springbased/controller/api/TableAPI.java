@@ -86,14 +86,17 @@ public class TableAPI {
                                   @RequestParam(value = "orderBy", defaultValue = "") String orderBy,
                                   @RequestParam(value = "selectColumns", defaultValue = "") String selectColumns) {
         List<Object> bindVars = new ArrayList<>();
-        List<Map<String, Object>> list = this.queryService.query(
-                this.queryService.toSql(schema, table, whereSql, orderBy, selectColumns),
+        String sql = this.queryService.toSql(schema, table, whereSql, orderBy, selectColumns);
+        List<Map<String, Object>> list = this.queryService.query(sql,
                 new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl), bindVars.toArray());
         if (selectColumns.contains("distinct") && list.size() > 29) {
             list = list.subList(0, 29);
         }
         //JSONObject json = new JSONObject(list)
         JSONArray jsonArray = new JSONArray();
+        JSONObject sqlJson = new JSONObject();
+        sqlJson.put("sql", sql);
+        jsonArray.put(sqlJson);
         for (Map<String, Object> map : list) {
             JSONObject jsonMap = new JSONObject(map);
             jsonArray.put(jsonMap);
