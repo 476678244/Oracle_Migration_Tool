@@ -73,10 +73,10 @@
 			<!-- where section -->
 			<div role="where-section" class="option-select ">
 				<h5><span class="label label-default">Where</span></h5>
-				<div class="col-lg-6 values-input">
+				<div class="">
 			    	<div class="input-group">
 			      		<div class="input-group-btn">
-				 			 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				 			<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 				    			{{ columnSelected || "Column" }}
 				    		<span class="caret"></span></button>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -84,7 +84,7 @@
 									<a ng-click="columnNameSelected(this)"> {{ columnName.name }} </a>
 								</li>
 							</ul>
-						</div>
+						</div><!-- input-group-btn -->
 						<!-- expression -->
 						<input type="text" class="form-control" aria-label="..." value="{{expression1}}" ng-model="expression1">
 					</div><!-- /input-group -->

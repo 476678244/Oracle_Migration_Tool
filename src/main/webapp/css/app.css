@@ -228,6 +228,7 @@ input.form-control {
 
 .values-input {
   margin-left: -15px;
+  padding-right: 0px;
 }
 
 .condition-input {
