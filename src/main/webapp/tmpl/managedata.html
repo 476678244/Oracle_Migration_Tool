@@ -39,19 +39,24 @@
 			</div>
 		</div>
 		<div role="function-area" class="function-area">
+			<!-- schema -->
 			<div role="schema-select" class="option-select">
 				<h5><span class="label label-default">Schema</span></h5>
 				<div class="dropdown">
 				  	<select class="js-data-schema-ajax js-states form-control"></select>
 				</div>
 			</div> <!-- schema-select -->
+
+			<!-- table -->
 			<div role="table-select" class="option-select">
 				<h5><span class="label label-default">From Table</span></h5>
 				<div class="dropdown">
 				  <select class="js-data-table-ajax js-states form-control"></select>
 				</div>
 			</div> <!-- table-select -->
-			<div role="selectcolumn-select" class="option-select">
+
+			<!-- select column section -->
+			<div role="selectcolumn-section" class="option-select">
 				<h5>
 					<span class="label label-default">Select Column</span>
 					<div class="checkbox inline">
@@ -63,42 +68,31 @@
 				<div class="dropdown">
 				  <select class="js-data-selectcolumn-ajax js-states form-control" multiple="multiple"></select>
 				</div>
-				
 			</div> <!-- selectcolumn-select -->
-			<div role="column-select" class="option-select">
-				<h5><span class="label label-default">Where</span></h5>
-				<div class="dropdown">
-				  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-				    {{ columnSelected || "Column" }}
-				    <span class="caret"></span>
-				  </button>
-				  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-				  	<li ng-repeat="columnName in columnNames">
-				  		<a ng-click="columnNameSelected(this)"> {{ columnName.name }} </a>
-				  	</li>
-				  </ul>
-				</div>
-			</div> <!-- column-select -->
-			
-			<div role="values-input" class="option-select values-input">
-				<!-- condition1 -->
-				<div class="col-lg-6 condition-input">
-				    <div class="input-group ">
-				      <div class="input-group-btn">
-				        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ conditionOp1 || "Operator" }} <span class="caret"></span></button>
-				        <ul class="dropdown-menu">
-						  	<li ng-repeat="conditionOp in conditionOps">
-						  		<a ng-click="conditionOp1Selected(this)"> {{ conditionOp.name }} </a>
-						  	</li>
-				        </ul>
-				      </div><!-- /btn-group -->
-				      <input type="text" class="form-control" aria-label="..." value="{{conditionValue1}}" ng-model="conditionValue1">
-				    </div><!-- /input-group -->
-				</div><!-- /.col-lg-6 -->
-			</div> <!-- values-input -->
 
-					<!-- order by section -->
-			<div role="column-select" class="option-select">
+			<!-- where section -->
+			<div role="where-section" class="option-select ">
+				<h5><span class="label label-default">Where</span></h5>
+				<div class="col-lg-6 values-input">
+			    	<div class="input-group">
+			      		<div class="input-group-btn">
+				 			 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				    			{{ columnSelected || "Column" }}
+				    		<span class="caret"></span></button>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+								<li ng-repeat="columnName in columnNames">
+									<a ng-click="columnNameSelected(this)"> {{ columnName.name }} </a>
+								</li>
+							</ul>
+						</div>
+						<!-- expression -->
+						<input type="text" class="form-control" aria-label="..." value="{{expression1}}" ng-model="expression1">
+					</div><!-- /input-group -->
+				</div><!-- /.col-lg-6 -->
+			</div>
+
+			<!-- order by section -->
+			<div role="orderby-section" class="option-select">
 				<h5><span class="label label-default">Order By</span></h5>
 				<div class="dropdown inline">
 				  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">

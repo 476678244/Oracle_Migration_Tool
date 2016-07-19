@@ -82,17 +82,12 @@ public class TableAPI {
                                   @RequestParam("sourceUrl") String sourceUrl,
                                   @RequestParam(value = "schema", defaultValue = "") String schema,
                                   @RequestParam(value = "table", defaultValue = "") String table,
-                                  @RequestParam(value = "column", defaultValue = "") String column,
-                                  @RequestParam(value = "columnOperator", defaultValue = "") String columnOperator,
-                                  @RequestParam(value = "value", defaultValue = "") String value,
+                                  @RequestParam(value = "whereSql", defaultValue = "") String whereSql,
                                   @RequestParam(value = "orderBy", defaultValue = "") String orderBy,
                                   @RequestParam(value = "selectColumns", defaultValue = "") String selectColumns) {
         List<Object> bindVars = new ArrayList<>();
-        if (!StringUtils.isBlank(value)) {
-            bindVars.add(value);
-        }
         List<Map<String, Object>> list = this.queryService.query(
-                this.queryService.toSql(schema, table, column, columnOperator, value, orderBy, selectColumns),
+                this.queryService.toSql(schema, table, whereSql, orderBy, selectColumns),
                 new ConnectionInfo(sourceUsername, sourcePassword, sourceUrl), bindVars.toArray());
         if (selectColumns.contains("distinct") && list.size() > 29) {
             list = list.subList(0, 29);

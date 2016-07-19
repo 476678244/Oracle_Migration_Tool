@@ -27,12 +27,8 @@ public class ManageDataQueryService {
         return result;
     }
 
-    public String toSql(String schema, String table, String column, String operator,
-                        String value, String orderBy, String selectColumns) {
-        String sql = " select " + selectColumns + " from " + schema + "." + table;
-        if (!StringUtils.isBlank(column) && !StringUtils.isBlank(operator) && !StringUtils.isBlank(value)) {
-            sql += " where " + column + " " + operator + " ? " ;
-        }
+    public String toSql(String schema, String table, String whereSql, String orderBy, String selectColumns) {
+        String sql = " select " + selectColumns + " from " + schema + "." + table + " " + whereSql;
         if (!selectColumns.contains("distinct")) {
             sql = " select * from ( " + sql + " ) where ROWNUM < 30 ";
         } else {
@@ -41,6 +37,7 @@ public class ManageDataQueryService {
         if (!StringUtils.isBlank(orderBy)) {
             sql += " order by " + orderBy;
         }
+        log.info("building sql:" + sql);
         return sql;
     }
 
