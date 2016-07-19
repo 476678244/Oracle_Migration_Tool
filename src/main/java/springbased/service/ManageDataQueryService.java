@@ -34,7 +34,7 @@ public class ManageDataQueryService {
             sql += " where " + column + " " + operator + " ? " ;
         }
         if (!selectColumns.contains("distinct")) {
-            sql += " where ROWNUM < 30 ";
+            sql = " select * from ( " + sql + " ) where ROWNUM < 30 ";
         } else {
             // currently, distinct does not work well with limit
         }
