@@ -15,7 +15,7 @@ import java.io.Serializable;
 /**
  * Created by zonghan on 7/20/16.
  */
-@Entity
+@Entity(noClassnameStored = true)
 public class CopyTableDataRequest implements Serializable, Cloneable {
 
     @Id
@@ -213,4 +213,5 @@ public class CopyTableDataRequest implements Serializable, Cloneable {
         this.endId = endId;
         return this;
     }
+
 }
