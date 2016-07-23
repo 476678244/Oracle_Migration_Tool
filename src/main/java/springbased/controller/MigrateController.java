@@ -60,7 +60,7 @@ public class MigrateController {
     List<String> tableList = new ArrayList<String>();
     try {
       TableUtil.execute(targetConInfo, targetSchema, sourceConInfo,
-          sourceSchema, tableList);
+          sourceSchema, tableList, 0);
     } catch (SQLException sqle) {
       log.error("Migration process failed due to:");
       log.error(sqle);

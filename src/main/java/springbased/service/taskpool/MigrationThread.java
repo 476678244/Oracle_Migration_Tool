@@ -49,7 +49,7 @@ public class MigrationThread extends Thread implements MigrationRunnable {
       try {
         this.jobDAO.updateStatus(job.getJobId(), StatusEnum.TABLE);
         TableUtil.execute(job.getTarget(), job.getTargetSchema(),
-            job.getSource(), job.getSourceSchema(), tableList);
+            job.getSource(), job.getSourceSchema(), tableList, job.getJobId());
         this.jobDAO.updateStatus(job.getJobId(), StatusEnum.UK);
         UKUtil.execute(job.getTarget(), job.getTargetSchema(), job.getSource(),
             job.getSourceSchema());

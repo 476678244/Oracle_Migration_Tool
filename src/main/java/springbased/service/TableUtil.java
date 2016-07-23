@@ -23,7 +23,12 @@ import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
+import org.mongodb.morphia.Datastore;
 import springbased.bean.ConnectionInfo;
+import springbased.bean.CopyTableDataRequest;
+import springbased.bean.RequestStatusEnum;
+import springbased.config.DataStoreFactory;
+import springbased.dao.AbstractDAO;
 import springbased.monitor.ThreadLocalErrorMonitor;
 import springbased.monitor.ThreadLocalMonitor;
 import springbased.readonly.ReadOnlyConnection;
@@ -36,7 +41,7 @@ public class TableUtil {
 
   public static void execute(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
-      List<String> tableList) throws SQLException, InterruptedException {
+      List<String> tableList, long jobId) throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("collecting table");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
     //Connection targetConn = MigrationService.getConnection(targetConnInfo);
@@ -72,7 +77,7 @@ public class TableUtil {
 
     try {
       copyDataToTable(targetConnInfo, targetSchema, sourceConnInfo, sourceSchema,
-          tableList, tempTableList);
+          tableList, tempTableList, jobId);
     } catch (NullPointerException e ) {
       log.error(e);
       throw new NullPointerException(e.getMessage());
@@ -85,7 +90,7 @@ public class TableUtil {
 
   private static void copyDataToTable(ConnectionInfo targetConnInfo,
       String targetSchema, ConnectionInfo sourceConnInfo, String sourceSchema,
-      List<String> tableList, HashMap<String, String> tempTableList)
+      List<String> tableList, HashMap<String, String> tempTableList, long jobId)
           throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("collecting PK contrain");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
@@ -167,24 +172,6 @@ public class TableUtil {
         ps = targetConn.prepareStatement(tableDDL);
         ps.execute();
         log.info("successfully run:" + tableDDL);
-        // specially for form_content table, can copy data for this table from now
-        if (tableDDL.contains(".FORM_CONTENT (")) {
-          try {
-            ThreadLocalMonitor.getFutures()
-                .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
-                  try {
-                    migrateTableData("FORM_CONTENT", sourceSchema,
-                        sourceConnInfo, targetSchema, targetConnInfo,
-                        scaleMap.get("FORM_CONTENT"), 0);
-                  } catch (Exception e) {
-                    log.error(e);
-                  }
-                }));
-          } catch (NullPointerException e) {
-            log.error(e);
-            throw new NullPointerException(e.getMessage());
-          }
-        }
       } catch (SQLException e) {
         ThreadLocalErrorMonitor.add(tableDDL, e);
         log.error(e);
@@ -227,7 +214,7 @@ public class TableUtil {
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
               try {
                 migrateTableData(tableName, sourceSchema, sourceConnInfo,
-                    targetSchema, targetConnInfo, scaleMap.get(tableName), 0);
+                    targetSchema, targetConnInfo, pkmap, jobId);
               } catch (Exception e) {
                 log.error(e);
               }
@@ -239,6 +226,7 @@ public class TableUtil {
     }
     // monitor
     monitorAndBlock(ThreadLocalMonitor.getFutures(), tableList.size());
+    monitorCopyTableDataRequestsAndBlock();
     ThreadLocalMonitor.getInfo().setProcessRate("");
     ThreadLocalMonitor.getInfo().setTableUtilState("");
   }
@@ -372,8 +360,9 @@ public class TableUtil {
   }
 
   public static void migrateTableData(String tableName, String sourceSchema,
-      ConnectionInfo sourceConnInfo, String targetSchema, ConnectionInfo targetConnInfo,
-      Map<String, Integer> columnScales, int start) throws SQLException, InterruptedException {
+                                      ConnectionInfo sourceConnInfo, String targetSchema,
+                                      ConnectionInfo targetConnInfo, Map<String, List<String>> pkmap, long jobId)
+          throws SQLException, InterruptedException {
     int rows = 0;
     int batchSize = 300;
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
@@ -423,10 +412,6 @@ public class TableUtil {
               if (queryResult.wasNull()) {
                 prepStmnt.setNull(i, type);
               } else {
-                int scale = 0;
-                if (columnScales.get(md.getColumnName(i)) != null) {
-                  scale = columnScales.get(md.getColumnName(i)).intValue();
-                }
                 if (d.precision() > 34
                     && !tableName.contains("EMAIL_TEMPLATE")) {
                   prepStmnt.setBigDecimal(i, new BigDecimal(0));
@@ -489,10 +474,23 @@ public class TableUtil {
             }
 
           } else if (type == Types.CLOB) {
+            if (TableUtil.isPkAnId(md, tableName, sourceSchema, pkmap)) {
+              String idColumnName = pkmap.get(tableName).get(0);
+              if (TableUtil.populateCopyTableDataRequest(tableName, sourceSchema, sourceConnInfo,
+                      targetSchema, targetConnInfo, idColumnName,  sourceConn, jobId)) {
+                return;
+              }
+            }
             String nclob = queryResult.getString(i);
             prepStmnt.setString(i, nclob);
-
           } else if (type == Types.BLOB) {
+            if (TableUtil.isPkAnId(md, tableName, sourceSchema, pkmap)) {
+              String idColumnName = pkmap.get(tableName).get(0);
+              if (TableUtil.populateCopyTableDataRequest(tableName, sourceSchema, sourceConnInfo,
+                      targetSchema, targetConnInfo, idColumnName,  sourceConn, jobId)) {
+                return;
+              }
+            }
             Blob blob = queryResult.getBlob(i);
             if (blob == null) {
               prepStmnt.setNull(i, Types.BLOB);
@@ -552,7 +550,64 @@ public class TableUtil {
       sourceConn.close();
     }
   }
-  
+
+  private static boolean populateCopyTableDataRequest(String tableName, String sourceSchema,
+                                                   ConnectionInfo sourceConnInfo, String targetSchema,
+                                                   ConnectionInfo targetConnInfo, String idColumnName,
+                                                   ReadOnlyConnection sourceConn, long jobId) throws SQLException {
+    final int BATCH = 500;
+    long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
+    if (maxId < BATCH) return false;
+    long numberRequests = maxId / BATCH + 1;
+    Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
+    for (int i = 0; i < numberRequests ; i ++) {
+      CopyTableDataRequest request = new CopyTableDataRequest().setConnectionUrl(sourceConnInfo.getUrl())
+              .setUsername(sourceConnInfo.getUsername()).setPassword(sourceConnInfo.getPassword())
+              .setTargetConnectionUrl(targetConnInfo.getUrl()).setTargetUsername(targetConnInfo.getUsername())
+              .setTargetPassword(targetConnInfo.getPassword()).setSchema(sourceSchema).setTargetSchema(targetSchema)
+              .setTable(tableName).setIdColumnName(idColumnName).setStartId(i * BATCH + 1).setEndId(i * BATCH + BATCH)
+              .setMigrationJobId(jobId);
+      ds.save(request);
+    }
+    return true;
+  }
+
+  private static long maxId(ReadOnlyConnection sourceConn, String tableName, String sourceSchema, String idColumnName)
+          throws SQLException {
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      String sql = "select max( " + idColumnName + " ) from " + sourceSchema + "." + tableName ;
+      ps = sourceConn.prepareStatement(sql);
+      rs = ps.executeQuery();
+      rs.next();
+      long maxIdValue = rs.getLong(1);
+      return maxIdValue;
+    } finally {
+      rs.close();
+      ps.close();
+    }
+
+  }
+
+  private static boolean isPkAnId(ResultSetMetaData md, String tableName, String sourceSchema, Map<String, List<String>> pkmap)
+          throws SQLException {
+    if (pkmap.get(tableName).size() != 1) {
+      return false;
+    }
+    String idColumnName = pkmap.get(tableName).get(0);
+    int cols = md.getColumnCount();
+    for (int i = 1; i <= cols; i++) {
+      if (md.getColumnName(i).equalsIgnoreCase(idColumnName)) {
+        int type = md.getColumnType(i);
+        if (type == Types.NUMERIC || type == Types.BIGINT || type == Types.INTEGER) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private static void monitorAndBlock(Set<Future<?>> futures, int totalSize)
       throws InterruptedException {
     // monitor threads
@@ -564,13 +619,38 @@ public class TableUtil {
         Thread.yield();
       }
       ThreadLocalMonitor.getInfo().setProcessRate(
-          String.valueOf(100 - (futures.size() * 100 / totalSize)));
+              String.valueOf( ( 100 - ( futures.size() * 100 / totalSize) ) / 2) );
       Iterator<Future<?>> itFuture = futures.iterator();
       while (itFuture.hasNext()) {
         if (itFuture.next().isDone()) {
           itFuture.remove();
         }
       }
+    }
+
+  }
+
+  private static void monitorCopyTableDataRequestsAndBlock() throws InterruptedException {
+    Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
+    List<CopyTableDataRequest> requests = ds.find(CopyTableDataRequest.class).asList();
+    int totalSize = requests.size();
+    while (!requests.isEmpty()) {
+      if (Thread.currentThread().isInterrupted()) {
+        ThreadLocalMonitor.getThreadPool().shutdownNow();
+        throw new InterruptedException("Migration Job is interrupted");
+      } else {
+        Thread.sleep(1000);
+      }
+      requests = ds.find(CopyTableDataRequest.class).asList();
+      final Iterator<CopyTableDataRequest> requestIterator = requests.iterator();
+      while (requestIterator.hasNext()) {
+        CopyTableDataRequest r = requestIterator.next();
+        if (r.getStatus() == RequestStatusEnum.FINISHED) {
+          requestIterator.remove();
+        }
+      }
+      ThreadLocalMonitor.getInfo().setProcessRate(
+              String.valueOf( ( 100 - ( requests.size() * 100 / totalSize) ) / 2) );
     }
   }
 
