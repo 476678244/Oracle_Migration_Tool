@@ -207,8 +207,6 @@ public class TableUtil {
     // multi-thread processing
     for (int i = 0; i < tableList.size(); i++) {
       String tableName = tableList.get(i);
-      if (tableName.equals("FORM_CONTENT"))
-        continue;
       try {
         ThreadLocalMonitor.getFutures()
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
@@ -555,7 +553,7 @@ public class TableUtil {
                                                    ConnectionInfo sourceConnInfo, String targetSchema,
                                                    ConnectionInfo targetConnInfo, String idColumnName,
                                                    ReadOnlyConnection sourceConn, long jobId) throws SQLException {
-    final int BATCH = 500;
+    final int BATCH = 1500;
     long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
     if (maxId < BATCH) return false;
     long numberRequests = maxId / BATCH + 1;
