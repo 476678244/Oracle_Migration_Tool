@@ -28,6 +28,7 @@ public class DataStoreFactory {
         return datastore;
     }
 
+    private static final String HOSTNAME = "10.59.184.110";
     private static final int PORT = 27017;
 
     private static Datastore ds = null;
@@ -36,7 +37,7 @@ public class DataStoreFactory {
         if (ds == null) {
             try {
                 ds = new Morphia().map(CopyTableDataRequest.class).createDatastore(
-                        new MongoClient(), "copydatarequest");
+                        new MongoClient(HOSTNAME), "copydatarequest");
             } catch (UnknownHostException e) {
                 return null;
             }

@@ -35,6 +35,8 @@ import springbased.readonly.ReadOnlyConnection;
 
 public class TableUtil {
 
+  private static final int BATCH = 300;
+
   private static final Logger log = Logger.getLogger(TableUtil.class);
 
   public static Map<String, List<String>> columnMap = new HashMap<String, List<String>>();
@@ -362,7 +364,6 @@ public class TableUtil {
                                       ConnectionInfo targetConnInfo, Map<String, List<String>> pkmap, long jobId)
           throws SQLException, InterruptedException {
     int rows = 0;
-    int batchSize = 300;
     String queryString = "SELECT * FROM " + sourceSchema + "." + tableName + "";
     PreparedStatement pstmt = null;
     PreparedStatement prepStmnt = null;
@@ -514,9 +515,9 @@ public class TableUtil {
         prepStmnt.addBatch();
         log.info(targetSchema + "add batch:" + insertString);
         
-        if (batchSize > 0) {
+        if (BATCH > 0) {
           try {
-            if (rows % batchSize == 0) {
+            if (rows % BATCH == 0) {
               prepStmnt.executeBatch();
               //targetConn.commit();
               log.info(targetSchema + "batch executed!");
@@ -553,9 +554,8 @@ public class TableUtil {
                                                    ConnectionInfo sourceConnInfo, String targetSchema,
                                                    ConnectionInfo targetConnInfo, String idColumnName,
                                                    ReadOnlyConnection sourceConn, long jobId) throws SQLException {
-    final int BATCH = 1500;
     long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
-    if (maxId < BATCH) return false;
+    if (maxId < BATCH * 10) return false;
     long numberRequests = maxId / BATCH + 1;
     Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
     for (int i = 0; i < numberRequests ; i ++) {
@@ -644,11 +644,13 @@ public class TableUtil {
       while (requestIterator.hasNext()) {
         CopyTableDataRequest r = requestIterator.next();
         if (r.getStatus() == RequestStatusEnum.FINISHED) {
+          ds.delete(r);
           requestIterator.remove();
         }
       }
-      ThreadLocalMonitor.getInfo().setProcessRate(
-              String.valueOf( ( 100 - ( requests.size() * 100 / totalSize) ) / 2) );
+      String processRate = String.valueOf( 50 + ( 100 - ( requests.size() * 100 / totalSize) ) / 2);
+      log.info("Table Util processRate:" +processRate);
+      ThreadLocalMonitor.getInfo().setProcessRate(processRate);
     }
   }
 

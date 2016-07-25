@@ -32,7 +32,7 @@ public class ThreadLocalErrorMonitor {
   }
   
   public static boolean isErrorsExisting() {
-    return !monitor.get().isEmpty();
+    return !getMonitor().isEmpty();
   }
   
   public static boolean isDebugMode() {
