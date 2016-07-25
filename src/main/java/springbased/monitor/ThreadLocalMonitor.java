@@ -39,7 +39,7 @@ public class ThreadLocalMonitor {
 
     @Override
     protected ExecutorService initialValue() {
-      return new ThreadPoolExecutor(2, 2, 0L,
+      return new ThreadPoolExecutor(3, 3, 0L,
           TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     }
     
