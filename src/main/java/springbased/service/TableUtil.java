@@ -139,12 +139,13 @@ public class TableUtil {
 
     for (int i = 0; i < tableList.size(); i++) {
       String tableName = tableList.get(i);
+      Set<String> tableWithBlobClobColumns = ThreadLocalMonitor.getInfo().getTablesWithBlobClobColumns();
       ThreadLocalMonitor.getFutures().add(ThreadLocalMonitor.getThreadPool().submit(() -> {
         try {
           // construct table DDL
           Map<String, Integer> columnMap = new HashMap<String, Integer>();
           String tableDDL = constructTableDDL(tableName, sourceSchema,
-              sourceConnInfo, targetSchema, tempTableList, columnMap);
+              sourceConnInfo, targetSchema, tempTableList, columnMap, tableWithBlobClobColumns);
           // add primary key DDL
           String pkDDL = addPKDDL(tableName, targetSchema, pkmap,
               pktable2namemap);
@@ -207,8 +208,16 @@ public class TableUtil {
     ThreadLocalMonitor.getInfo().setTableUtilState("migrateTableData");
     
     // multi-thread processing
-    for (int i = 0; i < tableList.size(); i++) {
-      String tableName = tableList.get(i);
+    List<String> blobClobFirstTableList = new ArrayList<>();
+    for (String table : tableList) {
+      if (ThreadLocalMonitor.getInfo().getTablesWithBlobClobColumns().contains(table)) {
+        blobClobFirstTableList.add(0, table);
+      } else {
+        blobClobFirstTableList.add(table);
+      }
+    }
+    for (int i = 0; i < blobClobFirstTableList.size(); i++) {
+      String tableName = blobClobFirstTableList.get(i);
       try {
         ThreadLocalMonitor.getFutures()
             .add(ThreadLocalMonitor.getThreadPool().submit(() -> {
@@ -233,7 +242,7 @@ public class TableUtil {
 
   public static String constructTableDDL(String tableName, String sourceSchema,
       ConnectionInfo sourceConnInfo, String targetSchema,
-      HashMap<String, String> tempTableList, Map<String, Integer> columnMap)
+      HashMap<String, String> tempTableList, Map<String, Integer> columnMap, Set<String> tableWithBlobClobColumns)
       throws SQLException, InterruptedException {
     ThreadLocalMonitor.getInfo().setTableUtilState("constructTableDDL");
     ReadOnlyConnection sourceConn = MigrationService.getReadOnlyConnection(sourceConnInfo);
@@ -296,6 +305,10 @@ public class TableUtil {
         }
         sb.append("\"" + colname + "\" " + datatype + ""
             + (nullable.equals("N") ? " NOT NULL" : "") + " ,");
+        // collection tables with blob or clob columns
+        if (datatype.equals("BLOB") || datatype.equals("CLOB")) {
+          tableWithBlobClobColumns.add(tableName);
+        }
       }
 
       ddl = sb.toString();
@@ -554,17 +567,29 @@ public class TableUtil {
                                                    ConnectionInfo sourceConnInfo, String targetSchema,
                                                    ConnectionInfo targetConnInfo, String idColumnName,
                                                    ReadOnlyConnection sourceConn, long jobId) throws SQLException {
-    long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
-    if (maxId < BATCH * 10) return false;
-    long numberRequests = maxId / BATCH + 1;
+    final long THRESHOLD = BATCH * 15;
+    final int LOADPERREQUEST = BATCH * 7;
     Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
-    for (int i = 0; i < numberRequests ; i ++) {
+    long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
+    if (maxId < THRESHOLD) {
+      // not huge table, only one request
       CopyTableDataRequest request = new CopyTableDataRequest().setConnectionUrl(sourceConnInfo.getUrl())
               .setUsername(sourceConnInfo.getUsername()).setPassword(sourceConnInfo.getPassword())
               .setTargetConnectionUrl(targetConnInfo.getUrl()).setTargetUsername(targetConnInfo.getUsername())
               .setTargetPassword(targetConnInfo.getPassword()).setSchema(sourceSchema).setTargetSchema(targetSchema)
-              .setTable(tableName).setIdColumnName(idColumnName).setStartId(i * BATCH + 1).setEndId(i * BATCH + BATCH)
-              .setMigrationJobId(jobId);
+              .setTable(tableName).setIdColumnName(idColumnName).setStartId(1).setEndId(maxId).setMigrationJobId(jobId);
+      ds.save(request);
+      return true;
+    }
+    long numberRequests = maxId / LOADPERREQUEST + 1;
+    for (int i = 0; i < numberRequests ; i ++) {
+      // split to requests
+      CopyTableDataRequest request = new CopyTableDataRequest().setConnectionUrl(sourceConnInfo.getUrl())
+              .setUsername(sourceConnInfo.getUsername()).setPassword(sourceConnInfo.getPassword())
+              .setTargetConnectionUrl(targetConnInfo.getUrl()).setTargetUsername(targetConnInfo.getUsername())
+              .setTargetPassword(targetConnInfo.getPassword()).setSchema(sourceSchema).setTargetSchema(targetSchema)
+              .setTable(tableName).setIdColumnName(idColumnName).setStartId(i * LOADPERREQUEST + 1)
+              .setEndId(i * LOADPERREQUEST + LOADPERREQUEST).setMigrationJobId(jobId);
       ds.save(request);
     }
     return true;
