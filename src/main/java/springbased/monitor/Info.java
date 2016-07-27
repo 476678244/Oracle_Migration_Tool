@@ -14,6 +14,8 @@ public class Info {
   private Set<String> tablesWithBlobClobColumns = Collections.newSetFromMap(
           new ConcurrentHashMap<String, Boolean>());
 
+  private long jobId;
+
   public String getProcessRate() {
     return processRate;
   }
@@ -32,5 +34,13 @@ public class Info {
 
   public Set<String> getTablesWithBlobClobColumns() {
     return tablesWithBlobClobColumns;
+  }
+
+  public long getJobId() {
+    return jobId;
+  }
+
+  public void setJobId(long jobId) {
+    this.jobId = jobId;
   }
 }

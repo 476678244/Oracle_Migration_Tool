@@ -42,6 +42,7 @@ public class MigrationThread extends Thread implements MigrationRunnable {
   @Override
   public void run() {
     ThreadLocalMonitor.setInfo(info);
+    info.setJobId(job.getJobId());
     try {
       this.jobDAO.updateStatus(job.getJobId(), StatusEnum.TABLE);
       this.jobDAO.updateStartTime(job.getJobId(), new Date());

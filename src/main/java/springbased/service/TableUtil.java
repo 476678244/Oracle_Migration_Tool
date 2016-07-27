@@ -567,11 +567,12 @@ public class TableUtil {
                                                    ConnectionInfo sourceConnInfo, String targetSchema,
                                                    ConnectionInfo targetConnInfo, String idColumnName,
                                                    ReadOnlyConnection sourceConn, long jobId) throws SQLException {
-    final long THRESHOLD = BATCH * 15;
-    final int LOADPERREQUEST = BATCH * 7;
+    final long THRESHOLD = BATCH * 20;
+    int LOAD = BATCH * 6;
     Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
     long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
-    if (maxId < THRESHOLD) {
+    if (maxId < THRESHOLD && !(tableName.equalsIgnoreCase("FORM_CONTENT") || tableName.equalsIgnoreCase("FORM_DATA")
+            || tableName.equalsIgnoreCase("ODATA_API_AUDIT_LOB"))) {
       // not huge table, only one request
       CopyTableDataRequest request = new CopyTableDataRequest().setConnectionUrl(sourceConnInfo.getUrl())
               .setUsername(sourceConnInfo.getUsername()).setPassword(sourceConnInfo.getPassword())
@@ -581,15 +582,19 @@ public class TableUtil {
       ds.save(request);
       return true;
     }
-    long numberRequests = maxId / LOADPERREQUEST + 1;
+    if (tableName.equalsIgnoreCase("FORM_CONTENT") || tableName.equalsIgnoreCase("FORM_DATA")
+            || tableName.equalsIgnoreCase("ODATA_API_AUDIT_LOB")) {
+      LOAD = BATCH * 1;
+    }
+    long numberRequests = maxId / LOAD + 1;
     for (int i = 0; i < numberRequests ; i ++) {
       // split to requests
       CopyTableDataRequest request = new CopyTableDataRequest().setConnectionUrl(sourceConnInfo.getUrl())
               .setUsername(sourceConnInfo.getUsername()).setPassword(sourceConnInfo.getPassword())
               .setTargetConnectionUrl(targetConnInfo.getUrl()).setTargetUsername(targetConnInfo.getUsername())
               .setTargetPassword(targetConnInfo.getPassword()).setSchema(sourceSchema).setTargetSchema(targetSchema)
-              .setTable(tableName).setIdColumnName(idColumnName).setStartId(i * LOADPERREQUEST + 1)
-              .setEndId(i * LOADPERREQUEST + LOADPERREQUEST).setMigrationJobId(jobId);
+              .setTable(tableName).setIdColumnName(idColumnName).setStartId(i * LOAD + 1)
+              .setEndId(i * LOAD + LOAD).setMigrationJobId(jobId);
       ds.save(request);
     }
     return true;
@@ -655,7 +660,8 @@ public class TableUtil {
 
   private static void monitorCopyTableDataRequestsAndBlock() throws InterruptedException {
     Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
-    List<CopyTableDataRequest> requests = ds.find(CopyTableDataRequest.class).asList();
+    List<CopyTableDataRequest> requests = ds.createQuery(
+            CopyTableDataRequest.class).filter("migrationJobId", ThreadLocalMonitor.getInfo().getJobId()).asList();
     int totalSize = requests.size();
     while (!requests.isEmpty()) {
       if (Thread.currentThread().isInterrupted()) {
@@ -664,7 +670,8 @@ public class TableUtil {
       } else {
         Thread.sleep(1000);
       }
-      requests = ds.find(CopyTableDataRequest.class).asList();
+      requests = ds.createQuery(CopyTableDataRequest.class).filter(
+              "migrationJobId", ThreadLocalMonitor.getInfo().getJobId()).asList();
       final Iterator<CopyTableDataRequest> requestIterator = requests.iterator();
       while (requestIterator.hasNext()) {
         CopyTableDataRequest r = requestIterator.next();
