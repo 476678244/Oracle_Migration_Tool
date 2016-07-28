@@ -568,7 +568,7 @@ public class TableUtil {
                                                    ConnectionInfo targetConnInfo, String idColumnName,
                                                    ReadOnlyConnection sourceConn, long jobId) throws SQLException {
     final long THRESHOLD = BATCH * 20;
-    int LOAD = BATCH * 6;
+    long LOAD = BATCH * 6;
     Datastore ds = DataStoreFactory.getCopyTableDataRequestDS();
     long maxId = maxId(sourceConn,tableName, sourceSchema, idColumnName);
     if (maxId < THRESHOLD && !(tableName.equalsIgnoreCase("FORM_CONTENT") || tableName.equalsIgnoreCase("FORM_DATA")
@@ -584,7 +584,16 @@ public class TableUtil {
     }
     if (tableName.equalsIgnoreCase("FORM_CONTENT") || tableName.equalsIgnoreCase("FORM_DATA")
             || tableName.equalsIgnoreCase("ODATA_API_AUDIT_LOB")) {
+      // special for slow processing tables
       LOAD = BATCH * 1;
+    } else {
+      // handle cases maxId is huge but count All is not that big
+      long countAllValue = countAll(sourceConn,tableName, sourceSchema, idColumnName);
+      if ( maxId / countAllValue >= 3 ) {
+        if (LOAD < (maxId / countAllValue) * 2000) {
+          LOAD = (maxId / 10);
+        }
+      }
     }
     long numberRequests = maxId / LOAD + 1;
     for (int i = 0; i < numberRequests ; i ++) {
@@ -615,8 +624,25 @@ public class TableUtil {
       rs.close();
       ps.close();
     }
-
   }
+
+  private static long countAll(ReadOnlyConnection sourceConn, String tableName, String sourceSchema, String idColumnName)
+          throws SQLException {
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      String sql = "select count( " + idColumnName + " ) from " + sourceSchema + "." + tableName ;
+      ps = sourceConn.prepareStatement(sql);
+      rs = ps.executeQuery();
+      rs.next();
+      long countAllValue = rs.getLong(1);
+      return countAllValue;
+    } finally {
+      rs.close();
+      ps.close();
+    }
+  }
+
 
   private static boolean isPkAnId(ResultSetMetaData md, String tableName, String sourceSchema, Map<String, List<String>> pkmap)
           throws SQLException {
