@@ -6,7 +6,7 @@ rm -rf spring-based
 cd /local/git/spring-based
 git pull origin data_manage
 mvn install
-cp -r target/springbased-1.0 ../../tomcat/apache-tomcat-8.0.36/webapps/
+cp -r target/springbased ../../tomcat/apache-tomcat-8.0.36/webapps/
 cd /local/tomcat/apache-tomcat-8.0.36/bin
 ./startup.sh
 vi test
