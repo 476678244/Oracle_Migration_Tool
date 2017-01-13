@@ -28,6 +28,10 @@ public class DataSourceFactory {
       ds.setInitialSize(1);
       ds.setMaxTotal(20);
       ds.setMaxOpenPreparedStatements(200);
+	  if ("sysdba".equalsIgnoreCase(connectionInfo.getLogin_role().trim())) {
+		  // login as sys dba role
+		  ds.setConnectionProperties("internal_logon=sysdba");
+	  }
       dataSources.put(connectionInfo, ds);
       return ds;
     }

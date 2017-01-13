@@ -1,2 +1,2 @@
 mvn install
-cp -r target/springbased-1.0 ../express/../../tomcat/webapps
+cp -r target/springbased ../express/../../tomcat/webapps

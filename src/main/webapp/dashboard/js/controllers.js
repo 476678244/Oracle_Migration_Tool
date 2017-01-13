@@ -12,7 +12,7 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 
 	$http({
 		method: 'GET',
-		url: '/springbased-1.0/jobs'
+		url: '/springbased/jobs'
 	}).then(function successCallback(response) {
 		$scope.jobs = response.data;
 		// transform data to readable
@@ -43,7 +43,7 @@ oracleMigration.controller('MonitorController', ["$scope", '$http', 'adAlerts', 
 		$confirm({text: 'Are you sure you want to cancel this migration job?'}).then(function() {
             $http({
 				method: 'GET',
-				url: '/springbased-1.0/cancelJob',
+				url: '/springbased/cancelJob',
 				params: {
 					jobId: jobId
 				}

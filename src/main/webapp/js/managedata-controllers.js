@@ -224,7 +224,7 @@ oracleMigration.controller('ManageDataController', ["$scope", '$http', 'adAlerts
 		$scope.fetchConditionOps = function() {
 			$http({
 				method: 'GET',
-				url: '/springbased-1.0/columnOperator'
+				url: '/springbased/columnOperator'
 			}).then(function successCallback(response) {
 				var data = response.data;
 				angular.forEach(data, function(value, key) {
