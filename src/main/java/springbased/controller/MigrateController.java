@@ -73,10 +73,11 @@ public class MigrateController {
   public ValidationResult validateSourceConnection(
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
-      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema,
+      @RequestParam("sourceLoginrole") String sourceLoginrole)
           throws SQLException, InterruptedException {
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
-    ConnectionInfo sourceConInfo = new ConnectionInfo(username, password, url);
+    ConnectionInfo sourceConInfo = new ConnectionInfo(username, password, url, sourceLoginrole);
     ReadOnlyConnection sourceCon = null;
     try {
       sourceCon = MigrationService.getReadOnlyConnection(sourceConInfo);
@@ -109,14 +110,15 @@ public class MigrateController {
   public ValidationResult validateTargetConnection(
       @RequestParam("ip") String ip, @RequestParam("username") String username,
       @RequestParam("password") String password,
-      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema,
+      @RequestParam("targetLoginrole") String targetLoginrole)
           throws SQLException, InterruptedException {
     boolean test = false;
     if (test) {
       return new ValidationResult();
     }
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
-    ConnectionInfo targetConInfo = new ConnectionInfo(username, password, url);
+    ConnectionInfo targetConInfo = new ConnectionInfo(username, password, url, targetLoginrole);
     Connection targetCon = null;
     try {
       targetCon = MigrationService.getConnection(targetConInfo);
@@ -158,9 +160,11 @@ public class MigrateController {
       @RequestParam("targetUsername") String targetUsername,
       @RequestParam("targetPassword") String targetPassword,
       @RequestParam("targetUrl") String targetUrl, 
-      @RequestParam("targetSchema") String targetSchema) { 
+      @RequestParam("targetSchema") String targetSchema,
+      @RequestParam("sourceLoginrole") String sourceLoginrole,
+      @RequestParam("targetLoginrole") String targetLoginrole) { 
     ConnectionInfo sourceConInfo = new ConnectionInfo(sourceUsername,
-        sourcePassword, sourceUrl);
+        sourcePassword, sourceUrl, sourceLoginrole);
     List<ConnectionInfo> connections = this.connectionInfoDAO.getAll();
     if (!connections.contains(sourceConInfo)) {
       this.connectionInfoDAO.save(sourceConInfo);
@@ -168,7 +172,7 @@ public class MigrateController {
     } 
     sourceConInfo = connections.get(connections.indexOf(sourceConInfo));
     ConnectionInfo targetConInfo = new ConnectionInfo(targetUsername,
-        targetPassword, targetUrl);
+        targetPassword, targetUrl, targetLoginrole);
     if (!this.connectionInfoDAO.getAll().contains(targetConInfo)) {
       this.connectionInfoDAO.save(targetConInfo);
       connections = this.connectionInfoDAO.getAll();
@@ -229,10 +233,11 @@ public class MigrateController {
   public void recreateSchema(@RequestParam("ip") String ip,
       @RequestParam("username") String username,
       @RequestParam("password") String password,
-      @RequestParam("sid") String sid, @RequestParam("schema") String schema)
+      @RequestParam("sid") String sid, @RequestParam("schema") String schema,
+      @RequestParam("targetLoginrole") String targetLoginrole)
       throws SQLException, InterruptedException {
     String url = "jdbc:oracle:thin:@" + ip + ":1521:" + sid;
-    ConnectionInfo connInfo = new ConnectionInfo(username, password, url);
+    ConnectionInfo connInfo = new ConnectionInfo(username, password, url, targetLoginrole);
     Connection conn = null;
     try {
       conn = MigrationService.getConnection(connInfo);

@@ -5,20 +5,22 @@
 var oracleMigration = window.oracleMigration;
 oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '$window','$confirm', 'ngDialog', '$location',
 		 function($scope, $http, adAlerts, $window, $confirm, ngDialog, $location) {
-	$scope.sourceIp = "10.58.100.66";
-	$scope.sourceUsername = "sfuser";
-	$scope.sourcePassword = "sfuser";
-	$scope.sourceSID = "dbpool1";
-	$scope.sourceSchema = "";
+	$scope.sourceIp = "127.0.0.1";
+	$scope.sourceUsername = "sys";
+	$scope.sourcePassword = "welcome";
+	$scope.sourceSID = "xe";
+	$scope.sourceSchema = "bizx_BizXTest";
+	$scope.sourceLoginrole = "";
 
 	$scope.sourceValidateResult = 0;
 	$scope.showLoadingIconForValidateSourceConnectionButton = false;
 
-	$scope.targetIp = "10.58.100.66";
-	$scope.targetUsername = "sfuser";
-	$scope.targetPassword = "sfuser";
-	$scope.targetSID = "dbpool1";
-	$scope.targetSchema = "";
+	$scope.targetIp = "127.0.0.1";
+	$scope.targetUsername = "sys";
+	$scope.targetPassword = "welcome";
+	$scope.targetSID = "xe";
+	$scope.targetSchema = "giant_wang";
+	$scope.targetLoginrole = "";
 
 	$scope.targetValidateResult = 0;
 	$scope.showLoadingIconForValidateTargetConnectionButton = false;
@@ -38,7 +40,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 					username: $scope.sourceUsername,
 					password: $scope.sourcePassword,
 					sid: $scope.sourceSID,
-					schema: $scope.sourceSchema
+					schema: $scope.sourceSchema,
+					sourceLoginrole: $scope.sourceLoginrole
 				}
 			}).then(function successCallback(response) {
 				$scope.sourceValidateResult = response.data.status;
@@ -56,7 +59,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 					username: $scope.targetUsername,
 					password: $scope.targetPassword,
 					sid: $scope.targetSID,
-					schema: $scope.targetSchema
+					schema: $scope.targetSchema,
+					targetLoginrole: $scope.targetLoginrole,
 				}
 			}).then(function successCallback(response) {
 				$scope.targetValidateResult = response.data.status;
@@ -125,7 +129,7 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 			$scope.targetQuickSelectOptionsSelected = {};
 		}
 	}
-
+	
 	$scope.fireMigration = function() {
 		$scope.showLoadingIcon = true;
 		var sourceUrl = "jdbc:oracle:thin:@" + $scope.sourceIp + ":1521:" + $scope.sourceSID;
@@ -138,10 +142,12 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 				sourcePassword: $scope.sourcePassword,
 				sourceUrl: sourceUrl,
 				sourceSchema: $scope.sourceSchema,
+				sourceLoginrole: $scope.sourceLoginrole,
 				targetUsername: $scope.targetUsername,
 				targetPassword: $scope.targetPassword,
 				targetUrl: targetUrl,
-				targetSchema: $scope.targetSchema
+				targetSchema: $scope.targetSchema,
+				targetLoginrole: $scope.targetLoginrole
 			}
 		}).then(function successCallback(response) {
 			$scope.showLoadingIcon = false;
@@ -210,7 +216,8 @@ oracleMigration.controller('ConfigController', ["$scope", '$http', 'adAlerts', '
 					username: $scope.targetUsername,
 					password: $scope.targetPassword,
 					sid: $scope.targetSID,
-					schema: $scope.targetSchema
+					schema: $scope.targetSchema,
+					targetLoginrole: $scope.targetLoginrole
 				}
 			}).then(function successCallback(response) {
 				$scope.showLoadingIconForRecreate = false;

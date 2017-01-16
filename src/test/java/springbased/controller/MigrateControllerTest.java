@@ -31,6 +31,7 @@ public class MigrateControllerTest {
     String targetPassword = "sfuser";
     String targetUrl = "jdbc:oracle:thin:@192.168.248.135:1521:dbpool1";
     String targetSchema = "sfuser_jdm";
+    String targetLoginrole = "sysdba";
     String ip = "192.168.248.135";
     String sid = "dbpool1";
     long cost = 0;
@@ -49,7 +50,7 @@ public class MigrateControllerTest {
     boolean test1 = false;
     if (test1) {
       this.controller.recreateSchema(ip, targetUsername, targetPassword, sid,
-          targetSchema);
+          targetSchema,targetLoginrole);
     }
   }
   
