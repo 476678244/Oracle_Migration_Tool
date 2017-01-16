@@ -16,6 +16,7 @@
 		<my.tomcat.path>../../apache-tomcat-8.0.35/webapps</my.tomcat.path>
 	</properties>
 	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -51,6 +52,7 @@
 					<server>tomcat8x</server>
 					<username>admin</username>
 					<password>admin123</password>
+					<path>/${project.artifactId}-${project.version}</path>
 				</configuration>
 			</plugin>
 		</plugins>
