@@ -3,7 +3,9 @@ package springbased.config;
 import java.net.UnknownHostException;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
+import de.flapdoodle.embed.mongo.MongodExecutable;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class DataStoreFactory {
   @Autowired
   private MongoClient mongoClient;
 
+  @Autowired
+  private MongodExecutable mongodExecutable;
+
   @PostConstruct
   void init() throws UnknownHostException {
     datastore = new Morphia().mapPackage("springbased.bean").createDatastore(
@@ -30,5 +35,10 @@ public class DataStoreFactory {
   @Bean
   public Datastore datastore() {
     return datastore;
+  }
+
+  @PreDestroy
+  void destroy() {
+    this.mongodExecutable.stop();
   }
 }
