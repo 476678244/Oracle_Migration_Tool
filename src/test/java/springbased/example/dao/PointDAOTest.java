@@ -1,10 +1,13 @@
 package springbased.example.dao;
 
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -12,10 +15,13 @@ import springbased.example.bean.Point;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class PointDAOTest {
+public class PointDAOTest extends TestCase {
 
 	@Autowired
 	private PointDAO<Point> pointDAO;
+
+	@Autowired
+	private MongodExecutable mongodExecutable;
 
 	@Test
 	public void test() {
@@ -31,5 +37,11 @@ public class PointDAOTest {
 	@Configuration
 	@ComponentScan("springbased.*")
 	public static class TestConfiguration {
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		mongodExecutable.stop();
 	}
 }
