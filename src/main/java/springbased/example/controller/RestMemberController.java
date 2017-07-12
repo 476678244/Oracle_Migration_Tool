@@ -5,7 +5,9 @@ package springbased.example.controller;
  */
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,14 @@ public class RestMemberController {
 		Members members = new Members();
 		members.addMembers(memberService.findAll());
 		return members;
+	}
+
+	@RequestMapping(value = "/getRestEntityMembers", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<Members> getRestEntityMembers(Model model) {
+		Members members = new Members();
+		members.addMembers(memberService.findAll());
+		return new ResponseEntity<Members>(members, HttpStatus.NO_CONTENT);
 	}
 
 }
