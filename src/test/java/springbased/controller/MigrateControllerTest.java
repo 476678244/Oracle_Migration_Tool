@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.StringUtils;
 
 import springbased.monitor.Info;
@@ -16,6 +17,7 @@ import springbased.monitor.ThreadLocalMonitor;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
+@WebAppConfiguration
 public class MigrateControllerTest {
 
   @Autowired

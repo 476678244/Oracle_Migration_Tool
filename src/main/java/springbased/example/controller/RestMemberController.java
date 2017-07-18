@@ -44,4 +44,20 @@ public class RestMemberController {
 		return new ResponseEntity<Members>(members, HttpStatus.NO_CONTENT);
 	}
 
+	@RequestMapping(value = "/membersIn", produces= MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Members getRestMembersInJson(Model model) {
+		Members members = new Members();
+		members.addMembers(memberService.findAll());
+		return members;
+	}
+
+	@RequestMapping(value = "/membersIn", produces= MediaType.APPLICATION_XML_VALUE)
+	@ResponseBody
+	public Members getRestMembersInXML(Model model) {
+		Members members = new Members();
+		members.addMembers(memberService.findAll());
+		return members;
+	}
+
 }

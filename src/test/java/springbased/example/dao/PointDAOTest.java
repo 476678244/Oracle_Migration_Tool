@@ -11,10 +11,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import org.springframework.test.context.web.WebAppConfiguration;
 import springbased.example.bean.Point;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
+@WebAppConfiguration
 public class PointDAOTest extends TestCase {
 
 //	@Autowired
