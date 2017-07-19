@@ -28,7 +28,6 @@ public class SpringMongoConfig {
   public static final int port = 12345;
 
   public @Bean MongoClient mongoClient() throws Exception {
-    mongodExecutable().start();
     MongoClient mongo = new MongoClient(bindIp, port);
     return mongo;
   }

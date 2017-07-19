@@ -1,5 +1,6 @@
 package springbased.config;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +28,8 @@ public class DataStoreFactory {
   private MongodExecutable mongodExecutable;
 
   @PostConstruct
-  void init() throws UnknownHostException {
+  void init() throws IOException {
+    this.mongodExecutable.start();
     datastore = new Morphia().mapPackage("springbased.bean").createDatastore(
         mongoClient, SpringMongoConfig.DB);
   }
