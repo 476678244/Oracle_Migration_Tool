@@ -29,7 +29,7 @@ public class DataStoreFactory {
 
   @PostConstruct
   void init() throws IOException {
-    this.mongodExecutable.start();
+    //this.mongodExecutable.start();
     datastore = new Morphia().mapPackage("springbased.bean").createDatastore(
         mongoClient, SpringMongoConfig.DB);
   }
@@ -41,6 +41,6 @@ public class DataStoreFactory {
 
   @PreDestroy
   void destroy() {
-    this.mongodExecutable.stop();
+    //this.mongodExecutable.stop();
   }
 }

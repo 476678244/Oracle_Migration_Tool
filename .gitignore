@@ -2,3 +2,5 @@
 .DS_Store
 .settings/
 .idea/
+logs/
+springbased.iml

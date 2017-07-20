@@ -38,7 +38,8 @@ public class SpringMongoConfig {
 
   }
 
-  public @Bean MongodExecutable mongodExecutable() throws IOException {
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  public MongodExecutable mongodExecutable() throws IOException {
     MongodStarter starter = MongodStarter.getDefaultInstance();
     IMongodConfig mongodConfig = new MongodConfigBuilder()
         .version(Version.Main.PRODUCTION)

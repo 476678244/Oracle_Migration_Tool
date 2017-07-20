@@ -11,7 +11,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import springbased.example.bean.Point;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(locations = "classpath:test-context.xml")
 @WebAppConfiguration
 public class PointDAOTest {
 

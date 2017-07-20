@@ -18,7 +18,7 @@ import springbased.monitor.Info;
 import springbased.monitor.ThreadLocalMonitor;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@ContextConfiguration(locations = "classpath:test-context.xml")
 @WebAppConfiguration
 public class MigrateControllerTest {
 
