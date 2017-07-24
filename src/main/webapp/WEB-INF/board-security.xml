@@ -7,9 +7,11 @@
               http://www.springframework.org/schema/security/spring-security.xsd">
 
   <http auto-config="true">
-    <intercept-url pattern="/mem*" access="hasRole('ROLE_ANONYMOUS')"/>
-    <intercept-url pattern="/get*" access="hasRole('ROLE_USER')"/>
-    <intercept-url pattern="/membersI*" access="hasRole('ROLE_ADMIN')"/>
+    <!--<intercept-url pattern="/mem*" access="hasRole('ROLE_ANONYMOUS')"/>-->
+    <intercept-url pattern="/mem*" access="hasRole('ROLE_USER')"/>
+    <!--<intercept-url pattern="/membersI*" access="hasRole('ROLE_ADMIN')"/>-->
+    <http-basic />
+    <form-login login-page="/login.html" default-target-url="/messageList" />
   </http>
 
   <authentication-manager>
