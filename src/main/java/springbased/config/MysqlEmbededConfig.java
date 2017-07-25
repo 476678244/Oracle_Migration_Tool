@@ -15,15 +15,24 @@ import static com.wix.mysql.distribution.Version.v5_7_latest;
 import static com.wix.mysql.config.MysqldConfig.aMysqldConfig;
 import static com.wix.mysql.config.Charset.UTF8;
 
+/**
+ * https://github.com/wix/wix-embedded-mysql
+ */
 @Configuration
 public class MysqlEmbededConfig {
+
+	static final String MYSQL_USERNAME = "user";
+
+	static final String MYSQL_PASSWORD = "1234";
+
+	static final int MYSQL_PORT = 3306;
 
 	@Bean(destroyMethod = "stop")
 	public EmbeddedMysql embeddedMysqlBuilder() {
 		MysqldConfig config = aMysqldConfig(v5_7_latest)
 			.withCharset(UTF8)
-			.withPort(3306)
-			.withUser("user", "1234")
+			.withPort(MYSQL_PORT)
+			.withUser(MYSQL_USERNAME, MYSQL_PASSWORD)
 			.withTimeZone("Europe/Vilnius")
 			.withTimeout(2, TimeUnit.MINUTES)
 			.withServerVariable("max_connect_errors", 666)
@@ -34,13 +43,12 @@ public class MysqlEmbededConfig {
 	}
 
 	@Bean
-	public DataSource dataSource() throws ClassNotFoundException {
-		Class.forName("com.mysql.jdbc.Driver");
+	public DataSource dataSource() {
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://localhost:3306/vehicle");
-		dataSource.setUsername("user");
-		dataSource.setPassword("1234");
+		dataSource.setUsername(MYSQL_USERNAME);
+		dataSource.setPassword(MYSQL_PASSWORD);
 		dataSource.setInitialSize(2);
 		dataSource.setMaxTotal(5);
 		return dataSource;

@@ -14,9 +14,9 @@ public class VehicleConfiguration {
 
 	@Autowired
 	private DataSource dataSource;
-	
+
 	@Bean
-	public VehicleDao vehicleDao() throws ClassNotFoundException {
+	public VehicleDao vehicleDao() {
 		return new JdbcVehicleDao(dataSource);
 	}
 }
