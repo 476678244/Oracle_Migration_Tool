@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import springbased.example.dao.VehicleDao;
 import springbased.example.dao.impl.JdbcVehicleDao;
 
@@ -18,7 +19,9 @@ public class VehicleConfiguration {
 
 	@Bean
 	public VehicleDao vehicleDao() {
-		return new JdbcVehicleDao(dataSource);
+		JdbcVehicleDao dao = new JdbcVehicleDao(dataSource);
+		dao.setDataSource(dataSource);
+		return dao;
 	}
 
 	@Bean

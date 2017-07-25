@@ -1,6 +1,9 @@
 package springbased.example.dao.impl;
 
 import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import springbased.example.bean.Vehicle;
 import springbased.example.dao.VehicleDao;
 
@@ -10,20 +13,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JdbcVehicleDao implements VehicleDao {
+public class JdbcVehicleDao extends NamedParameterJdbcDaoSupport implements VehicleDao {
 
 	public JdbcVehicleDao(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	private DataSource dataSource;
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
 
 	public void insert(Vehicle vehicle) {
 		String sql = "INSERT INTO VEHICLE (VEHICLE_NO, COLOR, WHEEL, SEAT) " + "VALUES (?, ?, ?, ?)";
@@ -83,6 +83,17 @@ public class JdbcVehicleDao implements VehicleDao {
 		jdbcTemplate.update(sql, vehicle.getVehicleNo(), vehicle.getColor(), vehicle.getWheel(), vehicle.getSeat());
 	}
 
+	public void insert5(final Vehicle vehicle) {
+		String sql = "INSERT INTO VEHICLE (VEHICLE_NO, COLOR, WHEEL, SEAT) " + "VALUES (:vehicleNo, :color, :wheel, :seat)";
+
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("vehicleNo", vehicle.getVehicleNo());
+		parameters.put("color", vehicle.getColor());
+		parameters.put("wheel", vehicle.getWheel());
+		parameters.put("seat", vehicle.getSeat());
+		getNamedParameterJdbcTemplate().update(sql, parameters);
+	}
+
 	public void insertBatch(final List<Vehicle> vehicles) {
 		String sql = "INSERT INTO VEHICLE (VEHICLE_NO, COLOR, WHEEL, SEAT) VALUES (?, ?, ?, ?)";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -99,6 +110,18 @@ public class JdbcVehicleDao implements VehicleDao {
 				ps.setInt(4, vehicle.getSeat());
 			}
 		});
+	}
+
+	public void insertBatch2(List<Vehicle> vehicles) {
+		String sql = "INSERT INTO VEHICLE (VEHICLE_NO, COLOR, WHEEL, SEAT) " + "VALUES (:vehicleNo, :color, :wheel, :seat)";
+
+		List<SqlParameterSource> parameters = new ArrayList<SqlParameterSource>();
+		for (Vehicle vehicle : vehicles) {
+			parameters.add(new BeanPropertySqlParameterSource(vehicle));
+		}
+
+		getNamedParameterJdbcTemplate().batchUpdate(sql, parameters.toArray(new SqlParameterSource[parameters.size()]));
+
 	}
 
 	public Vehicle findByVehicleNo(String vehicleNo) {
