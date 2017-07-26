@@ -25,6 +25,7 @@ public class JdbcVehicleDao extends NamedParameterJdbcDaoSupport implements Vehi
 
 	private DataSource dataSource;
 
+	@Override
 	public void insert(Vehicle vehicle) {
 		String sql = "INSERT INTO VEHICLE (VEHICLE_NO, COLOR, WHEEL, SEAT) " + "VALUES (?, ?, ?, ?)";
 		Connection conn = null;
@@ -49,6 +50,7 @@ public class JdbcVehicleDao extends NamedParameterJdbcDaoSupport implements Vehi
 		}
 	}
 
+	@Override
 	public void insert2(final Vehicle vehicle) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		jdbcTemplate.update(new PreparedStatementCreator() {
