@@ -2,6 +2,7 @@ package springbased.example.dao;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -18,6 +19,9 @@ import java.util.List;
 @WebAppConfiguration
 public class JpaCourseDaoTest {
 
+	@Autowired
+	private CourseDao courseDao;
+
 	@Test
 	public void test() {
 		CourseDao courseDao = new JpaCourseDao();
@@ -31,6 +35,16 @@ public class JpaCourseDaoTest {
 		List<Course> courses = courseDao.findAll();
 		courses.forEach(c -> System.out.println(c.getId()));
 		int a = 0;
+	}
+
+	@Test
+	public void testHibernate() {
+		Course course = new Course();
+		course.setTitle("course1");
+		course.setBeginDate(new Date());
+		course.setEndDate(new Date());
+		course.setFee(100);
+		this.courseDao.store(course);
 	}
 
 	@Configuration

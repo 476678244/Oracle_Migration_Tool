@@ -1,3 +1,4 @@
+GRANT ALL PRIVILEGES ON vehicle.* TO user@localhost identified by '1234';
 CREATE TABLE VEHICLE
 (
   VEHICLE_NO VARCHAR(10),
