@@ -1,8 +1,12 @@
 package springbased.example.dao;
 
+import com.wix.mysql.EmbeddedMysql;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,6 +25,9 @@ public class JpaCourseDaoTest {
 
 	@Autowired
 	private CourseDao courseDao;
+
+	@Autowired
+	private CourseDao hibernateContextualSessionCourseDAO;
 
 	@Test
 	public void test() {
@@ -45,6 +52,18 @@ public class JpaCourseDaoTest {
 		course.setEndDate(new Date());
 		course.setFee(100);
 		this.courseDao.store(course);
+	}
+
+	@Test
+	public void testContextualSession() {
+		Course course = new Course();
+		course.setTitle("course1");
+		course.setBeginDate(new Date());
+		course.setEndDate(new Date());
+		course.setFee(100);
+		this.hibernateContextualSessionCourseDAO.store(course);
+		Course c = this.hibernateContextualSessionCourseDAO.findById(course.getId());
+		this.hibernateContextualSessionCourseDAO.delete(c.getId());
 	}
 
 	@Configuration

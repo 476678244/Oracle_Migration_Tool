@@ -1,32 +1,42 @@
 package springbased.example.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.hibernate.SessionFactory;
+import org.springframework.context.annotation.*;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.hibernate4.HibernateTemplate;
-import org.springframework.orm.hibernate4.HibernateTransactionManager;
-import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import springbased.config.MysqlEmbededConfig;
 import springbased.example.dao.CourseDao;
+import springbased.example.dao.impl.HibernateContextualSessionCourseDAO;
 import springbased.example.dao.impl.HibernateCourseDao;
 import springbased.example.dao.impl.HibernateDAOSupportCourseDAO;
 
 import java.util.Properties;
 
 @Configuration
+@EnableTransactionManagement
 public class CourseConfiguration {
 	@Bean
 	public CourseDao courseDao() {
-		return new HibernateCourseDao(sessionfactory().getObject());
+		return new HibernateCourseDao(sessionFactory());
 	}
 
 	@Bean
-	public LocalSessionFactoryBean sessionfactory() {
+	@DependsOn("embeddedMysqlStarter")
+	public LocalSessionFactoryBean sessionFactoryBean() {
 		LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
 		sessionFactoryBean.setConfigLocation(new ClassPathResource("hibernate.cfg.xml"));
 		sessionFactoryBean.setHibernateProperties(hibernateProperties());
 		sessionFactoryBean.setPackagesToScan("springbased.example.bean");
 		return sessionFactoryBean;
+	}
+
+	@Bean
+	public SessionFactory sessionFactory() {
+		return sessionFactoryBean().getObject();
 	}
 
 	private Properties hibernateProperties() {
@@ -40,13 +50,13 @@ public class CourseConfiguration {
 	@Bean
 	public CourseDao courseDao2() {
 		HibernateDAOSupportCourseDAO courseDao = new HibernateDAOSupportCourseDAO();
-		courseDao.setSessionFactory(sessionfactory().getObject());
+		courseDao.setSessionFactory(sessionFactory());
 		return courseDao;
 	}
 
 	@Bean
 	public HibernateTemplate hibernateTemplate() {
-		return new HibernateTemplate(sessionfactory().getObject());
+		return new HibernateTemplate(sessionFactory());
 	}
 
 	/**
@@ -55,6 +65,6 @@ public class CourseConfiguration {
 	 */
 	@Bean
 	public PlatformTransactionManager transactionManager() {
-		return new HibernateTransactionManager(sessionfactory().getObject());
+		return new HibernateTransactionManager(sessionFactory());
 	}
 }

@@ -4,6 +4,7 @@ import com.wix.mysql.EmbeddedMysql;
 import com.wix.mysql.config.MysqldConfig;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
@@ -28,7 +29,7 @@ public class MysqlEmbededConfig {
 	static final int MYSQL_PORT = 3306;
 
 	@Bean(destroyMethod = "stop")
-	public EmbeddedMysql embeddedMysqlBuilder() {
+	public EmbeddedMysql embeddedMysqlStarter() {
 		MysqldConfig config = aMysqldConfig(v5_7_latest)
 			.withCharset(UTF8)
 			.withPort(MYSQL_PORT)
