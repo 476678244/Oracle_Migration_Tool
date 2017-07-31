@@ -1,6 +1,7 @@
 package springbased.example.config;
 
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.hibernate5.HibernateTemplate;
@@ -14,11 +15,16 @@ import springbased.example.dao.impl.HibernateContextualSessionCourseDAO;
 import springbased.example.dao.impl.HibernateCourseDao;
 import springbased.example.dao.impl.HibernateDAOSupportCourseDAO;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
 public class CourseConfiguration {
+
+	@Autowired
+	private DataSource dataSource;
+
 	@Bean
 	public CourseDao courseDao() {
 		return new HibernateCourseDao(sessionFactory());
@@ -31,6 +37,7 @@ public class CourseConfiguration {
 		sessionFactoryBean.setConfigLocation(new ClassPathResource("hibernate.cfg.xml"));
 		sessionFactoryBean.setHibernateProperties(hibernateProperties());
 		sessionFactoryBean.setPackagesToScan("springbased.example.bean");
+		sessionFactoryBean.setDataSource(dataSource);
 		return sessionFactoryBean;
 	}
 

@@ -1,13 +1,16 @@
 package springbased.config;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.wix.mysql.EmbeddedMysql;
 import com.wix.mysql.config.MysqldConfig;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 import static com.wix.mysql.EmbeddedMysql.anEmbeddedMysql;
@@ -44,14 +47,14 @@ public class MysqlEmbededConfig {
 	}
 
 	@Bean
-	public DataSource dataSource() {
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dataSource.setUrl("jdbc:mysql://localhost:3306/vehicle");
-		dataSource.setUsername(MYSQL_USERNAME);
+	public DataSource dataSource() throws IOException, SQLException, PropertyVetoException {
+		ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		dataSource.setDriverClass("com.mysql.jdbc.Driver");
+		dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/vehicle");
+		dataSource.setUser(MYSQL_USERNAME);
 		dataSource.setPassword(MYSQL_PASSWORD);
-		dataSource.setInitialSize(2);
-		dataSource.setMaxTotal(5);
+		dataSource.setInitialPoolSize(2);
+		dataSource.setMaxPoolSize(5);
 		return dataSource;
 	}
 }
