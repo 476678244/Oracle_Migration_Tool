@@ -1,6 +1,9 @@
 package springbased.example.dao.impl;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.springframework.transaction.annotation.Transactional;
 import springbased.example.bean.Course;
 import springbased.example.dao.CourseDao;
 
@@ -18,11 +21,14 @@ public class HibernateCourseDao implements CourseDao {
         this.sessionFactory = sessionFactory;
     }
 
+    @Transactional
     @Override
     public void store(Course course) {
-        this.sessionFactory.openSession().save(course);
+        Session session = this.sessionFactory.getCurrentSession();
+        session.save(course);
     }
 
+    @Transactional
     @Override
     public void delete(Long courseId) {
         this.sessionFactory.openSession().delete(courseId);
