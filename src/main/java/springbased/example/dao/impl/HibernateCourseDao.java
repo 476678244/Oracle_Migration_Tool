@@ -49,6 +49,7 @@ public class HibernateCourseDao implements CourseIncFeeDao {
              * 解决方案：需要将两个方法分别写在不同的类里。
              */
             this.hibernateCourseDaoSupport.newCourse();
+            this.hibernateCourseDaoSupport.incFee30(course);
             // as incFee10 will start new transaction, it will not see fee as 110 , but see as 100
             this.hibernateCourseDaoSupport.incFee10(course1);
         } catch (RuntimeException re) {
