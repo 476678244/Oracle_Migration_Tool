@@ -11,8 +11,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import springbased.config.MysqlEmbededConfig;
 import springbased.example.dao.CourseDao;
+import springbased.example.dao.CourseIncFeeDao;
 import springbased.example.dao.impl.HibernateContextualSessionCourseDAO;
 import springbased.example.dao.impl.HibernateCourseDao;
+import springbased.example.dao.impl.HibernateCourseDaoSupport;
 import springbased.example.dao.impl.HibernateDAOSupportCourseDAO;
 
 import javax.sql.DataSource;
@@ -26,8 +28,15 @@ public class CourseConfiguration {
 	private DataSource dataSource;
 
 	@Bean
-	public CourseDao courseDao() {
-		return new HibernateCourseDao(sessionFactory());
+	public CourseIncFeeDao courseDao() {
+		HibernateCourseDao courseIncFeeDao = new HibernateCourseDao(sessionFactory(), hibernateCourseDaoSupport());
+		return courseIncFeeDao;
+	}
+
+	@Bean
+	public HibernateCourseDaoSupport hibernateCourseDaoSupport() {
+		HibernateCourseDaoSupport hibernateCourseDaoSupport = new HibernateCourseDaoSupport(sessionFactory());
+		return hibernateCourseDaoSupport;
 	}
 
 	@Bean
